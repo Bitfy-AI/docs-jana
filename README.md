@@ -2,59 +2,118 @@
 
 Conjunto completo de ferramentas para gerenciamento de workflows n8n, incluindo backup, migração e documentação automática.
 
-## Ferramentas Disponíveis
+## 🚀 Ferramentas Disponíveis
 
-1. **download-n8n-workflows.js** - Backup de workflows
-2. **upload-n8n-workflows.js** - Migração inteligente de workflows (NOVO!)
-3. **generate-docs.js** - Geração de documentação
-4. **generate-sql.js** - Geração de scripts SQL
+### 1. 📥 Download de Workflows (Backup)
+**Arquivo:** `download-n8n-workflows.js`
 
-## Sistema de Migração de Workflows (NOVO!)
+Baixa workflows do n8n via API, com suporte para filtros por tag e autenticação flexível.
 
-Sistema completo para migração de workflows n8n entre instâncias, **garantindo ZERO elos perdidos**.
+### 2. 📤 Upload/Migração de Workflows
+**Arquivo:** `upload-n8n-workflows.js`
 
-### Características
+Sistema completo de migração de workflows entre instâncias n8n, com análise de dependências e garantia de zero elos perdidos.
 
-- Análise automática de dependências entre workflows
-- Ordenação topológica para upload na ordem correta
-- Mapeamento inteligente de IDs (prioridade por nome)
-- Atualização recursiva de referências
-- Verificação de integridade pós-migração
-- Modo dry-run para simulação
-- Relatórios detalhados em JSON
+### 3. 📝 Geração de Documentação
+**Arquivo:** `generate-docs.js`
 
-### Uso Rápido
+Gera documentação markdown automática a partir de workflows n8n, incluindo extração de sticky notes e análise de qualidade.
 
-```bash
-# 1. Configure credenciais no .env
-cp .env.example .env
-# Edite .env com suas credenciais
+### 4. 🧪 Teste de Migração
+**Arquivo:** `test-migration.js`
 
-# 2. Teste a migração (simulação)
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --dry-run
-
-# 3. Execute a migração real
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/
-```
-
-### Documentação Completa
-
-Veja [MIGRATION-GUIDE.md](./MIGRATION-GUIDE.md) para documentação detalhada da migração.
+Valida o sistema de migração sem fazer upload real, executando 6 testes automatizados.
 
 ---
 
-## Download de Workflows (Backup)
+## 🎯 Início Rápido
 
-Script para baixar todos os workflows (ou workflows filtrados por tag) do n8n via API.
+### Pré-requisitos
 
-## 📋 Pré-requisitos
+- Node.js 14+ instalado
+- Acesso à API do n8n (URL + credenciais)
+- Instância n8n de origem e/ou destino
 
-- Node.js instalado
-- Acesso à API do n8n (URL e credenciais)
+### Instalação
 
-## 🚀 Como Usar
+```bash
+# Clone o repositório
+git clone https://github.com/matheusmaiberg/docs-jana.git
+cd docs-jana
 
-### Opção 1: Via linha de comando
+# Configure as variáveis de ambiente
+cp .env.example .env
+# Edite .env com suas credenciais
+```
+
+### Exemplos de Uso
+
+#### 1. Fazer Backup de Workflows
+
+```bash
+# Baixar todos os workflows
+node download-n8n-workflows.js
+
+# Baixar apenas workflows com tag específica
+node download-n8n-workflows.js --tag=producao
+```
+
+#### 2. Migrar Workflows Entre Instâncias
+
+```bash
+# Teste primeiro (dry-run)
+node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --dry-run
+
+# Execute a migração real
+node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/
+
+# Com filtro por tag e ativação automática
+node upload-n8n-workflows.js ./workflows --tag=jana --activate
+```
+
+#### 3. Gerar Documentação
+
+```bash
+# Gerar documentação de workflows
+node generate-docs.js ./n8n-workflows-2025-09-30/
+```
+
+---
+
+## 📚 Sistema de Migração de Workflows
+
+Sistema completo para migração de workflows n8n entre instâncias, **garantindo ZERO elos perdidos**.
+
+### ✨ Características Principais
+
+- 🔍 **Análise automática de dependências** entre workflows
+- 📊 **Ordenação topológica** para upload na ordem correta
+- 🎯 **Mapeamento inteligente de IDs** (prioridade por nome)
+- 🔄 **Atualização recursiva** de todas as referências
+- ✅ **Verificação de integridade** pós-migração (4 checks)
+- 🧪 **Modo dry-run** para simulação segura
+- 📋 **Relatórios detalhados** em JSON
+
+### 🏗️ Arquitetura em 5 Fases
+
+1. **Inicialização** - Carrega configurações e workflows
+2. **Análise de Dependências** - Constrói grafo e calcula ordem
+3. **Upload Sequencial** - Cria workflows respeitando dependências
+4. **Atualização de Referências** - Atualiza IDs usando mapeamento por nome
+5. **Verificação** - Valida integridade completa
+
+### 📖 Documentação Detalhada
+
+- [MIGRATION-GUIDE.md](./MIGRATION-GUIDE.md) - Guia completo de migração
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Arquitetura técnica detalhada
+- [EXAMPLES.md](./EXAMPLES.md) - Exemplos práticos e troubleshooting
+- [IMPLEMENTATION-SUMMARY.md](./IMPLEMENTATION-SUMMARY.md) - Resumo da implementação
+
+---
+
+## 📥 Referência: Download de Workflows
+
+### Uso via Linha de Comando
 
 ```bash
 node download-n8n-workflows.js <N8N_URL> <API_KEY> [TAG]
@@ -70,34 +129,21 @@ node download-n8n-workflows.js https://seu-n8n.com n8n_api_xxxxx
 node download-n8n-workflows.js https://seu-n8n.com n8n_api_xxxxx producao
 ```
 
-### Opção 2: Via variáveis de ambiente
+### Uso via Variáveis de Ambiente (.env)
 
+Configure o arquivo `.env`:
 ```bash
-# Com API Key
-N8N_URL=https://seu-n8n.com N8N_API_KEY=sua-chave node download-n8n-workflows.js
-
-# Com usuário e senha
-N8N_URL=https://seu-n8n.com N8N_USERNAME=admin N8N_PASSWORD=senha123 node download-n8n-workflows.js
-
-# Com filtro por tag
-N8N_URL=https://seu-n8n.com N8N_API_KEY=sua-chave N8N_TAG=producao node download-n8n-workflows.js
+N8N_URL=https://seu-n8n.com
+N8N_API_KEY=sua-chave
+N8N_TAG=producao  # opcional
 ```
 
-## 🏷️ Filtrar por Tag
-
-Para baixar apenas workflows com uma tag específica, adicione o nome da tag como último argumento:
-
+Execute:
 ```bash
-node download-n8n-workflows.js https://seu-n8n.com sua-api-key producao
+node download-n8n-workflows.js
 ```
 
-Ou via variável de ambiente:
-
-```bash
-N8N_TAG=producao node download-n8n-workflows.js
-```
-
-## 📁 Saída
+### Saída
 
 O script cria uma pasta com timestamp no formato:
 ```
@@ -107,59 +153,46 @@ n8n-workflows-YYYY-MM-DDTHH-MM-SS/
   └── _backup-log.json
 ```
 
-Cada arquivo contém:
-- **workflow-*.json**: Dados completos do workflow em JSON
-- **_backup-log.json**: Log do backup com informações de sucesso/falha
+- **workflow-*.json**: Dados completos do workflow
+- **_backup-log.json**: Log com estatísticas de sucesso/falha
 
-## 🔑 Autenticação
+### Autenticação Suportada
 
-O script suporta duas formas de autenticação:
+- **API Key** (recomendado): `N8N_API_KEY`
+- **Basic Auth**: `N8N_USERNAME` + `N8N_PASSWORD`
 
-1. **API Key** (recomendado):
-   - Vá em Settings → API no n8n
-   - Crie uma API Key
-   - Use via `N8N_API_KEY` ou segundo argumento
-
-2. **Usuário e Senha**:
-   - Use `N8N_USERNAME` e `N8N_PASSWORD`
+---
 
 ## 🔧 Variáveis de Ambiente
 
 | Variável | Descrição | Obrigatório |
 |----------|-----------|-------------|
-| `N8N_URL` | URL do n8n (ex: https://n8n.exemplo.com) | Sim |
-| `N8N_API_KEY` | API Key do n8n | Sim* |
-| `N8N_USERNAME` | Usuário do n8n | Sim* |
-| `N8N_PASSWORD` | Senha do n8n | Sim* |
-| `N8N_TAG` | Tag para filtrar workflows (opcional) | Não |
+| `N8N_URL` | URL da instância n8n | Sim |
+| `N8N_API_KEY` | API Key do n8n | Condicional* |
+| `N8N_USERNAME` | Usuário do n8n | Condicional* |
+| `N8N_PASSWORD` | Senha do n8n | Condicional* |
+| `N8N_TAG` | Filtro por tag (opcional) | Não |
+| `LOG_LEVEL` | Nível de log (debug/info/warn/error) | Não |
 
-*Forneça API_KEY ou USERNAME+PASSWORD
+*Forneça `API_KEY` ou `USERNAME`+`PASSWORD`
 
-## ✨ Recursos
+---
 
-- ✅ Baixa todos os workflows do n8n
-- ✅ Filtra por tag específica (opcional)
-- ✅ Suporta autenticação via API Key ou Basic Auth
-- ✅ Cria backup organizado por timestamp
-- ✅ Gera log detalhado do processo
-- ✅ Sanitiza nomes de arquivos
-- ✅ Tratamento de erros individual por workflow
+## 🤝 Contribuindo
 
-## 📝 Exemplo de Log
+Contribuições são bem-vindas! Por favor:
 
-```json
-{
-  "success": [
-    {
-      "id": "1",
-      "name": "Workflow Produção",
-      "file": "Workflow_Producao-1.json",
-      "tags": ["producao"]
-    }
-  ],
-  "failed": [],
-  "timestamp": "2025-09-30T10:30:00.000Z",
-  "n8nUrl": "https://seu-n8n.com",
-  "tag": "producao"
-}
-```
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
+3. Commit suas mudanças (`git commit -m 'feat: adiciona MinhaFeature'`)
+4. Push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+
+## 📧 Contato
+
+- GitHub: [@matheusmaiberg](https://github.com/matheusmaiberg)
+- Repositório: [docs-jana](https://github.com/matheusmaiberg/docs-jana)
