@@ -29,7 +29,7 @@ Agente especializado em inicializar e configurar projetos com padrões de desenv
 - **Testing framework** setup (Vitest/Jest + Playwright)
 - **TypeScript** configuração avançada
 - **Linting & Formatting** (ESLint, Prettier, Husky)
-- **IDE configuration** (VS Code settings, extensions)
+- **IDE configuration** (VS Code settings, extensions, file nesting)
 - **Development server** otimização
 - **Hot reload** e developer experience
 
@@ -386,6 +386,166 @@ excellent_score: 95
 - **Test execution**: < 5 segundos para unit tests
 - **Hot reload**: < 500ms para mudanças de código
 - **CI/CD pipeline**: < 5 minutos para validação completa
+
+## VS Code File Nesting Configuration
+
+### 🎯 Intelligent File Nesting Strategy
+
+O Setup Agent implementa file nesting inteligente usando uma abordagem **balanced** (equilibrada) escolhida através de avaliação AI com múltiplos critérios.
+
+#### Metodologia de Seleção
+
+```yaml
+evaluation_process:
+  strategies_generated: 3
+    - conservative: "Mínimo nesting, máxima acessibilidade"
+    - balanced: "Equilíbrio entre organização e usabilidade"
+    - aggressive: "Máximo nesting, mínima visibilidade"
+
+  evaluation_criteria:
+    - usability: "Facilidade de encontrar arquivos"
+    - organization: "Qualidade da organização lógica"
+    - maintainability: "Facilidade de manutenção"
+    - adaptability: "Escalabilidade com crescimento"
+    - cleanliness: "Redução de visual clutter"
+
+  winner: "balanced"
+  score: "40/50 pontos"
+```
+
+#### Configuração Vencedora (v2_balanced)
+
+```json
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, .eslintrc.json, jest.config.js, .mcp.json, .env.example, .gitignore, .gitattributes, .gitmodules",
+    "README.md": "CHANGELOG.md, MIGRATION-GUIDE.md, NEXT-STEPS.md, FOLDER_FILTER_IMPLEMENTATION.md, FOLDER_FILTER_QUICK_GUIDE.md, IMPLEMENTATION-SUMMARY.md, IMPLEMENTATION_COMPLETE.md, TAG_CODE_CHANGES.md, TAG_IMPLEMENTATION_SUMMARY.md, WORKFLOW-ID-PRESERVATION-REPORT.md, WORKFLOW-REFERENCES.md",
+    ".env": ".env.example, .env.local, .env.*.local",
+    "index.js": "cli.js, src",
+    "cli.js": "list-duplicates.js, test-*.js, check-*.js, cleanup-*.js, delete-*.js, unarchive-*.js, workflows",
+    "jest.config.js": "__tests__",
+    "*.js": "$(capture).test.js, $(capture).spec.js, $(capture).test.ts, $(capture).spec.ts",
+    "*.ts": "$(capture).test.ts, $(capture).spec.ts, $(capture).test.js, $(capture).spec.js",
+    "*.jsx": "$(capture).test.jsx, $(capture).spec.jsx",
+    "*.tsx": "$(capture).test.tsx, $(capture).spec.tsx"
+  }
+}
+```
+
+#### Grupos Lógicos Implementados
+
+**1. Package.json Hub (Configurações do Projeto)**
+- Lock files: `pnpm-lock.yaml`, `package-lock.json`
+- Workspace config: `pnpm-workspace.yaml`
+- Linting: `.eslintrc.json`
+- Testing: `jest.config.js`
+- APIs: `.mcp.json`
+- Environment: `.env.example`
+- Git: `.gitignore`, `.gitattributes`, `.gitmodules`
+
+**Razão**: Centraliza todas as configurações que definem o comportamento do projeto sob o manifesto principal.
+
+**2. README.md Hub (Documentação)**
+- Changelogs e migration guides
+- Implementation summaries e reports
+- Workflow documentation
+- Tag-related documentation
+
+**Razão**: Agrupa toda documentação técnica sob o documento de entrada principal do projeto.
+
+**3. CLI.js Hub (Utilitários CLI)**
+- Test utilities: `test-*.js`
+- Check scripts: `check-*.js`
+- Cleanup scripts: `cleanup-*.js`, `delete-*.js`
+- Archive utilities: `unarchive-*.js`
+- Workflows folder: `workflows/`
+
+**Razão**: Organiza scripts CLI-related e arquivos gerados sob o entry point da ferramenta CLI.
+
+**4. Index.js Hub (Application Entry)**
+- Main CLI file: `cli.js`
+- Source folder: `src/`
+
+**Razão**: Agrupa o código fonte e entry points principais da aplicação.
+
+**5. Jest.config.js Hub (Testing Infrastructure)**
+- Tests folder: `__tests__/`
+
+**Razão**: Mantém a infraestrutura de testes agrupada com sua configuração.
+
+**6. Wildcards para Test Files**
+- Auto-nest test files junto aos source files
+- Patterns: `*.test.js`, `*.spec.js`, `*.test.ts`, `*.spec.ts`
+
+**Razão**: Mantém testes automaticamente organizados próximos ao código que testam.
+
+#### Benefícios da Estratégia Balanced
+
+```yaml
+usability:
+  score: 7/10
+  strengths:
+    - "Arquivos relacionados logicamente agrupados"
+    - "Wildcards para auto-organização de testes"
+    - "Padrões consistentes e previsíveis"
+
+organization:
+  score: 9/10
+  strengths:
+    - "Grupos conceituais claros (config, docs, CLI, source)"
+    - "Reduz significativamente o root clutter"
+    - "Escalável com crescimento do projeto"
+
+maintainability:
+  score: 7/10
+  strengths:
+    - "Padrões consistentes fáceis de estender"
+    - "Wildcards reduzem manutenção manual"
+    - "Documentação clara da lógica de agrupamento"
+
+adaptability:
+  score: 8/10
+  strengths:
+    - "Wildcards lidam automaticamente com novos test files"
+    - "Folders agrupados previnem root bloat"
+    - "Patterns extensíveis para novos tipos de arquivo"
+
+cleanliness:
+  score: 9/10
+  strengths:
+    - "Root directory mostra apenas entry points essenciais"
+    - "Config files consolidados sob package.json"
+    - "Docs consolidados sob README.md"
+```
+
+#### Implementação Automática
+
+O Setup Agent:
+
+1. **Gera 3 estratégias** usando agents paralelos
+2. **Avalia com spec-judge** usando 5 critérios objetivos
+3. **Seleciona a vencedora** baseado em score total
+4. **Aplica automaticamente** ao `.vscode/settings.json`
+5. **Documenta o processo** para referência futura
+
+#### Customização por Tipo de Projeto
+
+```yaml
+framework_specific_nesting:
+  next_js:
+    "next.config.js": "next-env.d.ts, next.config.*.js, .next, out"
+    "app": "layout.tsx, page.tsx, loading.tsx, error.tsx"
+
+  react_vite:
+    "vite.config.ts": "vite.config.*.ts, vite-env.d.ts"
+    "index.html": "public"
+
+  node_express:
+    "server.js": "app.js, routes, middleware"
+    "app.js": "controllers, models, services"
+```
 
 ---
 
