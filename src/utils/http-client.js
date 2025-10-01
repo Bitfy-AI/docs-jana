@@ -105,7 +105,8 @@ class HttpClient {
     let lastError;
     let attempt = 0;
 
-    while (attempt <= this.retryConfig.maxRetries) {
+    // FIX: Changed <= to < to ensure maxRetries attempts (not maxRetries+1)
+    while (attempt < this.retryConfig.maxRetries) {
       try {
         const result = await this.executeRequest(endpoint, options);
         return result;
@@ -114,15 +115,13 @@ class HttpClient {
         const statusCode = this.extractStatusCode(error);
 
         // Se não deve retentar ou já esgotou as tentativas, lança erro
-        if (!this.shouldRetry(error, statusCode) || attempt >= this.retryConfig.maxRetries) {
+        if (!this.shouldRetry(error, statusCode) || attempt >= this.retryConfig.maxRetries - 1) {
           this.stats.failedRequests++;
           throw error;
         }
 
-        // Incrementa contador de retry
-        if (attempt > 0) {
-          this.stats.retriedRequests++;
-        }
+        // Incrementa contador de retry (always increment on retry)
+        this.stats.retriedRequests++;
 
         // Calcula delay com backoff exponencial e jitter
         const delay = this.calculateBackoff(attempt);
@@ -159,12 +158,18 @@ class HttpClient {
     };
 
     return new Promise((resolve, reject) => {
-      // Timeout com AbortController (simulado com timer)
+      // FIX: Track timeout state to prevent race condition
+      let timedOut = false;
+      let requestCompleted = false;
+
       const timeoutId = setTimeout(() => {
-        req.destroy();
-        const timeoutError = new Error(`Request timeout after ${this.retryConfig.timeout}ms`);
-        timeoutError.code = 'ETIMEDOUT';
-        reject(timeoutError);
+        if (!requestCompleted) {
+          timedOut = true;
+          req.destroy();
+          const timeoutError = new Error(`Request timeout after ${this.retryConfig.timeout}ms`);
+          timeoutError.code = 'ETIMEDOUT';
+          reject(timeoutError);
+        }
       }, this.retryConfig.timeout);
 
       const req = protocol.request(requestOptions, (res) => {
@@ -175,11 +180,18 @@ class HttpClient {
         });
 
         res.on('end', () => {
+          if (timedOut || requestCompleted) return;
+          requestCompleted = true;
           clearTimeout(timeoutId);
 
           if (res.statusCode >= 200 && res.statusCode < 300) {
             try {
-              resolve(JSON.parse(data));
+              // FIX: Handle empty responses
+              if (data.trim().length === 0) {
+                resolve(null);
+              } else {
+                resolve(JSON.parse(data));
+              }
             } catch (e) {
               resolve(data);
             }
@@ -192,6 +204,8 @@ class HttpClient {
       });
 
       req.on('error', (error) => {
+        if (timedOut || requestCompleted) return;
+        requestCompleted = true;
         clearTimeout(timeoutId);
         reject(error);
       });

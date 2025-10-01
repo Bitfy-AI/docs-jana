@@ -42,27 +42,64 @@ class Logger {
   }
 
   /**
-   * Masks sensitive data in messages
+   * Masks sensitive data in messages (supports strings and objects)
    * Auto-detects and redacts patterns like "Bearer xxx", "password: xxx", etc.
-   * @param {string} message - Message to mask
-   * @returns {string} - Masked message
+   * FIX: Implements deep object traversal to mask sensitive data in nested objects
+   * @param {string|object} message - Message to mask (string or object)
+   * @returns {string} - Masked message as string
    */
   maskSensitive(message) {
-    if (typeof message !== 'string') {
-      // Try to stringify objects
+    // FIX: Handle objects by deep cloning and traversing to mask sensitive keys
+    if (typeof message === 'object' && message !== null) {
       try {
-        message = JSON.stringify(message);
+        // Deep clone to avoid mutating original object
+        const cloned = JSON.parse(JSON.stringify(message));
+        this._maskObjectDeep(cloned);
+        message = JSON.stringify(cloned, null, 2);
+      } catch (e) {
+        message = String(message);
+      }
+    } else if (typeof message !== 'string') {
+      // Try to stringify non-object, non-string values
+      try {
+        message = JSON.stringify(message, null, 2);
       } catch (e) {
         message = String(message);
       }
     }
 
+    // Apply pattern-based masking to the string representation
     let maskedMessage = message;
     for (const { pattern, replacement } of this.sensitivePatterns) {
       maskedMessage = maskedMessage.replace(pattern, replacement);
     }
 
     return maskedMessage;
+  }
+
+  /**
+   * Recursively masks sensitive keys in objects
+   * @private
+   * @param {object} obj - Object to mask (mutated in place)
+   */
+  _maskObjectDeep(obj) {
+    // Sensitive keys to mask (case-insensitive)
+    const sensitiveKeys = ['password', 'token', 'apikey', 'api_key', 'authorization', 'bearer', 'secret'];
+
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const lowerKey = key.toLowerCase();
+
+        // Check if this key is sensitive
+        if (sensitiveKeys.some(sensitiveKey => lowerKey.includes(sensitiveKey))) {
+          // Mask the value
+          obj[key] = '***REDACTED***';
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          // Recursively traverse nested objects and arrays
+          this._maskObjectDeep(obj[key]);
+        }
+      }
+    }
   }
 
   debug(message, ...args) {

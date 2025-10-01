@@ -17,12 +17,31 @@ class FileManager {
    * @returns {string} Created directory path
    */
   createBackupDirectory(baseDir = process.cwd(), prefix = 'n8n-workflows') {
+    // FIX: Validate baseDir to prevent path traversal attacks
+    // Ensure baseDir is absolute (not relative with ../)
+    if (!path.isAbsolute(baseDir)) {
+      throw new Error('baseDir must be an absolute path');
+    }
+
+    // FIX: Prevent path traversal by checking for ../ sequences
+    const normalizedBase = path.normalize(baseDir);
+    if (normalizedBase.includes('..')) {
+      throw new Error('baseDir contains invalid path traversal sequences (..)');
+    }
+
+    // FIX: Ensure we don't write outside current working directory
+    const cwd = process.cwd();
+    const resolvedBase = path.resolve(baseDir);
+    if (!resolvedBase.startsWith(cwd)) {
+      throw new Error(`baseDir must be within current working directory: ${cwd}`);
+    }
+
     const timestamp = new Date()
       .toISOString()
       .replace(/[:.]/g, '-')
       .slice(0, -5);
 
-    const dirPath = path.join(baseDir, `${prefix}-${timestamp}`);
+    const dirPath = path.join(resolvedBase, `${prefix}-${timestamp}`);
 
     try {
       fs.mkdirSync(dirPath, { recursive: true });
@@ -73,6 +92,7 @@ class FileManager {
 
     let sanitized = filename
       // Remove caracteres de controle (\x00-\x1F)
+      // eslint-disable-next-line no-control-regex
       .replace(/[\x00-\x1F]/g, '')
       // Remove separadores de caminho e caracteres especiais perigosos
       .replace(/[<>:"/\\|?*]/g, '-')
@@ -95,8 +115,11 @@ class FileManager {
     const lowerSanitized = sanitized.toLowerCase();
 
     // Verifica se é nome reservado do Windows
-    // Extrai nome base sem extensão para verificação
-    const baseName = lowerSanitized.split('.')[0];
+    // FIX: Handle files without extensions correctly
+    // split('.')[0] returns the whole filename if there's no dot
+    const lastDotIndex = lowerSanitized.lastIndexOf('.');
+    const baseName = lastDotIndex > 0 ? lowerSanitized.substring(0, lastDotIndex) : lowerSanitized;
+
     if (WINDOWS_RESERVED.test(baseName)) {
       return 'untitled';
     }
@@ -117,13 +140,24 @@ class FileManager {
    * @returns {string} Saved file path
    */
   saveWorkflow(directory, workflow) {
-    const { id, name, data } = workflow;
+    // Handle both formats: { id, name, data } and direct workflow object
+    const workflowData = workflow.data || workflow;
+    const id = workflow.id || workflowData.id;
+    const name = workflow.name || workflowData.name;
+
     const safeName = this.sanitizeFilename(name || `workflow-${id}`);
     const filename = `${safeName}-${id}.json`;
     const filePath = path.join(directory, filename);
 
     try {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+      // FIX: Add directory existence check before writing
+      // Create directory if it doesn't exist to prevent ENOENT errors
+      if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+        this.logger.debug(`Created directory: ${directory}`);
+      }
+
+      fs.writeFileSync(filePath, JSON.stringify(workflowData, null, 2), 'utf8');
       this.logger.success(`   Salvo: ${filename}`);
       return filename;
     } catch (error) {
@@ -201,14 +235,34 @@ class FileManager {
   getDirectorySize(dirPath) {
     let totalSize = 0;
 
-    const files = fs.readdirSync(dirPath);
-    for (const file of files) {
-      const filePath = path.join(dirPath, file);
-      const stats = fs.statSync(filePath);
+    try {
+      const files = fs.readdirSync(dirPath);
+      for (const file of files) {
+        const filePath = path.join(dirPath, file);
 
-      if (stats.isFile()) {
-        totalSize += stats.size;
+        try {
+          // FIX: Use lstatSync instead of statSync to detect symlinks
+          // lstatSync returns info about the symlink itself, not the target
+          const stats = fs.lstatSync(filePath);
+
+          // FIX: Skip symbolic links to prevent infinite loops
+          if (stats.isSymbolicLink()) {
+            this.logger.debug(`Skipping symbolic link: ${filePath}`);
+            continue;
+          }
+
+          if (stats.isFile()) {
+            totalSize += stats.size;
+          }
+        } catch (error) {
+          // FIX: Handle permission errors gracefully - log and continue
+          this.logger.debug(`Cannot access ${filePath}: ${error.message}`);
+          continue;
+        }
       }
+    } catch (error) {
+      // FIX: Handle directory read errors (permission denied, etc.)
+      this.logger.error(`Cannot read directory ${dirPath}: ${error.message}`);
     }
 
     return totalSize;
