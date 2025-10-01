@@ -184,6 +184,7 @@ class ConfigManager {
     }
 
     if (errors.length > 0) {
+      console.error('❌ Erros de validação:', errors);
       const error = new Error('Erros de validação de configuração');
       error.validationErrors = errors;
       throw error;
@@ -205,35 +206,37 @@ class ConfigManager {
     }
 
     switch (type) {
-      case 'string':
-        return String(value);
+    case 'string':
+      return String(value);
 
-      case 'number':
-        const num = Number(value);
-        if (isNaN(num)) {
-          throw new Error(`Não foi possível converter "${value}" para número`);
-        }
-        return num;
+    case 'number': {
+      const num = Number(value);
+      if (isNaN(num)) {
+        throw new Error(`Não foi possível converter "${value}" para número`);
+      }
+      return num;
+    }
 
-      case 'boolean':
-        if (typeof value === 'boolean') return value;
-        if (typeof value === 'string') {
-          const lower = value.toLowerCase();
-          if (lower === 'true' || lower === '1' || lower === 'yes') return true;
-          if (lower === 'false' || lower === '0' || lower === 'no') return false;
-        }
-        throw new Error(`Não foi possível converter "${value}" para boolean`);
+    case 'boolean':
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') {
+        const lower = value.toLowerCase();
+        if (lower === 'true' || lower === '1' || lower === 'yes') return true;
+        if (lower === 'false' || lower === '0' || lower === 'no') return false;
+      }
+      throw new Error(`Não foi possível converter "${value}" para boolean`);
 
-      case 'array':
-        if (Array.isArray(value)) return value;
-        if (typeof value === 'string') {
-          // Support comma-separated values
-          return value.split(',').map(v => v.trim()).filter(v => v.length > 0);
-        }
-        throw new Error(`Não foi possível converter "${value}" para array`);
+    case 'array': {
+      if (Array.isArray(value)) return value;
+      if (typeof value === 'string') {
+        // Support comma-separated values
+        return value.split(',').map(v => v.trim()).filter(v => v.length > 0);
+      }
+      throw new Error(`Não foi possível converter "${value}" para array`);
+    }
 
-      default:
-        return value;
+    default:
+      return value;
     }
   }
 
@@ -308,7 +311,7 @@ class ConfigManager {
 
     if (flagFields.length > 0) {
       console.log('\n📖 OPÇÕES:');
-      for (const [key, field] of flagFields) {
+      for (const [, field] of flagFields) {
         const required = field.required ? '(obrigatório)' : '(opcional)';
         const defaultValue = field.default !== undefined ? ` [padrão: ${field.default}]` : '';
         console.log(`  ${field.flag.padEnd(20)} ${field.description} ${required}${defaultValue}`);
@@ -321,7 +324,7 @@ class ConfigManager {
 
     if (envFields.length > 0) {
       console.log('\n📖 VARIÁVEIS DE AMBIENTE:');
-      for (const [key, field] of envFields) {
+      for (const [, field] of envFields) {
         const required = field.required ? '(obrigatório)' : '(opcional)';
         const defaultValue = field.default !== undefined ? ` [padrão: ${field.default}]` : '';
         console.log(`  ${field.env.padEnd(20)} ${field.description} ${required}${defaultValue}`);

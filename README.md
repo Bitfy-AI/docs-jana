@@ -29,12 +29,14 @@
 git clone https://github.com/jana-team/docs-jana.git
 cd docs-jana
 
-# Install dependencies
-npm install
+# Install dependencies with pnpm
+pnpm install
 
 # Make CLI globally available (optional)
-npm link
+pnpm link --global
 ```
+
+> **Note:** This project uses pnpm for package management. Install pnpm globally with: `npm install -g pnpm`
 
 ### Configuration
 
@@ -75,11 +77,11 @@ docs-jana
 #### Download Workflows
 
 ```bash
-# Download all workflows
-docs-jana n8n:download
+# Download all workflows organized by tags
+docs-jana n8n:download --source --no-tag-filter --output ./workflows
 
 # Download with tag filter
-docs-jana n8n:download --tag production
+docs-jana n8n:download --source --tag jana --output ./workflows
 
 # Download to specific directory
 docs-jana n8n:download --output ./my-workflows
@@ -88,20 +90,50 @@ docs-jana n8n:download --output ./my-workflows
 npm run n8n:download
 ```
 
-#### Upload Workflows
+**Features:**
+- ✅ **Automatic pagination**: Downloads all workflows (no limit)
+- ✅ **Tag organization**: Creates folders by tag (workflows/{tag}/)
+- ✅ **Source flag**: Use `--source` to download from source instance
+
+#### Upload Workflows with Advanced Features
 
 ```bash
-# Dry-run (test without uploading)
-docs-jana n8n:upload --input ./workflows --dry-run
+# 1. Validate before uploading (dry-run)
+docs-jana n8n:upload --input ./workflows --folder jana --dry-run
 
-# Upload workflows
-docs-jana n8n:upload --input ./workflows
+# 2. Upload specific folder with tag sync
+docs-jana n8n:upload --input ./workflows --folder jana --sync-tags
 
-# Upload with tag filter and activate
-docs-jana n8n:upload --input ./workflows --tag production --activate
+# 3. Force overwrite existing workflows
+docs-jana n8n:upload --input ./workflows --folder jana --sync-tags --force
 
-# Skip existing workflows
-docs-jana n8n:upload --input ./workflows --skip-existing
+# 4. Upload all workflows without folder filter
+docs-jana n8n:upload --input ./workflows --sync-tags
+
+# 5. Skip ID remapping (if no executeWorkflow nodes)
+docs-jana n8n:upload --input ./workflows --folder jana --skip-remap
+```
+
+**Features:**
+- ✅ **Folder filtering**: Upload only workflows from specific tag folder
+- ✅ **Automatic ID remapping**: Updates executeWorkflow node references (3-phase process)
+- ✅ **Tag management**: Auto-detects tags from folder name, creates/links them
+- ✅ **Upload history**: Tracks last 3 upload operations (saved in `.upload-history.json`)
+- ✅ **Dry-run mode**: Validate workflows before uploading
+- ✅ **Reference analysis**: Detects missing workflow dependencies
+- ✅ **Progress reporting**: Real-time progress with detailed error reports
+
+**3-Phase Upload Process:**
+1. **Phase 1**: Initial upload (N8N assigns new IDs)
+2. **Phase 2**: ID remapping (updates workflow references)
+3. **Phase 3**: Re-upload with corrected references
+
+**Upload History Display:**
+```
+📋 Últimas ações:
+✅ [01/10 14:30] jana: 28/30 workflows uploaded
+⚠️  [01/10 12:15] no-tag: 100/150 workflows uploaded (50 failed)
+✅ [30/09 18:00] v1.0.1: 6/6 workflows uploaded
 ```
 
 ### Outline Documentation
@@ -325,6 +357,20 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 | `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
 | `MAX_RETRIES` | `3` | Max HTTP retry attempts |
 | `TIMEOUT` | `30000` | HTTP request timeout (ms) |
+
+### Multi-Instance Support
+
+For migrating workflows between instances, use environment variable prefixes:
+
+```bash
+# Source instance (for download)
+N8N_URL_SOURCE=https://source.n8n.com
+N8N_API_KEY_SOURCE=source-api-key
+
+# Target instance (for upload)
+N8N_URL=https://target.n8n.com
+N8N_API_KEY=target-api-key
+```
 
 ---
 

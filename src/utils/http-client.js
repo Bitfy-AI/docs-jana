@@ -254,6 +254,13 @@ class HttpClient {
   }
 
   /**
+   * PATCH request
+   */
+  async patch(endpoint, body, headers = {}) {
+    return this.request(endpoint, { method: 'PATCH', body, headers });
+  }
+
+  /**
    * DELETE request
    */
   async delete(endpoint, headers = {}) {

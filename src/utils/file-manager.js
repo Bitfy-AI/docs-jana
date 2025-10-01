@@ -54,6 +54,27 @@ class FileManager {
   }
 
   /**
+   * Ensure directory exists, creating it if necessary
+   * @param {string} baseDir - Base directory path
+   * @param {string} subDir - Subdirectory name
+   * @returns {string} Full directory path
+   */
+  ensureDirectory(baseDir, subDir) {
+    const dirPath = path.join(baseDir, subDir);
+
+    try {
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        this.logger.debug(`Created directory: ${dirPath}`);
+      }
+      return dirPath;
+    } catch (error) {
+      this.logger.error(`Failed to create directory: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Sanitiza nome de arquivo - remove caracteres inválidos e previne path traversal
    *
    * SEGURANÇA CRÍTICA: Este método protege contra vulnerabilidades de path traversal
@@ -90,7 +111,7 @@ class FileManager {
     // Nomes reservados do Windows (case-insensitive)
     const WINDOWS_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 
-    let sanitized = filename
+    const sanitized = filename
       // Remove caracteres de controle (\x00-\x1F)
       // eslint-disable-next-line no-control-regex
       .replace(/[\x00-\x1F]/g, '')

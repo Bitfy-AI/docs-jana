@@ -46,6 +46,8 @@ class N8nBackupApp {
     this.showHelp = false;
     this.tagFilter = null;
     this.outputDir = null;
+    this.noTagFilter = false;
+    this.useSource = false;
   }
 
   /**
@@ -68,6 +70,12 @@ class N8nBackupApp {
       case '-o':
         this.outputDir = args[++i];
         break;
+      case '--no-tag-filter':
+        this.noTagFilter = true;
+        break;
+      case '--source':
+        this.useSource = true;
+        break;
       }
     }
   }
@@ -83,7 +91,9 @@ USAGE:
   docs-jana n8n:download [options]
 
 OPTIONS:
+  --source              Download from N8N_URL_SOURCE instead of N8N_URL
   --tag, -t <tag>       Filter workflows by tag
+  --no-tag-filter       Ignore N8N_TAG from .env and download all workflows
   --output, -o <dir>    Output directory (default: ./n8n-workflows-TIMESTAMP)
   --help, -h            Show this help message
 
@@ -95,8 +105,8 @@ ENVIRONMENT VARIABLES:
   N8N_TAG               Filter workflows by tag (optional)
 
 EXAMPLES:
-  # Download all workflows
-  docs-jana n8n:download
+  # Download all workflows organized by tag
+  docs-jana n8n:download --no-tag-filter
 
   # Download workflows with specific tag
   docs-jana n8n:download --tag production
@@ -128,7 +138,14 @@ EXAMPLES:
     this.config.tagFilter = this.config.tag;
 
     // Override with command-line args
-    if (this.tagFilter) {
+    if (this.useSource) {
+      // Use SOURCE credentials from .env
+      this.config.baseUrl = process.env.N8N_URL_SOURCE;
+      this.config.apiKey = process.env.N8N_API_KEY_SOURCE;
+    }
+    if (this.noTagFilter) {
+      this.config.tagFilter = null;
+    } else if (this.tagFilter) {
       this.config.tagFilter = this.tagFilter;
     }
     if (this.outputDir) {
@@ -188,7 +205,7 @@ EXAMPLES:
     let filteredWorkflows = workflows;
     if (this.config.tagFilter) {
       filteredWorkflows = this.workflowService.filterByTag(workflows, this.config.tagFilter);
-      this.logger.info(`🔍 After filtering: ${filteredWorkflows.length} workflows`);
+      this.logger.info(`🔍 After tag filtering: ${filteredWorkflows.length} workflows`);
     }
 
     if (filteredWorkflows.length === 0) {
@@ -211,7 +228,18 @@ EXAMPLES:
 
       try {
         const fullWorkflow = await this.workflowService.getWorkflow(workflow.id);
-        this.fileManager.saveWorkflow(outputDir, fullWorkflow);
+
+        // Organize by tag: workflows/tag/workflow.json
+        const tags = fullWorkflow.tags || [];
+        const firstTag = tags.length > 0 ? tags[0].name : 'no-tag';
+
+        // Sanitize tag name to remove invalid characters
+        const safeTag = firstTag.replace(/[<>:"/\\|?*]/g, '-');
+
+        // Create tag subfolder
+        const targetDir = this.fileManager.ensureDirectory(outputDir, safeTag);
+
+        this.fileManager.saveWorkflow(targetDir, fullWorkflow);
       } catch (error) {
         this.logger.error(`Failed to download workflow ${workflow.name}: ${error.message}`);
       }

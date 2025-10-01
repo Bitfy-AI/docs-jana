@@ -787,7 +787,7 @@ class OutlineService {
         };
 
         // Processa árvore de documentos para esta coleção
-        const collectionStats = await this.processDocumentTree(tree, collection.name);
+        const collectionStats = await this.processDocumentTree(tree, collection.name, collectionDir);
 
         // Atualiza estatísticas da coleção
         collectionResults.success = collectionStats.success;

@@ -17,8 +17,8 @@
  * - Clean separation of concerns
  */
 
-const path = require('path');
-const fs = require('fs');
+// const path = require('path');
+// const fs = require('fs');
 
 // Load environment variables
 require('dotenv').config();
@@ -34,17 +34,17 @@ const COMMANDS = {
     handler: () => require('./src/commands/n8n-download'),
     aliases: ['n8n:backup', 'download:n8n']
   },
+  'n8n:upload': {
+    description: 'Upload workflows to N8N',
+    handler: () => require('./src/commands/n8n-upload'),
+    aliases: ['upload:n8n', 'n8n:restore']
+  },
   'outline:download': {
     description: 'Download documentation from Outline',
     handler: () => require('./src/commands/outline-download'),
     aliases: ['download:outline']
   },
   // TODO: Implement these commands without legacy dependencies
-  // 'n8n:upload': {
-  //   description: 'Upload workflows to N8N',
-  //   handler: () => require('./src/commands/n8n-upload'),
-  //   aliases: ['upload:n8n']
-  // },
   // 'docs:generate': {
   //   description: 'Generate markdown docs from workflow sticky notes',
   //   handler: () => require('./src/commands/docs-generate'),
@@ -114,6 +114,9 @@ COMMANDS:
     n8n:download          Download workflows from N8N instance
                           Aliases: n8n:backup, download:n8n
 
+    n8n:upload            Upload workflows to N8N instance with preserved IDs
+                          Aliases: upload:n8n, n8n:restore
+
   Outline Documentation:
     outline:download      Download documentation from Outline
                           Aliases: download:outline
@@ -129,6 +132,12 @@ EXAMPLES:
 
   # Download N8N workflows with filtering
   ${CLI_NAME} n8n:download --tag production --output ./workflows
+
+  # Upload N8N workflows with preserved IDs
+  ${CLI_NAME} n8n:upload --input ./n8n-workflows-2025-10-01T13-27-51
+
+  # Test upload without making changes
+  ${CLI_NAME} n8n:upload --input ./workflows --dry-run
 
   # Download Outline documentation
   ${CLI_NAME} outline:download --output ./docs
@@ -155,6 +164,7 @@ CONFIGURATION:
 
   See command-specific help for detailed options:
     ${CLI_NAME} n8n:download --help
+    ${CLI_NAME} n8n:upload --help
     ${CLI_NAME} outline:download --help
 
 MORE INFO:
