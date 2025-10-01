@@ -17,10 +17,9 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, .eslintrc.json, jest.config.js, .mcp.json, .env.example",
+    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, .eslintrc.json, jest.config.js, .mcp.json, .env.example, .gitignore, .gitattributes, .gitmodules",
     "README.md": "CHANGELOG.md, MIGRATION-GUIDE.md, NEXT-STEPS.md, FOLDER_FILTER_IMPLEMENTATION.md, FOLDER_FILTER_QUICK_GUIDE.md, IMPLEMENTATION-SUMMARY.md, IMPLEMENTATION_COMPLETE.md, TAG_CODE_CHANGES.md, TAG_IMPLEMENTATION_SUMMARY.md, WORKFLOW-ID-PRESERVATION-REPORT.md, WORKFLOW-REFERENCES.md",
     ".env": ".env.example, .env.local, .env.*.local",
-    ".gitignore": ".gitattributes, .gitmodules",
     "index.js": "cli.js, src",
     "cli.js": "list-duplicates.js, test-*.js, check-*.js, cleanup-*.js, delete-*.js, unarchive-*.js, workflows",
     "jest.config.js": "__tests__",
