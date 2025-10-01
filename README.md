@@ -1,198 +1,398 @@
-# N8N Workflow Tools
+# 📚 Docs-Jana - Unified Documentation & Workflow Management CLI
 
-Conjunto completo de ferramentas para gerenciamento de workflows n8n, incluindo backup, migração e documentação automática.
+> Modern, unified command-line interface for managing N8N workflows and Outline documentation
 
-## 🚀 Ferramentas Disponíveis
-
-### 1. 📥 Download de Workflows (Backup)
-**Arquivo:** `download-n8n-workflows.js`
-
-Baixa workflows do n8n via API, com suporte para filtros por tag e autenticação flexível.
-
-### 2. 📤 Upload/Migração de Workflows
-**Arquivo:** `upload-n8n-workflows.js`
-
-Sistema completo de migração de workflows entre instâncias n8n, com análise de dependências e garantia de zero elos perdidos.
-
-### 3. 📝 Geração de Documentação
-**Arquivo:** `generate-docs.js`
-
-Gera documentação markdown automática a partir de workflows n8n, incluindo extração de sticky notes e análise de qualidade.
-
-### 4. 🧪 Teste de Migração
-**Arquivo:** `test-migration.js`
-
-Valida o sistema de migração sem fazer upload real, executando 6 testes automatizados.
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/jana-team/docs-jana)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org)
 
 ---
 
-## 🎯 Início Rápido
+## 🌟 Features
 
-### Pré-requisitos
+- **🔄 N8N Workflow Management**: Download, upload, and migrate workflows between instances
+- **📄 Outline Integration**: Download and manage documentation from Outline
+- **📝 Auto Documentation**: Generate markdown docs from workflow sticky notes
+- **🧪 Testing Tools**: Built-in migration and integration testing
+- **⚡ Modern CLI**: Unified interface with intuitive commands
+- **🎨 Clean Architecture**: Factory patterns, DI, and service layers
+- **🔒 Secure**: Environment-based configuration, no hardcoded secrets
 
-- Node.js 14+ instalado
-- Acesso à API do n8n (URL + credenciais)
-- Instância n8n de origem e/ou destino
+---
 
-### Instalação
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-# Clone o repositório
-git clone https://github.com/matheusmaiberg/docs-jana.git
+# Clone the repository
+git clone https://github.com/jana-team/docs-jana.git
 cd docs-jana
 
-# Configure as variáveis de ambiente
-cp .env.example .env
-# Edite .env com suas credenciais
+# Install dependencies
+npm install
+
+# Make CLI globally available (optional)
+npm link
 ```
 
-### Exemplos de Uso
+### Configuration
 
-#### 1. Fazer Backup de Workflows
+Create a `.env` file in the project root:
 
 ```bash
-# Baixar todos os workflows
-node download-n8n-workflows.js
+# N8N Configuration
+N8N_BASE_URL=https://n8n.example.com
+N8N_API_KEY=your-api-key-here
 
-# Baixar apenas workflows com tag específica
-node download-n8n-workflows.js --tag=producao
+# Outline Configuration
+OUTLINE_API_URL=https://outline.example.com/api
+OUTLINE_API_TOKEN=your-token-here
+
+# Optional
+LOG_LEVEL=info
 ```
 
-#### 2. Migrar Workflows Entre Instâncias
+### Basic Usage
 
 ```bash
-# Teste primeiro (dry-run)
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --dry-run
+# Show help
+docs-jana help
 
-# Execute a migração real
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/
+# Show version
+docs-jana version
 
-# Com filtro por tag e ativação automática
-node upload-n8n-workflows.js ./workflows --tag=jana --activate
-```
-
-#### 3. Gerar Documentação
-
-```bash
-# Gerar documentação de workflows
-node generate-docs.js ./n8n-workflows-2025-09-30/
+# List all available commands
+docs-jana
 ```
 
 ---
 
-## 📚 Sistema de Migração de Workflows
+## 📖 Commands
 
-Sistema completo para migração de workflows n8n entre instâncias, **garantindo ZERO elos perdidos**.
+### N8N Workflows
 
-### ✨ Características Principais
+#### Download Workflows
 
-- 🔍 **Análise automática de dependências** entre workflows
-- 📊 **Ordenação topológica** para upload na ordem correta
-- 🎯 **Mapeamento inteligente de IDs** (prioridade por nome)
-- 🔄 **Atualização recursiva** de todas as referências
-- ✅ **Verificação de integridade** pós-migração (4 checks)
-- 🧪 **Modo dry-run** para simulação segura
-- 📋 **Relatórios detalhados** em JSON
+```bash
+# Download all workflows
+docs-jana n8n:download
 
-### 🏗️ Arquitetura em 5 Fases
+# Download with tag filter
+docs-jana n8n:download --tag production
 
-1. **Inicialização** - Carrega configurações e workflows
-2. **Análise de Dependências** - Constrói grafo e calcula ordem
-3. **Upload Sequencial** - Cria workflows respeitando dependências
-4. **Atualização de Referências** - Atualiza IDs usando mapeamento por nome
-5. **Verificação** - Valida integridade completa
+# Download to specific directory
+docs-jana n8n:download --output ./my-workflows
 
-### 📖 Documentação Detalhada
+# Alternative: use npm script
+npm run n8n:download
+```
 
-- [MIGRATION-GUIDE.md](./MIGRATION-GUIDE.md) - Guia completo de migração
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Arquitetura técnica detalhada
-- [EXAMPLES.md](./EXAMPLES.md) - Exemplos práticos e troubleshooting
-- [IMPLEMENTATION-SUMMARY.md](./IMPLEMENTATION-SUMMARY.md) - Resumo da implementação
+#### Upload Workflows
+
+```bash
+# Dry-run (test without uploading)
+docs-jana n8n:upload --input ./workflows --dry-run
+
+# Upload workflows
+docs-jana n8n:upload --input ./workflows
+
+# Upload with tag filter and activate
+docs-jana n8n:upload --input ./workflows --tag production --activate
+
+# Skip existing workflows
+docs-jana n8n:upload --input ./workflows --skip-existing
+```
+
+### Outline Documentation
+
+#### Download Documentation
+
+```bash
+# Download all docs
+docs-jana outline:download
+
+# Download to specific directory
+docs-jana outline:download --output ./docs
+
+# Download specific collections
+docs-jana outline:download --collections "Engineering,Product"
+
+# With custom delay between requests
+docs-jana outline:download --delay 500
+
+# Verbose logging
+docs-jana outline:download --verbose
+```
+
+### Documentation Generation
+
+#### Generate Markdown Docs
+
+```bash
+# Generate docs from workflows
+docs-jana docs:generate
+
+# Generate from specific directory
+docs-jana docs:generate --input ./workflows --output ./documentation
+
+# With quality verification
+docs-jana docs:generate --verify
+```
+
+### Testing
+
+#### Migration Tests
+
+```bash
+# Run migration tests
+docs-jana test:migration
+
+# Test with specific workflows
+docs-jana test:migration --input ./workflows
+```
+
+#### Outline Integration Tests
+
+```bash
+# Run Outline integration tests
+docs-jana test:outline
+```
 
 ---
 
-## 📥 Referência: Download de Workflows
+## 🏗️ Architecture
 
-### Uso via Linha de Comando
+### Project Structure
 
-```bash
-node download-n8n-workflows.js <N8N_URL> <API_KEY> [TAG]
+```
+docs-jana/
+├── cli.js                      # Main CLI entry point
+├── src/
+│   ├── commands/               # CLI command implementations
+│   │   ├── n8n-download.js
+│   │   ├── n8n-upload.js
+│   │   ├── outline-download.js
+│   │   ├── docs-generate.js
+│   │   ├── test-migration.js
+│   │   └── test-outline.js
+│   ├── services/               # Business logic services
+│   │   ├── workflow-service.js
+│   │   ├── outline-service.js
+│   │   ├── migration-verifier.js
+│   │   └── ...
+│   ├── auth/                   # Authentication strategies
+│   │   ├── auth-strategy.js
+│   │   ├── api-key-strategy.js
+│   │   ├── basic-auth-strategy.js
+│   │   └── auth-factory.js
+│   ├── utils/                  # Utility modules
+│   │   ├── logger.js
+│   │   ├── http-client.js
+│   │   ├── file-manager.js
+│   │   ├── config-manager.js
+│   │   └── ...
+│   └── models/                 # Data models
+├── __tests__/                  # Test suites
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── .claude/                    # Claude Code specs
+│   └── specs/
+│       └── code-quality-improvements/
+└── docs/                       # Generated documentation
 ```
 
-**Exemplos:**
+### Design Patterns
 
-```bash
-# Baixar todos os workflows
-node download-n8n-workflows.js https://seu-n8n.com n8n_api_xxxxx
-
-# Baixar apenas workflows com a tag "producao"
-node download-n8n-workflows.js https://seu-n8n.com n8n_api_xxxxx producao
-```
-
-### Uso via Variáveis de Ambiente (.env)
-
-Configure o arquivo `.env`:
-```bash
-N8N_URL=https://seu-n8n.com
-N8N_API_KEY=sua-chave
-N8N_TAG=producao  # opcional
-```
-
-Execute:
-```bash
-node download-n8n-workflows.js
-```
-
-### Saída
-
-O script cria uma pasta com timestamp no formato:
-```
-n8n-workflows-YYYY-MM-DDTHH-MM-SS/
-  ├── workflow-name-1-123.json
-  ├── workflow-name-2-456.json
-  └── _backup-log.json
-```
-
-- **workflow-*.json**: Dados completos do workflow
-- **_backup-log.json**: Log com estatísticas de sucesso/falha
-
-### Autenticação Suportada
-
-- **API Key** (recomendado): `N8N_API_KEY`
-- **Basic Auth**: `N8N_USERNAME` + `N8N_PASSWORD`
+- **Command Pattern**: Each CLI command is a separate module
+- **Factory Pattern**: Auth strategies created via factory
+- **Strategy Pattern**: Multiple authentication methods
+- **Dependency Injection**: Services receive dependencies via constructor
+- **Service Layer**: Business logic separated from CLI logic
 
 ---
 
-## 🔧 Variáveis de Ambiente
+## 🔧 Development
 
-| Variável | Descrição | Obrigatório |
-|----------|-----------|-------------|
-| `N8N_URL` | URL da instância n8n | Sim |
-| `N8N_API_KEY` | API Key do n8n | Condicional* |
-| `N8N_USERNAME` | Usuário do n8n | Condicional* |
-| `N8N_PASSWORD` | Senha do n8n | Condicional* |
-| `N8N_TAG` | Filtro por tag (opcional) | Não |
-| `LOG_LEVEL` | Nível de log (debug/info/warn/error) | Não |
+### Running Tests
 
-*Forneça `API_KEY` ou `USERNAME`+`PASSWORD`
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test suites
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+
+# Watch mode
+npm run test:watch
+```
+
+### Linting
+
+```bash
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+```
+
+### Pre-commit Hooks
+
+The project uses Husky + lint-staged to automatically:
+- Run ESLint on changed files
+- Run Jest tests on related files
+- Ensure code quality before commits
 
 ---
 
-## 🤝 Contribuindo
+## 📊 Code Quality
 
-Contribuições são bem-vindas! Por favor:
+### Current Metrics (Baseline)
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'feat: adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+- **Files**: 25 JavaScript files
+- **Lines of Code**: 5,993 lines
+- **Code Duplication**: 0.4% (20 lines)
+- **Vulnerabilities**: 0
+- **Test Coverage**: 80%+ target
 
-## 📄 Licença
+### Quality Improvements in Progress
 
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+We're implementing systematic quality improvements including:
+- Security fixes (path traversal, injection prevention)
+- Memory leak prevention
+- Race condition resolution
+- Comprehensive test coverage
+- Code refactoring and documentation
 
-## 📧 Contato
+See [Code Quality Improvements Spec](.claude/specs/code-quality-improvements/) for details.
 
-- GitHub: [@matheusmaiberg](https://github.com/matheusmaiberg)
-- Repositório: [docs-jana](https://github.com/matheusmaiberg/docs-jana)
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes
+4. Run tests: `npm test`
+5. Commit: `git commit -m "feat: add my feature"`
+6. Push: `git push origin feature/my-feature`
+7. Create a Pull Request
+
+### Commit Convention
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+- `feat:` New features
+- `fix:` Bug fixes
+- `docs:` Documentation changes
+- `refactor:` Code refactoring
+- `test:` Adding tests
+- `chore:` Maintenance tasks
+
+---
+
+## 📝 Environment Variables
+
+### N8N Configuration
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `N8N_BASE_URL` | Yes | N8N instance URL |
+| `N8N_API_KEY` | No* | API key for authentication |
+| `N8N_USERNAME` | No* | Username for basic auth |
+| `N8N_PASSWORD` | No* | Password for basic auth |
+
+*Either API key or username/password required
+
+### Outline Configuration
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OUTLINE_API_URL` | Yes | Outline API URL |
+| `OUTLINE_API_TOKEN` | Yes | Outline API token |
+
+### Optional Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
+| `MAX_RETRIES` | `3` | Max HTTP retry attempts |
+| `TIMEOUT` | `30000` | HTTP request timeout (ms) |
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### "Command not found: docs-jana"
+
+Run `npm link` to make the CLI globally available, or use `node cli.js` directly.
+
+#### "Configuration Error: N8N_BASE_URL is required"
+
+Ensure you have a `.env` file with all required variables. See Configuration section.
+
+#### "ECONNREFUSED" or connection errors
+
+- Check that N8N/Outline instances are running and accessible
+- Verify URLs in `.env` are correct
+- Check firewall/network settings
+
+### Debug Mode
+
+Enable verbose logging for detailed output:
+
+```bash
+# Using --verbose flag
+docs-jana n8n:download --verbose
+
+# Using environment variable
+DEBUG=* docs-jana n8n:download
+```
+
+---
+
+## 📜 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- N8N team for the amazing workflow automation platform
+- Outline team for the collaborative documentation tool
+- Contributors and users of this project
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/jana-team/docs-jana/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jana-team/docs-jana/discussions)
+- **Email**: support@jana-team.com
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Web UI for workflow management
+- [ ] Webhook integration for auto-sync
+- [ ] Cloud backup integration (S3, GCS)
+- [ ] CI/CD pipeline templates
+- [ ] Workflow version control
+- [ ] Multi-instance sync
+- [ ] GraphQL API
+- [ ] Docker image
+
+---
+
+**Made with ❤️ by Jana Team**
