@@ -955,7 +955,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 31: Testar uso programático de index.js
+### ✅ Task 31: Testar uso programático de index.js (COMPLETED)
 
 **Objetivo**: Validar que index.js pode ser usado programaticamente (require('docs-jana')).
 
@@ -985,7 +985,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 32: Verificar compatibilidade com Husky hooks
+### ✅ Task 32: Verificar compatibilidade com Husky hooks (COMPLETED)
 
 **Objetivo**: Validar que refatoração não quebra pre-commit hooks do Husky.
 
@@ -1016,7 +1016,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 33: Executar testes de performance (overhead < 50ms)
+### ✅ Task 33: Executar testes de performance (overhead < 50ms) (COMPLETED)
 
 **Objetivo**: Validar que separação cli.js → index.js adiciona ≤ 50ms de overhead.
 
