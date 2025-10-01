@@ -1,0 +1,32 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/node_modules": true,
+    "**/.claude": false
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, .eslintrc.json, jest.config.js, .mcp.json, .env.example",
+    "README.md": "CHANGELOG.md, MIGRATION-GUIDE.md, NEXT-STEPS.md, FOLDER_FILTER_IMPLEMENTATION.md, FOLDER_FILTER_QUICK_GUIDE.md, IMPLEMENTATION-SUMMARY.md, IMPLEMENTATION_COMPLETE.md, TAG_CODE_CHANGES.md, TAG_IMPLEMENTATION_SUMMARY.md, WORKFLOW-ID-PRESERVATION-REPORT.md, WORKFLOW-REFERENCES.md",
+    ".env": ".env.example, .env.local, .env.*.local",
+    ".gitignore": ".gitattributes, .gitmodules",
+    "index.js": "cli.js, src",
+    "cli.js": "list-duplicates.js, test-*.js, check-*.js, cleanup-*.js, delete-*.js, unarchive-*.js, workflows",
+    "jest.config.js": "__tests__",
+    "*.js": "$(capture).test.js, $(capture).spec.js, $(capture).test.ts, $(capture).spec.ts",
+    "*.ts": "$(capture).test.ts, $(capture).spec.ts, $(capture).test.js, $(capture).spec.js",
+    "*.jsx": "$(capture).test.jsx, $(capture).spec.jsx",
+    "*.tsx": "$(capture).test.tsx, $(capture).spec.tsx"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "strategy": "aggressive",
+  "reasoning": [
+    "Group ALL configuration files under package.json as the project manifest",
+    "Nest ALL documentation and implementation guides under README.md",
+    "Group testing infrastructure under jest.config.js",
+    "Nest environment files under .env.example as the template",
+    "Group git-related config files under .gitignore",
+    "Hide utility scripts that are not primary entry points",
+    "Nest source-related folders under the main entry point (cli.js)",
+    "Maximize organization by using extensive wildcards for related files",
+    "Create logical groupings that reduce visual clutter in the file explorer"
+  ],
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, .npmrc, .nvmrc, .node-version, yarn.lock, .yarnrc, .yarnrc.yml, .eslintrc*, .eslintignore, .prettierrc*, .prettierignore, .editorconfig, .mcp.json, .husky, node_modules",
+
+    "README.md": "CHANGELOG.md, MIGRATION-GUIDE.md, NEXT-STEPS.md, FOLDER_FILTER_IMPLEMENTATION.md, FOLDER_FILTER_QUICK_GUIDE.md, IMPLEMENTATION_COMPLETE.md, IMPLEMENTATION-SUMMARY.md, TAG_CODE_CHANGES.md, TAG_IMPLEMENTATION_SUMMARY.md, WORKFLOW-ID-PRESERVATION-REPORT.md, WORKFLOW-REFERENCES.md, *.md, docs, LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md",
+
+    ".env.example": ".env, .env.*, .envrc",
+
+    ".gitignore": ".gitattributes, .gitmodules, .git",
+
+    "jest.config.js": "__tests__, *.test.js, *.spec.js, test-*.js, *.test.*, *.spec.*, coverage, test-results",
+
+    "cli.js": "index.js, src, workflows, list-duplicates.js, check-*.js, cleanup-*.js, delete-*.js, test-*.js, unarchive-*.js",
+
+    "tsconfig.json": "tsconfig.*.json, tsconfig-*.json",
+
+    ".vscode": ".claude, .idea, .vs"
+  }
+}

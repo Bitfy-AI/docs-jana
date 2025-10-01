@@ -1,0 +1,28 @@
+{
+  "strategy": "conservative",
+  "reasoning": [
+    "Groups only files with direct, obvious relationships",
+    "Package managers: package.json nests its lock files and workspace config",
+    "Environment files: .env nests its example template",
+    "Git config: .gitignore nests related git artifacts",
+    "ESLint: .eslintrc.json nests related config files",
+    "Jest: jest.config.js nests test-related files",
+    "Documentation: Main README nests implementation and migration docs",
+    "Entry points: cli.js nests the secondary index.js entry point",
+    "Does NOT nest folders under files",
+    "Does NOT nest loosely related files",
+    "Follows VS Code's recommended conservative patterns"
+  ],
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, yarn.lock",
+    ".env": ".env.example, .env.local, .env.*.local, .env.development, .env.production, .env.test",
+    ".gitignore": ".gitattributes, .gitmodules",
+    ".eslintrc.json": ".eslintignore, .eslintrc.*, eslint.config.js",
+    "jest.config.js": "jest.setup.js, jest.config.*.js",
+    ".mcp.json": ".mcp.*.json",
+    "README.md": "CHANGELOG.md, MIGRATION-GUIDE.md, IMPLEMENTATION-SUMMARY.md, IMPLEMENTATION_COMPLETE.md, FOLDER_FILTER_IMPLEMENTATION.md, FOLDER_FILTER_QUICK_GUIDE.md, NEXT-STEPS.md, TAG_CODE_CHANGES.md, TAG_IMPLEMENTATION_SUMMARY.md, WORKFLOW-ID-PRESERVATION-REPORT.md, WORKFLOW-REFERENCES.md",
+    "cli.js": "index.js"
+  }
+}

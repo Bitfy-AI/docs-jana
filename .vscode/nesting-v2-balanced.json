@@ -1,0 +1,30 @@
+{
+  "strategy": "balanced",
+  "reasoning": [
+    "Groups package management files (lockfiles, workspace config) under package.json",
+    "Nests configuration files (.env.example, .eslintrc.json, jest.config.js, .mcp.json) under package.json as they define project behavior",
+    "Groups all documentation markdown files under README.md to reduce clutter",
+    "Nests implementation/migration documentation under README.md as they document the project",
+    "Groups entry point files (cli.js, index.js) together as they are the main application entry points",
+    "Nests utility/test scripts (test-*, check-*, cleanup-*, delete-*, unarchive-*, list-duplicates.js) under cli.js as they are CLI-related utilities",
+    "Groups .env.example under .env as it's the template for environment variables",
+    "Nests .gitignore under .git for version control organization",
+    "Groups the src/ folder under index.js as it's the main entry point to the source code",
+    "Groups the __tests__ folder under jest.config.js as it contains all test files",
+    "Groups the workflows/ folder under cli.js as it contains CLI-generated workflow files",
+    "Uses wildcards for common test file patterns to automatically nest test files alongside their source files"
+  ],
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, pnpm-workspace.yaml, .eslintrc.json, jest.config.js, .mcp.json, .env.example",
+    "README.md": "CHANGELOG.md, MIGRATION-GUIDE.md, NEXT-STEPS.md, FOLDER_FILTER_IMPLEMENTATION.md, FOLDER_FILTER_QUICK_GUIDE.md, IMPLEMENTATION-SUMMARY.md, IMPLEMENTATION_COMPLETE.md, TAG_CODE_CHANGES.md, TAG_IMPLEMENTATION_SUMMARY.md, WORKFLOW-ID-PRESERVATION-REPORT.md, WORKFLOW-REFERENCES.md",
+    ".env": ".env.example, .env.local, .env.*.local",
+    ".gitignore": ".gitattributes, .gitmodules",
+    "index.js": "cli.js, src",
+    "cli.js": "list-duplicates.js, test-*.js, check-*.js, cleanup-*.js, delete-*.js, unarchive-*.js, workflows",
+    "jest.config.js": "__tests__",
+    "*.js": "$(capture).test.js, $(capture).spec.js, $(capture).test.ts, $(capture).spec.ts",
+    "*.ts": "$(capture).test.ts, $(capture).spec.ts, $(capture).test.js, $(capture).spec.js",
+    "*.jsx": "$(capture).test.jsx, $(capture).spec.jsx",
+    "*.tsx": "$(capture).test.tsx, $(capture).spec.tsx"
+  }
+}
