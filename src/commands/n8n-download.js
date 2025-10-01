@@ -54,18 +54,18 @@ class N8nBackupApp {
       const arg = args[i];
 
       switch (arg) {
-        case '--help':
-        case '-h':
-          this.showHelp = true;
-          break;
-        case '--tag':
-        case '-t':
-          this.tagFilter = args[++i];
-          break;
-        case '--output':
-        case '-o':
-          this.outputDir = args[++i];
-          break;
+      case '--help':
+      case '-h':
+        this.showHelp = true;
+        break;
+      case '--tag':
+      case '-t':
+        this.tagFilter = args[++i];
+        break;
+      case '--output':
+      case '-o':
+        this.outputDir = args[++i];
+        break;
       }
     }
   }
@@ -108,7 +108,16 @@ EXAMPLES:
    */
   initialize() {
     // Load and validate configuration
-    this.config = this.configManager.load();
+    try {
+      this.config = this.configManager.load();
+    } catch (error) {
+      console.error('❌ Failed to load configuration:', error.message);
+      console.error('\n💡 Tip: Make sure you have a .env file with N8N configuration');
+      console.error('   Example:\n');
+      console.error('   N8N_BASE_URL=https://n8n.example.com');
+      console.error('   N8N_API_KEY=your-api-key\n');
+      throw error;
+    }
 
     // Override with command-line args
     if (this.tagFilter) {
@@ -123,6 +132,8 @@ EXAMPLES:
     if (!validation.valid) {
       console.error('❌ Configuration Error:\n');
       validation.errors.forEach(error => console.error(`   - ${error}`));
+      console.error('\n💡 See help for required environment variables:');
+      console.error('   docs-jana n8n:download --help\n');
       throw new Error('Invalid configuration');
     }
 
