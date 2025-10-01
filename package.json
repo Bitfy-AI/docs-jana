@@ -1,0 +1,65 @@
+{
+  "name": "docs-jana",
+  "version": "2.0.0",
+  "description": "Unified CLI for documentation and workflow management (N8N + Outline)",
+  "main": "cli.js",
+  "bin": {
+    "docs-jana": "./cli.js"
+  },
+  "scripts": {
+    "start": "node cli.js",
+    "n8n:download": "node cli.js n8n:download",
+    "download:n8n": "node cli.js n8n:download",
+    "outline:download": "node cli.js outline:download",
+    "download:outline": "node cli.js outline:download",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:coverage:watch": "jest --coverage --watch",
+    "test:unit": "jest __tests__/unit",
+    "test:integration": "jest __tests__/integration",
+    "test:e2e": "jest __tests__/e2e",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "documentation",
+    "n8n",
+    "outline",
+    "backup",
+    "migration",
+    "workflow"
+  ],
+  "author": "Jana Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "dependencies": {
+    "cli-progress": "^3.12.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "jscpd": "^4.0.5",
+    "lint-staged": "^16.2.3",
+    "nodemon": "^3.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jana-team/docs-jana.git"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "jest --bail --findRelatedTests --passWithNoTests"
+    ]
+  }
+}

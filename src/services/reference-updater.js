@@ -126,8 +126,9 @@ class ReferenceUpdater {
    * Segue o padrão do código de referência do usuário
    * @param {object|Array} obj - Objeto ou array para processar
    * @param {number} depth - Profundidade atual da recursão (para evitar stack overflow)
+   * @param {WeakSet} visited - Set de objetos já visitados (para evitar referências circulares)
    */
-  updateObjectRecursively(obj, depth = 0) {
+  updateObjectRecursively(obj, depth = 0, visited = new WeakSet()) {
     // Limite de profundidade para evitar stack overflow
     const MAX_DEPTH = 50;
     if (depth > MAX_DEPTH) {
@@ -139,10 +140,19 @@ class ReferenceUpdater {
       return;
     }
 
+    // PROTEÇÃO: Detecta referências circulares
+    if (visited.has(obj)) {
+      this.logger.debug(`  Referência circular detectada - ignorando objeto`);
+      return;
+    }
+
+    // Marca objeto como visitado
+    visited.add(obj);
+
     // Se é um array, processa cada elemento
     if (Array.isArray(obj)) {
       for (const item of obj) {
-        this.updateObjectRecursively(item, depth + 1);
+        this.updateObjectRecursively(item, depth + 1, visited);
       }
       return;
     }
@@ -161,7 +171,7 @@ class ReferenceUpdater {
 
       // Continua recursão
       if (typeof value === 'object' && value !== null) {
-        this.updateObjectRecursively(value, depth + 1);
+        this.updateObjectRecursively(value, depth + 1, visited);
       }
     }
   }

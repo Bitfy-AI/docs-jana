@@ -1,349 +1,317 @@
-# Guia de Migração de Workflows N8N
+# 📦 N8N Workflow Migration Guide
 
-Sistema completo para migração de workflows n8n entre instâncias, preservando todas as dependências e referências.
+Guia completo para migrar workflows entre instâncias N8N usando docs-jana CLI.
 
-## Características
+## 🎯 Cenário: Migrar workflows da pasta "jana"
 
-- **ZERO elos perdidos**: Garante que todas as referências entre workflows sejam mantidas
-- **Análise de dependências**: Detecta e ordena workflows automaticamente
-- **Busca inteligente**: Prioriza busca por nome (cachedResultName) sobre ID
-- **Verificação de integridade**: Valida migração após conclusão
-- **Modo dry-run**: Simula migração sem fazer alterações
-- **Relatórios detalhados**: Gera JSON com estatísticas completas
+Este guia mostra como migrar workflows da instância de origem (Nexus) para a instância de destino (Refrisol).
 
-## Arquitetura
+---
 
-### 5 Fases da Migração
+## 📋 Pré-requisitos
 
-1. **Inicialização**: Carrega configurações, autentica e carrega workflows
-2. **Análise de Dependências**: Constrói grafo e calcula ordem de upload
-3. **Upload Sequencial**: Cria workflows respeitando dependências
-4. **Atualização de Referências**: Atualiza IDs usando mapeamento por nome
-5. **Verificação**: Valida integridade (ZERO elos perdidos)
+1. **Node.js** >= 14.0.0
+2. **pnpm** instalado (`npm install -g pnpm`)
+3. **Credenciais** de ambas as instâncias N8N
 
-### Estrutura de Arquivos Criados
+---
 
-```
-src/
-├── models/
-│   └── workflow-graph.js          # Grafo de dependências (ordenação topológica)
-├── utils/
-│   ├── workflow-loader.js         # Carregador de workflows do filesystem
-│   └── id-mapper.js               # Mapeamento inteligente de IDs (prioridade: nome)
-└── services/
-    ├── dependency-analyzer.js     # Análise e ordenação de dependências
-    ├── workflow-upload-service.js # Upload sequencial de workflows
-    ├── reference-updater.js       # Atualização recursiva de referências
-    └── migration-verifier.js      # Verificação de integridade
+## 🔧 Configuração
 
-upload-n8n-workflows.js            # Script principal de migração
-```
-
-## Instalação
-
-### 1. Configurar credenciais
-
-Copie o arquivo `.env.example` para `.env`:
+### 1. Clonar e instalar
 
 ```bash
-cp .env.example .env
+git clone https://github.com/jana-team/docs-jana.git
+cd docs-jana
+pnpm install
 ```
 
-Edite `.env` e configure suas credenciais:
+### 2. Configurar variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
 
 ```bash
-# N8N de DESTINO (onde workflows serão criados)
-N8N_URL=https://destino.n8n.cloud/
-N8N_API_KEY=sua_api_key_aqui
+# Instância de ORIGEM (download)
+N8N_URL_SOURCE=https://flows.nexus.bitfy.ai
+N8N_API_KEY_SOURCE=sua-api-key-source
 
-# Opcional: Filtrar por tag
-# N8N_TAG=jana
+# Instância de DESTINO (upload)
+N8N_URL=https://n8n.refrisol.com.br
+N8N_API_KEY=sua-api-key-target
+
+# Opcional
+LOG_LEVEL=info
 ```
 
-### 2. Baixar workflows da origem (opcional)
+---
 
-Se você ainda não tem os workflows em JSON, baixe-os primeiro:
+## 🚀 Processo de Migração
+
+### Passo 1: Download dos workflows
+
+Baixa todos os workflows da instância de origem, organizados por tags:
 
 ```bash
-# Configure .env com credenciais da ORIGEM
-node download-n8n-workflows.js
+node cli.js n8n:download --source --no-tag-filter --output workflows
 ```
 
-Isso criará uma pasta `n8n-workflows-YYYY-MM-DD/` com todos os workflows.
+**O que acontece:**
+- ✅ Conecta na instância SOURCE
+- ✅ Baixa TODOS os workflows (paginação automática)
+- ✅ Organiza em pastas por tag: `workflows/{tag}/`
+- ✅ Salva com ID original preservado
 
-## Uso
+**Estrutura criada:**
+```
+workflows/
+├── jana/           (30 workflows)
+├── aventureiro/    (3 workflows)
+├── interno/        (1 workflow)
+├── no-tag/         (154 workflows)
+└── v1.0.1/         (6 workflows)
+```
 
-### Sintaxe Básica
+### Passo 2: Validação (Dry-Run)
+
+Valide os workflows antes de subir:
 
 ```bash
-node upload-n8n-workflows.js <caminho-dos-workflows> [opções]
+node cli.js n8n:upload --input workflows --folder jana --dry-run
 ```
 
-### Exemplos
+**O que é verificado:**
+- ✅ Workflows válidos (campos obrigatórios)
+- ✅ Referências entre workflows (executeWorkflow nodes)
+- ✅ Workflows faltando que são referenciados
+- ✅ Análise de dependências
 
-#### 1. Simulação (Dry Run) - RECOMENDADO PRIMEIRO
+**Exemplo de saída:**
+```
+📊 Validation Summary:
+   Valid:   30
+   Invalid: 0
+   Total:   30
+
+🔗 Workflow Reference Analysis:
+   Workflows with references: 9
+   Referenced workflow IDs:   23
+   Total reference links:     55
+
+⚠️  Warning: 3 referenced workflows are NOT in the upload set:
+   - H2uokpNckevszoVI (OAuth token)
+   - 3JAysWPS3auAr2lW (Follow Up)
+   - lKQiQULidnbJUMM5 (Seleciona atendente humano)
+```
+
+### Passo 3: Upload com todas as features
+
+Execute o upload completo:
 
 ```bash
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --dry-run
+node cli.js n8n:upload --input workflows --folder jana --sync-tags
 ```
 
-Isso vai:
-- Analisar dependências
-- Calcular ordem de upload
-- Simular criação de workflows
-- Gerar relatório
-- **SEM fazer alterações no servidor**
+**Processo de 3 Fases:**
 
-#### 2. Migração Real
+#### Fase 1: Upload Inicial
+- Faz upload de todos os 30 workflows
+- N8N atribui novos IDs automaticamente
+- Constrói mapeamento: `old_id → new_id`
+- Salva em `workflows/jana/_id-mapping.json`
+
+#### Fase 2: Remapeamento de IDs
+- Lê todos os workflows com `executeWorkflow` nodes
+- Atualiza referências com novos IDs
+- Valida que todas as referências podem ser resolvidas
+
+#### Fase 3: Re-upload
+- Re-faz upload dos workflows com referências corrigidas
+- Usa flag `--force` para sobrescrever
+- Garante que todos os links entre workflows funcionem
+
+#### Fase 4: Sincronização de Tags (com --sync-tags)
+- Detecta tag pela pasta de origem ("jana")
+- Busca ou cria a tag no N8N de destino
+- Vincula todos os workflows à tag
+
+**Exemplo de saída:**
+```
+📊 FINAL SUMMARY
+═══════════════════════════════════════════════════════
+🎯 Target N8N: https://n8n.refrisol.com.br
+
+Phase 1 (Initial Upload):
+   Created:  30
+   Updated:  0
+   Skipped:  0
+   Failed:   0
+
+Phase 2 & 3 (ID Remapping & Re-upload):
+   References remapped:  55
+   Re-upload succeeded:  9
+   Re-upload failed:     0
+
+Phase 4 (Tag Sync):
+   Tags synced:  30
+
+✅ Upload complete! All workflows uploaded successfully.
+   55 workflow references were remapped and updated.
+```
+
+### Passo 4: Verificar histórico
+
+O sistema salva automaticamente o histórico:
 
 ```bash
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/
+# Na próxima execução, você verá:
+📋 Últimas ações:
+✅ [01/10 14:30] jana: 30/30 workflows uploaded
 ```
 
-#### 3. Filtrar por Tag
+---
+
+## 🔄 Casos de Uso Avançados
+
+### Upload forçado (sobrescrever existentes)
 
 ```bash
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --tag=jana
+node cli.js n8n:upload --input workflows --folder jana --sync-tags --force
 ```
 
-#### 4. Ativar Workflows Após Upload
+### Sem remapeamento de IDs (workflows sem referências)
 
 ```bash
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --activate
+node cli.js n8n:upload --input workflows --folder jana --skip-remap
 ```
 
-#### 5. Não Pular Workflows Existentes
+### Upload de todas as pastas
 
 ```bash
-node upload-n8n-workflows.js ./n8n-workflows-2025-09-30/ --skip-existing=false
+node cli.js n8n:upload --input workflows --sync-tags
 ```
 
-### Opções Disponíveis
+### Filtrar por tag específica no download
 
-| Opção | Descrição | Padrão |
-|-------|-----------|--------|
-| `--dry-run` | Simula migração sem fazer alterações | `false` |
-| `--skip-existing` | Pula workflows que já existem no destino | `true` |
-| `--activate` | Ativa workflows após criação | `false` |
-| `--no-verify` | Pula verificação de integridade | `false` |
-| `--tag=<tag>` | Filtra workflows por tag | - |
-| `--log-level=<level>` | Nível de log (debug/info/warn/error) | `info` |
-| `--no-report` | Não salva relatório JSON | `false` |
-
-## Fluxo de Execução
-
-### Exemplo de Saída
-
-```
-==================================================
-N8N WORKFLOW MIGRATION TOOL
-==================================================
-Configuração:
-  Origem: ./n8n-workflows-2025-09-30/
-  Modo: REAL
-  Pular existentes: Sim
-  Ativar workflows: Não
-  Verificar: Sim
-
-==================================================
-FASE 1: INICIALIZAÇÃO
-==================================================
-[2025-09-30T12:00:00.000Z] ℹ️  Carregando configurações...
-[2025-09-30T12:00:00.001Z] ✅ Autenticação configurada
-[2025-09-30T12:00:00.002Z] ℹ️  URL: https://destino.n8n.cloud/
-[2025-09-30T12:00:00.003Z] ℹ️  Método: ApiKeyStrategy
-
-[2025-09-30T12:00:00.004Z] 📍 Carregando workflows
-[2025-09-30T12:00:00.100Z] ℹ️  Carregando workflows do diretório: ./n8n-workflows-2025-09-30/
-[2025-09-30T12:00:00.150Z] ℹ️  Encontrados 19 arquivos JSON
-[2025-09-30T12:00:00.200Z] ✅ 19 workflows carregados com sucesso
-[2025-09-30T12:00:00.201Z] ℹ️  Ativos: 5 | Inativos: 14
-[2025-09-30T12:00:00.202Z] ℹ️  Tags: jana
-
-==================================================
-FASE 2: ANÁLISE DE DEPENDÊNCIAS
-==================================================
-[2025-09-30T12:00:00.300Z] 📍 Analisando dependências entre workflows
-[2025-09-30T12:00:00.301Z] ℹ️  Fase 1: Indexando workflows...
-[2025-09-30T12:00:00.310Z] ✅ 19 workflows indexados
-[2025-09-30T12:00:00.311Z] ℹ️  Fase 2: Extraindo dependências...
-[2025-09-30T12:00:00.350Z] ✅ 45 dependências encontradas
-[2025-09-30T12:00:00.351Z] ℹ️  Fase 3: Calculando ordem de upload...
-[2025-09-30T12:00:00.360Z] ✅ Ordem de upload calculada com sucesso
-[2025-09-30T12:00:00.361Z] ℹ️  Workflows sem dependências: 8
-[2025-09-30T12:00:00.362Z] ℹ️  Média de dependências por workflow: 2.37
-[2025-09-30T12:00:00.363Z] ℹ️  Máximo de dependências: 5
-
-==================================================
-FASE 3: UPLOAD SEQUENCIAL
-==================================================
-[2025-09-30T12:00:00.400Z] 📍 Iniciando upload de workflows
-[2025-09-30T12:00:00.500Z] 📥 [1/19] Processando: (INS-BCO-001) fabrica-insere-banco
-[2025-09-30T12:00:00.700Z] ✅   Criado: (INS-BCO-001) fabrica-insere-banco (ABC123xyz)
-[2025-09-30T12:00:01.200Z] 📥 [2/19] Processando: (BCO-CON-001) normalizador-banco-consultas
-...
-[2025-09-30T12:00:10.000Z] ✅ Upload concluído
-[2025-09-30T12:00:10.001Z] ℹ️  Total processados: 19
-[2025-09-30T12:00:10.002Z] ℹ️  Sucesso: 19
-[2025-09-30T12:00:10.003Z] ℹ️  Taxa de sucesso: 100.00%
-
-==================================================
-FASE 4: ATUALIZAÇÃO DE REFERÊNCIAS
-==================================================
-[2025-09-30T12:00:10.100Z] 📍 Atualizando referências de workflows
-[2025-09-30T12:00:10.200Z] 📥 [1/19] Atualizando: (INS-BCO-001) fabrica-insere-banco
-...
-[2025-09-30T12:00:15.000Z] ✅ Referências atualizadas com sucesso
-[2025-09-30T12:00:15.001Z] ℹ️  Workflows processados: 19
-[2025-09-30T12:00:15.002Z] ℹ️  Nodes processados: 234
-[2025-09-30T12:00:15.003Z] ℹ️  Referências atualizadas: 45
-[2025-09-30T12:00:15.004Z] ℹ️  Taxa de sucesso: 100.00%
-
-==================================================
-FASE 5: VERIFICAÇÃO DE INTEGRIDADE
-==================================================
-[2025-09-30T12:00:15.100Z] 📍 Verificando integridade da migração
-[2025-09-30T12:00:15.200Z] ℹ️  Check 1: Verificando contagem de workflows...
-[2025-09-30T12:00:15.300Z] ✅   19/19 workflows criados
-[2025-09-30T12:00:15.400Z] ℹ️  Check 2: Verificando criação de workflows...
-[2025-09-30T12:00:15.500Z] ✅   Todos os 19 workflows foram criados
-[2025-09-30T12:00:15.600Z] ℹ️  Check 3: Verificando integridade de referências...
-[2025-09-30T12:00:20.000Z] ✅   Todas as referências estão íntegras
-[2025-09-30T12:00:20.100Z] ℹ️  Check 4: Verificando integridade de nodes...
-[2025-09-30T12:00:20.200Z] ✅   Contagem de nodes está correta em todos os workflows
-
-==================================================
-RESULTADO DA VERIFICAÇÃO
-==================================================
-[2025-09-30T12:00:20.300Z] ✅ Status: PASSED
-[2025-09-30T12:00:20.301Z] ✅ Checks: 4/4 passaram
-[2025-09-30T12:00:20.302Z] ✅ Migração concluída com sucesso! ZERO elos perdidos.
-==================================================
-
-[2025-09-30T12:00:20.400Z] ✅ Relatório salvo: migration-report-2025-09-30T12-00-20-400Z.json
-
-==================================================
-RESUMO FINAL
-==================================================
-Duração total: 20s
-Workflows processados: 19
-
-Migração concluída com sucesso!
+```bash
+node cli.js n8n:download --source --tag jana --output workflows
 ```
 
-## Relatório de Migração
+---
 
-Após a execução, um relatório JSON é gerado com:
+## 📊 Monitoramento
 
+### Verificar log de upload
+
+```bash
+cat .upload-history.json
+```
+
+### Verificar mapeamento de IDs
+
+```bash
+cat workflows/jana/_id-mapping.json
+```
+
+Exemplo:
 ```json
 {
-  "timestamp": "2025-09-30T12:00:20.400Z",
-  "config": {
-    "sourcePath": "./n8n-workflows-2025-09-30/",
-    "dryRun": false,
-    "skipExisting": true,
-    ...
-  },
-  "duration": "20s",
-  "upload": {
-    "statistics": {
-      "attempted": 19,
-      "succeeded": 19,
-      "failed": 0,
-      "skipped": 0,
-      "successRate": "100.00%"
-    },
-    "results": {
-      "success": [...],
-      "failed": [],
-      "skipped": []
-    }
-  },
-  "mappings": {
-    "mappings": [
-      {
-        "name": "(INS-BCO-001) fabrica-insere-banco",
-        "oldId": "BrobqIHcPHBeCUPN",
-        "newId": "ABC123xyz"
-      },
-      ...
-    ]
-  },
-  "graph": {
-    "nodes": [...],
-    "edges": [...],
-    "statistics": {...}
-  }
+  "oldId1": "newId1",
+  "oldId2": "newId2",
+  ...
 }
 ```
 
-## Como Funciona a Busca por Nome
+---
 
-O sistema implementa a estratégia exata do código de referência:
+## ⚠️ Pontos de Atenção
 
-```javascript
-// 1. Mapeamento por NOME (PRIORIDADE)
-const mapNomeParaIdNovo = {};
-for (const workflow of workflowsCriados) {
-  mapNomeParaIdNovo[workflow.name] = workflow.id;
-}
+### 1. Workflows Referenciados Faltando
 
-// 2. Atualização recursiva
-function atualizarWorkflowIds(obj) {
-  if (obj.workflowId && obj.workflowId.cachedResultName) {
-    const nomeWorkflow = obj.workflowId.cachedResultName;
-    const idNovo = mapNomeParaIdNovo[nomeWorkflow];
-    if (idNovo) {
-      obj.workflowId.value = idNovo; // ATUALIZA O ID
-    }
-  }
-  // Recursão em todos os objetos/arrays...
-}
-```
+Se aparecer warning sobre workflows faltando, você tem 3 opções:
 
-## Tratamento de Erros
-
-### Ciclos de Dependências
-
-Se detectado ciclo, o sistema:
-1. Alerta o usuário
-2. Pede confirmação para continuar
-3. Cria workflows (mas referências podem estar incorretas)
-
-### Workflows Duplicados
-
-Se `--skip-existing=true` (padrão), workflows que já existem são pulados.
-
-### Referências Quebradas
-
-A Fase 5 detecta e reporta qualquer referência quebrada.
-
-## Troubleshooting
-
-### Erro: "Credenciais inválidas"
-
-Configure `N8N_API_KEY` ou `N8N_USERNAME` + `N8N_PASSWORD` no `.env`.
-
-### Erro: "Nenhum workflow encontrado"
-
-Verifique se o caminho está correto e contém arquivos `.json`.
-
-### Verificação falhou
-
-Execute com `--log-level=debug` para mais detalhes:
-
+**Opção A**: Fazer upload desses workflows primeiro
 ```bash
-node upload-n8n-workflows.js ./workflows --log-level=debug
+# Download específico
+node cli.js n8n:download --source --tag oauth --output workflows
+node cli.js n8n:upload --input workflows --folder oauth --sync-tags
 ```
 
-## Contribuindo
+**Opção B**: Ignorar e corrigir manualmente depois no N8N
 
-O código está organizado de forma modular:
+**Opção C**: Os workflows já existem no destino (verificar pelo ID)
 
-- **Models**: Estruturas de dados (grafo)
-- **Utils**: Utilitários (loader, mapper)
-- **Services**: Lógica de negócio (analyzer, updater, verifier)
+### 2. Workflows Duplicados
 
-## Licença
+Se workflows já existem no destino:
+- Sem `--force`: serão pulados (skipped)
+- Com `--force`: serão sobrescritos
 
-Este projeto segue a mesma licença do repositório principal.
+### 3. Tags Personalizadas
+
+Se workflows já têm tags no JSON:
+- Tags existentes são preservadas
+- Tag da pasta é adicionada (não substitui)
+
+---
+
+## 🐛 Troubleshooting
+
+### Erro: "Failed to list workflows"
+
+**Causa**: Problema de autenticação ou URL incorreta
+
+**Solução**:
+```bash
+# Testar conexão
+curl -H "X-N8N-API-KEY: sua-key" "https://seu-n8n.com/api/v1/workflows?limit=1"
+```
+
+### Erro: "HTTP 400: request/body must NOT have additional properties"
+
+**Causa**: JSON do workflow tem campos extras da API
+
+**Solução**: Já tratado automaticamente pelo sistema de limpeza de payload
+
+### Upload parcial (alguns falharam)
+
+**Causa**: Problemas de rede ou workflows inválidos
+
+**Solução**:
+1. Verificar log detalhado do erro
+2. Re-executar apenas os falhados (sistema continua em caso de erro)
+
+---
+
+## ✅ Checklist de Migração Completa
+
+- [ ] Configurar `.env` com credenciais de origem e destino
+- [ ] Fazer backup da instância de destino (precaução)
+- [ ] Download: `n8n:download --source --no-tag-filter`
+- [ ] Validação: `n8n:upload --folder jana --dry-run`
+- [ ] Upload: `n8n:upload --folder jana --sync-tags`
+- [ ] Verificar workflows no N8N de destino
+- [ ] Testar execução de workflows críticos
+- [ ] Validar referências entre workflows funcionando
+- [ ] Documentar IDs mapeados (salvo em `_id-mapping.json`)
+
+---
+
+## 📞 Suporte
+
+Em caso de problemas:
+1. Ativar debug: `LOG_LEVEL=debug node cli.js ...`
+2. Verificar `.upload-history.json`
+3. Abrir issue no GitHub com logs relevantes
+
+---
+
+## 🎓 Recursos Adicionais
+
+- [README.md](README.md) - Documentação completa
+- [CHANGELOG.md](CHANGELOG.md) - Histórico de versões
+- [.env.example](.env.example) - Exemplo de configuração
+
+---
+
+**Última atualização**: 2025-10-01
+**Versão do CLI**: 2.1.0

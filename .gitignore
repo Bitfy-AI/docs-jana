@@ -4,8 +4,19 @@
 # Node modules
 node_modules/
 
+# pnpm
+pnpm-lock.yaml
+.pnpm-debug.log*
+
 # Backup folders
 n8n-workflows-*/
+
+# Workflows (may contain secrets)
+workflows/
+
+# Upload history
+.upload-history.json
+.test-upload-history.json
 
 # Logs
 *.log
@@ -20,7 +31,13 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-.claude/
 
 # Downloaded documentation
 docs/
+
+# Test output
+test-results/
+coverage/
+*.test.js.snap.env
+.env.local
+# Security: Never commit .env files

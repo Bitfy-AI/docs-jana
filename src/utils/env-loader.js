@@ -14,10 +14,8 @@ class EnvLoader {
    */
   static load(envPath = path.join(process.cwd(), '.env')) {
     try {
-      if (!fs.existsSync(envPath)) {
-        return false;
-      }
-
+      // FIX: Removed existsSync check to prevent TOCTOU (Time-of-Check-Time-of-Use) vulnerability
+      // Instead, we attempt to read directly and handle ENOENT in the catch block
       const envContent = fs.readFileSync(envPath, 'utf8');
       const lines = envContent.split('\n');
 
@@ -34,6 +32,12 @@ class EnvLoader {
           const key = match[1].trim();
           let value = match[2].trim();
 
+          // FIX: Skip lines with empty keys (e.g., "=value")
+          // Empty keys are invalid and should be ignored
+          if (key.length === 0) {
+            continue;
+          }
+
           // Remove quotes if present
           if ((value.startsWith('"') && value.endsWith('"')) ||
               (value.startsWith("'") && value.endsWith("'"))) {
@@ -49,6 +53,11 @@ class EnvLoader {
 
       return true;
     } catch (error) {
+      // FIX: Handle ENOENT (file not found) explicitly - this is not an error condition
+      if (error.code === 'ENOENT') {
+        return false;
+      }
+      // For other errors (permission denied, etc.), log as warning
       console.warn(`Warning: Could not load .env file: ${error.message}`);
       return false;
     }

@@ -13,6 +13,10 @@ class IdMapper {
     // Mapa auxiliar: ID antigo -> novo ID
     this.oldIdToNewId = new Map();
 
+    // FIX: Add reverse mapping for O(1) lookup in getAllMappings
+    // Mapa reverso: novo ID -> ID antigo
+    this.newIdToOldId = new Map();
+
     // Mapa reverso: novo ID -> workflow completo
     this.newIdToWorkflow = new Map();
 
@@ -38,6 +42,10 @@ class IdMapper {
 
     // Mapeamento por ID antigo
     this.oldIdToNewId.set(oldId, newId);
+
+    // FIX: Maintain reverse mapping during register for O(1) lookup
+    // This eliminates the need for nested loop in getAllMappings
+    this.newIdToOldId.set(newId, oldId);
 
     // Armazena workflow completo
     this.newIdToWorkflow.set(newId, workflow);
@@ -136,20 +144,16 @@ class IdMapper {
 
   /**
    * Retorna lista de todos os mapeamentos
+   * FIX: Optimized from O(n²) to O(n) using reverse mapping
    * @returns {Array} Array de mapeamentos
    */
   getAllMappings() {
     const mappings = [];
 
     for (const [name, newId] of this.nameToNewId.entries()) {
-      // Encontra ID antigo correspondente
-      let oldId = null;
-      for (const [oId, nId] of this.oldIdToNewId.entries()) {
-        if (nId === newId) {
-          oldId = oId;
-          break;
-        }
-      }
+      // FIX: Use O(1) lookup instead of nested loop (O(n²) -> O(n))
+      // Get oldId directly from reverse mapping
+      const oldId = this.newIdToOldId.get(newId) || null;
 
       mappings.push({
         name,
@@ -207,6 +211,7 @@ class IdMapper {
   clear() {
     this.nameToNewId.clear();
     this.oldIdToNewId.clear();
+    this.newIdToOldId.clear(); // FIX: Clear reverse mapping too
     this.newIdToWorkflow.clear();
     this.stats = {
       totalMapped: 0,
