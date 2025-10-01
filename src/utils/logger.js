@@ -55,14 +55,14 @@ class Logger {
         // Deep clone to avoid mutating original object
         const cloned = JSON.parse(JSON.stringify(message));
         this._maskObjectDeep(cloned);
-        message = JSON.stringify(cloned, null, 2);
+        message = JSON.stringify(cloned);
       } catch (e) {
         message = String(message);
       }
     } else if (typeof message !== 'string') {
       // Try to stringify non-object, non-string values
       try {
-        message = JSON.stringify(message, null, 2);
+        message = JSON.stringify(message);
       } catch (e) {
         message = String(message);
       }
