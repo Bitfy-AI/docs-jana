@@ -830,7 +830,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 27: Executar suite completa de testes unitários
+### ✅ Task 27: Executar suite completa de testes unitários (COMPLETED)
 
 **Objetivo**: Executar todos testes unitários e garantir 100% passam.
 
@@ -861,7 +861,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 28: Executar testes de integração
+### ✅ Task 28: Executar testes de integração (COMPLETED)
 
 **Objetivo**: Executar testes de integração para validar cli.js → index.js → services.
 
@@ -890,7 +890,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 29: Testar todos comandos CLI manualmente
+### ✅ Task 29: Testar todos comandos CLI manualmente (COMPLETED)
 
 **Objetivo**: Executar cada comando CLI manualmente para validar funcionalidade end-to-end.
 
@@ -925,7 +925,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 30: Testar npm scripts (pnpm commands)
+### ✅ Task 30: Testar npm scripts (pnpm commands) (COMPLETED)
 
 **Objetivo**: Validar que todos npm scripts em package.json ainda funcionam corretamente.
 
