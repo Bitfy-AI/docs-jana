@@ -11,7 +11,9 @@
       "Bash(gh repo edit:*)",
       "Bash(gh api:*)",
       "Bash(git mv:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(dir:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
