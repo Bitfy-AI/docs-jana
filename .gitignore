@@ -31,7 +31,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-.claude/
 
 # Downloaded documentation
 docs/
