@@ -255,6 +255,57 @@ docs-jana/
 - **Service Layer**: Business logic separated from CLI logic
 - **Orchestration**: Lifecycle management for command execution
 
+### Architecture
+
+The project follows a **three-layer architecture** that separates concerns and improves testability:
+
+```
+┌─────────────────────────────────────────┐
+│  Layer 1: CLI Interface (cli.js)        │
+│  - Parse arguments                      │
+│  - Display help/version                 │
+│  - Interactive menu                     │
+│  - Invoke orchestration layer           │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  Layer 2: Orchestration (index.js)      │
+│  - ServiceContainer (Service Locator)   │
+│  - CommandOrchestrator                  │
+│  - Service lifecycle management         │
+│  - Configuration loading                │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  Layer 3: Business Logic (src/)         │
+│  - Command handlers (src/commands/)     │
+│  - Business services (src/services/)    │
+│  - Utilities (src/utils/)               │
+│  - Factories (src/factories/)           │
+└─────────────────────────────────────────┘
+```
+
+**Key Components:**
+
+- **[cli.js](cli.js)**: Command-line interface entry point
+  - Minimal business logic
+  - User-facing interactions
+  - Calls `executeCommand()` from index.js
+
+- **[index.js](index.js)**: Orchestration layer (468 lines)
+  - `ServiceContainer`: Service Locator with lazy instantiation
+  - `CommandOrchestrator`: Lifecycle management (initialize → run → cleanup)
+  - `executeCommand()`: Public API for command execution
+
+**Performance:**
+- Orchestration overhead: **~1ms average** (measured across 100 iterations)
+- Lazy instantiation: Services only created when needed
+- Resource cleanup: Automatic cleanup after each execution
+
+**Learn More:**
+- **[CLI Architecture](docs/architecture/CLI-ARCHITECTURE.md)** - Comprehensive architecture documentation
+- **[Service Factory](docs/architecture/SERVICE-FACTORY.md)** - Service management patterns
+
 ---
 
 ## 📚 Documentation
