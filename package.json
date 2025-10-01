@@ -9,10 +9,6 @@
   "scripts": {
     "start": "node cli.js",
     "n8n:download": "node cli.js n8n:download",
-    "n8n:upload": "node cli.js n8n:upload",
-    "outline:download": "node cli.js outline:download",
-    "docs:generate": "node cli.js docs:generate",
-    "download:outline": "node cli.js outline:download",
     "download:n8n": "node cli.js n8n:download",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -22,7 +18,6 @@
     "test:integration": "jest __tests__/integration",
     "test:e2e": "jest __tests__/e2e",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
-    "test:legacy": "node test-outline-integration.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky"

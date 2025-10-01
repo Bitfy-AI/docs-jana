@@ -34,31 +34,32 @@ const COMMANDS = {
     handler: () => require('./src/commands/n8n-download'),
     aliases: ['n8n:backup', 'download:n8n']
   },
-  'n8n:upload': {
-    description: 'Upload workflows to N8N',
-    handler: () => require('./src/commands/n8n-upload'),
-    aliases: ['upload:n8n']
-  },
-  'outline:download': {
-    description: 'Download documentation from Outline',
-    handler: () => require('./src/commands/outline-download'),
-    aliases: ['download:outline']
-  },
-  'docs:generate': {
-    description: 'Generate markdown docs from workflow sticky notes',
-    handler: () => require('./src/commands/docs-generate'),
-    aliases: ['generate', 'generate:docs']
-  },
-  'test:migration': {
-    description: 'Run migration tests',
-    handler: () => require('./src/commands/test-migration'),
-    aliases: ['test:migrate']
-  },
-  'test:outline': {
-    description: 'Run Outline integration tests',
-    handler: () => require('./src/commands/test-outline'),
-    aliases: []
-  },
+  // TODO: Implement these commands without legacy dependencies
+  // 'n8n:upload': {
+  //   description: 'Upload workflows to N8N',
+  //   handler: () => require('./src/commands/n8n-upload'),
+  //   aliases: ['upload:n8n']
+  // },
+  // 'outline:download': {
+  //   description: 'Download documentation from Outline',
+  //   handler: () => require('./src/commands/outline-download'),
+  //   aliases: ['download:outline']
+  // },
+  // 'docs:generate': {
+  //   description: 'Generate markdown docs from workflow sticky notes',
+  //   handler: () => require('./src/commands/docs-generate'),
+  //   aliases: ['generate', 'generate:docs']
+  // },
+  // 'test:migration': {
+  //   description: 'Run migration tests',
+  //   handler: () => require('./src/commands/test-migration'),
+  //   aliases: ['test:migrate']
+  // },
+  // 'test:outline': {
+  //   description: 'Run Outline integration tests',
+  //   handler: () => require('./src/commands/test-outline'),
+  //   aliases: []
+  // },
   'help': {
     description: 'Show this help message',
     handler: null,
@@ -113,23 +114,6 @@ COMMANDS:
     n8n:download          Download workflows from N8N instance
                           Aliases: n8n:backup, download:n8n
 
-    n8n:upload            Upload workflows to N8N instance
-                          Aliases: upload:n8n
-
-  Outline Documentation:
-    outline:download      Download documentation from Outline
-                          Aliases: download:outline
-
-  Documentation Generation:
-    docs:generate         Generate markdown docs from workflow sticky notes
-                          Aliases: generate, generate:docs
-
-  Testing:
-    test:migration        Run migration tests for workflows
-                          Aliases: test:migrate
-
-    test:outline          Run Outline integration tests
-
   Utility:
     help                  Show this help message
                           Aliases: -h, --help
@@ -142,17 +126,8 @@ EXAMPLES:
   # Download N8N workflows with filtering
   ${CLI_NAME} n8n:download --tag production --output ./workflows
 
-  # Upload workflows with dry-run
-  ${CLI_NAME} n8n:upload --input ./workflows --dry-run
-
-  # Download Outline docs with specific collections
-  ${CLI_NAME} outline:download --collections "Engineering,Product"
-
-  # Generate documentation
-  ${CLI_NAME} docs:generate --input ./workflows --output ./docs
-
-  # Run tests
-  ${CLI_NAME} test:migration
+  # Download N8N workflows with specific tag
+  ${CLI_NAME} n8n:download --tag jana
 
 GLOBAL OPTIONS:
   --help, -h            Show command-specific help
@@ -160,19 +135,15 @@ GLOBAL OPTIONS:
   --config <file>       Use specific config file
 
 CONFIGURATION:
-  Most commands use environment variables for configuration.
-  Create a .env file in the project root with:
+  Create a .env file in the project root with your N8N configuration:
 
     # N8N Configuration
-    N8N_BASE_URL=https://n8n.example.com
+    N8N_URL=https://n8n.example.com
     N8N_API_KEY=your-api-key
+    N8N_TAG=production
 
-    # Outline Configuration
-    OUTLINE_API_URL=https://outline.example.com/api
-    OUTLINE_API_TOKEN=your-token
-
-  See each command's help for detailed options:
-    ${CLI_NAME} <command> --help
+  See n8n:download command help for detailed options:
+    ${CLI_NAME} n8n:download --help
 
 MORE INFO:
   Documentation: https://github.com/jana-team/docs-jana
