@@ -28,4 +28,6 @@ docs/
 # Test output
 test-results/
 coverage/
-*.test.js.snap
+*.test.js.snap.env
+.env.local
+# Security: Never commit .env files
