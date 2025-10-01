@@ -741,7 +741,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 24: Atualizar README.md principal com links para nova estrutura
+### ✅ Task 24: Atualizar README.md principal com links para nova estrutura (COMPLETED)
 
 **Objetivo**: Atualizar README.md raiz para referenciar nova estrutura de /scripts e /docs.
 
@@ -770,7 +770,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 25: Verificar e atualizar .gitignore se necessário
+### ✅ Task 25: Verificar e atualizar .gitignore se necessário (COMPLETED)
 
 **Objetivo**: Revisar .gitignore e adicionar entradas para novos diretórios se necessário.
 

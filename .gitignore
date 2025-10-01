@@ -31,8 +31,13 @@ Thumbs.db
 *.swp
 *.swo
 
-# Downloaded documentation
-docs/
+# Downloaded documentation (from Outline)
+outline-docs/
+downloaded-docs/
+
+# Scripts temporary files
+scripts/temp/
+scripts/*/node_modules
 
 # Test output
 test-results/

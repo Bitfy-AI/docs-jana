@@ -200,14 +200,12 @@ docs-jana test:outline
 ```
 docs-jana/
 ├── cli.js                      # Main CLI entry point
+├── index.js                    # Orchestration layer (NEW)
 ├── src/
 │   ├── commands/               # CLI command implementations
 │   │   ├── n8n-download.js
 │   │   ├── n8n-upload.js
-│   │   ├── outline-download.js
-│   │   ├── docs-generate.js
-│   │   ├── test-migration.js
-│   │   └── test-outline.js
+│   │   └── outline-download.js
 │   ├── services/               # Business logic services
 │   │   ├── workflow-service.js
 │   │   ├── outline-service.js
@@ -224,24 +222,80 @@ docs-jana/
 │   │   ├── file-manager.js
 │   │   ├── config-manager.js
 │   │   └── ...
-│   └── models/                 # Data models
-├── __tests__/                  # Test suites
+│   ├── models/                 # Data models
+│   └── tests/                  # (moved to /scripts)
+├── __tests__/                  # Jest test suites
 │   ├── unit/
 │   ├── integration/
 │   └── e2e/
+├── scripts/                    # Utility scripts (NEW)
+│   ├── test/                   # Test scripts
+│   ├── admin/                  # Admin scripts
+│   └── README.md               # Scripts documentation
+├── examples/                   # CLI examples (NEW)
+│   ├── n8n-import/             # N8N import example
+│   └── simple-cli/             # Simple CLI example
+├── docs/                       # Documentation (NEW)
+│   ├── technical/              # Technical documentation
+│   ├── architecture/           # Architecture docs (future)
+│   └── README.md               # Documentation index
 ├── .claude/                    # Claude Code specs
 │   └── specs/
-│       └── code-quality-improvements/
-└── docs/                       # Generated documentation
+│       └── cli-architecture-refactor/
+└── test-orchestration.js       # Orchestration tests
 ```
 
 ### Design Patterns
 
+- **Service Locator**: Centralized service management with lazy loading (index.js)
 - **Command Pattern**: Each CLI command is a separate module
 - **Factory Pattern**: Auth strategies created via factory
 - **Strategy Pattern**: Multiple authentication methods
 - **Dependency Injection**: Services receive dependencies via constructor
 - **Service Layer**: Business logic separated from CLI logic
+- **Orchestration**: Lifecycle management for command execution
+
+---
+
+## 📚 Documentation
+
+Comprehensive documentation for all aspects of the project.
+
+### Documentation Hub
+- **[Documentation Index](docs/README.md)** - Central documentation hub with links to all docs
+
+### Key Documentation
+- **[Technical Documentation](docs/technical/)** - Implementation guides and technical reports
+- **[CLI Learning Guide](LEARNING-CLI.md)** - How the CLI works internally
+- **[Scripts Documentation](scripts/README.md)** - Utility scripts guide
+- **[Examples](examples/)** - CLI examples and templates
+
+### Specs & Architecture
+- **[KFC Specs](.claude/specs/)** - Feature specifications
+- **[CLI Architecture Refactor](.claude/specs/cli-architecture-refactor/)** - Current refactoring spec
+
+---
+
+## 🛠️ Scripts & Utilities
+
+Utility scripts for testing, administration, and maintenance.
+
+### Script Categories
+- **[Scripts Documentation](scripts/README.md)** - Complete scripts guide
+- **[Test Scripts](scripts/test/)** - Testing and validation scripts
+- **[Admin Scripts](scripts/admin/)** - Administrative utilities (⚠️ use with caution)
+
+### Quick Access
+```bash
+# View all available scripts
+cat scripts/README.md
+
+# Run a test script
+node scripts/test/test-tag-operations.js
+
+# Admin operations (careful!)
+node scripts/admin/cleanup-duplicates.js --dry-run
+```
 
 ---
 
