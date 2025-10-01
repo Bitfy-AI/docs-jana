@@ -191,7 +191,7 @@ class MigrationVerifier {
       }
 
       if (result.passed) {
-        this.logger.success(`  Todas as referências estão íntegras`);
+        this.logger.success('  Todas as referências estão íntegras');
       } else {
         this.logger.error(`  ${result.brokenReferences.length} workflows com referências quebradas`);
       }
@@ -310,7 +310,7 @@ class MigrationVerifier {
     }
 
     if (result.passed) {
-      this.logger.success(`  Contagem de nodes está correta em todos os workflows`);
+      this.logger.success('  Contagem de nodes está correta em todos os workflows');
     } else {
       this.logger.warn(`  ${result.mismatches.length} workflows com divergência de nodes`);
     }

@@ -111,8 +111,8 @@ describe('FileManager', () => {
     describe('Windows Reserved Names', () => {
       it('should reject Windows reserved device names (case-insensitive)', () => {
         const reservedNames = ['CON', 'PRN', 'AUX', 'NUL',
-                               'COM1', 'COM2', 'COM9',
-                               'LPT1', 'LPT2', 'LPT9'];
+          'COM1', 'COM2', 'COM9',
+          'LPT1', 'LPT2', 'LPT9'];
 
         for (const name of reservedNames) {
           expect(fileManager.sanitizeFilename(name)).toBe('untitled');

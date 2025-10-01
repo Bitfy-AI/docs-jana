@@ -13,7 +13,11 @@
       "Bash(git mv:*)",
       "Bash(git commit:*)",
       "Bash(dir:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git checkout:*)",
+      "Bash(node:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
