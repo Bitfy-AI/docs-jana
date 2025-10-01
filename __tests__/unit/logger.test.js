@@ -46,8 +46,8 @@ describe('Logger', () => {
       // Result is a JSON string with masked values
       // Pattern-based masking adds space after colon for sensitive keys
       expect(result).toContain('"name":"John"'); // Non-sensitive, no space
-      expect(result).toContain('"token": "***REDACTED***"'); // Sensitive, has space from pattern
-      expect(result).toContain('"password": "***REDACTED***"'); // Sensitive, has space from pattern
+      expect(result).toContain('"token":"***REDACTED***"'); // Sensitive, has space from pattern
+      expect(result).toContain('"password":"***REDACTED***"'); // Sensitive, has space from pattern
       expect(result).not.toContain('secret-token-123');
       expect(result).not.toContain('my-password');
     });
@@ -65,8 +65,8 @@ describe('Logger', () => {
       const result = logger.maskSensitive(obj);
 
       // apiKey contains 'apikey', apiSecret contains 'secret' - both should be masked
-      expect(result).toContain('"api_key": "***REDACTED***"'); // Pattern replacement adds space
-      expect(result).toContain('"secret": "***REDACTED***"'); // Pattern replacement
+      expect(result).toContain('"apiKey":"***REDACTED***"'); // Key contains 'apikey'
+      expect(result).toContain('"apiSecret":"***REDACTED***"'); // Key contains 'secret'
       expect(result).not.toContain('sk-1234567890');
       expect(result).not.toContain('pk-abcdef');
     });
@@ -133,6 +133,7 @@ describe('Logger', () => {
 
       const result = logger.maskSensitive(obj);
 
+      // JSON.stringify preserves the original case of keys
       expect(result).toContain('"PASSWORD":"***REDACTED***"');
       expect(result).toContain('"Token":"***REDACTED***"');
       expect(result).toContain('"ApiKey":"***REDACTED***"');
@@ -765,12 +766,12 @@ describe('Logger', () => {
 
       const result = logger.maskSensitive(authFlow);
 
-      expect(result).toContain('"step": "authentication"');
-      expect(result).toContain('"user": "alice@example.com"');
+      expect(result).toContain('"step":"authentication"');
+      expect(result).toContain('"user":"alice@example.com"');
       // All token-related keys are masked
-      expect(result).toContain('"accessToken": "***REDACTED***"');
-      expect(result).toContain('"refreshToken": "***REDACTED***"');
-      expect(result).toContain('"idToken": "***REDACTED***"');
+      expect(result).toContain('"accessToken":"***REDACTED***"');
+      expect(result).toContain('"refreshToken":"***REDACTED***"');
+      expect(result).toContain('"idToken":"***REDACTED***"');
       expect(result).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
       expect(result).not.toContain('def50200e8f7b');
     });
@@ -790,9 +791,9 @@ describe('Logger', () => {
       // Pattern masking should mask the token in the message
       expect(result).toContain('***REDACTED***');
       expect(result).not.toContain('abc123');
-      expect(result).toContain('"code": "AUTH_ERROR"');
-      expect(result).toContain('"api_key": "***REDACTED***"');
-      expect(result).toContain('"timestamp": "2024-01-01T00:00:00Z"');
+      expect(result).toContain('"code":"AUTH_ERROR"');
+      expect(result).toContain('"api_key":"***REDACTED***"');
+      expect(result).toContain('"timestamp":"2024-01-01T00:00:00Z"');
       expect(result).not.toContain('sk-test-123');
     });
   });

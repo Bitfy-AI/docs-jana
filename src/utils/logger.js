@@ -25,9 +25,9 @@ class Logger {
       { pattern: /apiKey[:\s=]+\S+/gi, replacement: 'apiKey: ***REDACTED***' },
       { pattern: /token[:\s=]+\S+/gi, replacement: 'token: ***REDACTED***' },
       { pattern: /authorization[:\s=]+\S+/gi, replacement: 'authorization: ***REDACTED***' },
-      { pattern: /"api[_-]?key"\s*:\s*"[^"]+"/gi, replacement: '"api_key": "***REDACTED***"' },
-      { pattern: /"token"\s*:\s*"[^"]+"/gi, replacement: '"token": "***REDACTED***"' },
-      { pattern: /"password"\s*:\s*"[^"]+"/gi, replacement: '"password": "***REDACTED***"' }
+      { pattern: /"api[_-]?key"\s*:\s*"[^"]+"/gi, replacement: '"api_key":"***REDACTED***"' },
+      { pattern: /"token"\s*:\s*"[^"]+"/gi, replacement: '"token":"***REDACTED***"' },
+      { pattern: /"password"\s*:\s*"[^"]+"/gi, replacement: '"password":"***REDACTED***"' }
     ];
   }
 
