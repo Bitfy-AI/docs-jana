@@ -233,13 +233,13 @@ async function main() {
 
   // Handle special commands
   switch (commandName) {
-    case 'help':
-      printHelp();
-      return;
+  case 'help':
+    printHelp();
+    return;
 
-    case 'version':
-      printVersion();
-      return;
+  case 'version':
+    printVersion();
+    return;
   }
 
   // Execute command
@@ -255,7 +255,7 @@ async function main() {
     // Execute command
     await CommandHandler.execute(commandArgs);
 
-    console.log(`\n✅ Command completed successfully\n`);
+    console.log('\n✅ Command completed successfully\n');
     process.exit(0);
   } catch (error) {
     console.error(`\n❌ Command failed: ${error.message}\n`);
@@ -271,22 +271,54 @@ async function main() {
 
 // ===== ERROR HANDLING =====
 
+// FIX: Track shutdown state to prevent duplicate shutdown calls
+let isShuttingDown = false;
+
+/**
+ * Graceful shutdown handler
+ * Gives 100ms for resource cleanup before exiting
+ * @param {string} reason - Reason for shutdown
+ * @param {number} exitCode - Exit code (default: 1)
+ */
+function gracefulShutdown(reason, exitCode = 1) {
+  // FIX: Prevent duplicate shutdown calls
+  if (isShuttingDown) {
+    return;
+  }
+
+  isShuttingDown = true;
+
+  console.error(`\n❌ ${reason}`);
+
+  // FIX: Give 100ms for cleanup (flush logs, close connections, etc.)
+  setTimeout(() => {
+    process.exit(exitCode);
+  }, 100);
+}
+
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  console.error('\n❌ Uncaught Exception:', error.message);
   if (process.env.DEBUG) {
-    console.error(error.stack);
+    console.error('Stack trace:', error.stack);
   }
-  process.exit(1);
+  gracefulShutdown(`Uncaught Exception: ${error.message}`, 1);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('\n❌ Unhandled Promise Rejection:', reason);
   if (process.env.DEBUG) {
-    console.error(promise);
+    console.error('Promise:', promise);
   }
-  process.exit(1);
+  gracefulShutdown(`Unhandled Promise Rejection: ${reason}`, 1);
+});
+
+// FIX: Handle SIGINT (Ctrl+C) and SIGTERM for graceful shutdown
+process.on('SIGINT', () => {
+  gracefulShutdown('Received SIGINT (Ctrl+C), shutting down gracefully...', 0);
+});
+
+process.on('SIGTERM', () => {
+  gracefulShutdown('Received SIGTERM, shutting down gracefully...', 0);
 });
 
 // ===== RUN CLI =====
