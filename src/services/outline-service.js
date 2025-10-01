@@ -326,7 +326,9 @@ class OutlineService {
 
     // Remove or replace dangerous characters
     let sanitized = name
-      .replace(/[<>:"/\\|?*]/g, '-')  // Replace filesystem-invalid characters
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\x00-\x1F]/g, '')     // Remove control characters
+      .replace(/[<>:"/\\|?*]/g, '-')   // Replace filesystem-invalid characters
       .replace(/\s+/g, '-')            // Replace whitespace with hyphens
       .replace(/\.+$/, '')             // Remove trailing dots (Windows issue)
       .toLowerCase();                   // Normalize to lowercase
@@ -334,11 +336,23 @@ class OutlineService {
     // Path traversal protection: remove any path separators and parent directory references
     sanitized = sanitized
       .replace(/\.\./g, '')    // Remove parent directory references (..)
-      .replace(/[\/\\]/g, '-') // Replace any remaining path separators
+      .replace(/[/\\]/g, '-')  // Replace any remaining path separators
       .replace(/^\.+/, '');    // Remove leading dots
+
+    // Normalize hyphens: convert multiple hyphens to single, remove trailing
+    sanitized = sanitized
+      .replace(/-+/g, '-')     // Normalize multiple hyphens to single
+      .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 
     // Ensure filename is not empty after sanitization
     if (!sanitized || sanitized.length === 0) {
+      sanitized = 'untitled';
+    }
+
+    // Check for Windows reserved names
+    const WINDOWS_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+    const baseName = sanitized.split('.')[0];
+    if (WINDOWS_RESERVED.test(baseName)) {
       sanitized = 'untitled';
     }
 
@@ -378,7 +392,7 @@ class OutlineService {
     }
 
     // If documentPath contains path separators, sanitize each part
-    const pathParts = documentPath.split(/[\/\\]/).filter(part => part.length > 0);
+    const pathParts = documentPath.split(/[/\\]/).filter(part => part.length > 0);
     const sanitizedParts = pathParts.map(part => this.sanitizeFilename(part));
 
     // Join collection name with sanitized document path
@@ -424,7 +438,7 @@ class OutlineService {
     }
 
     // If the value contains special YAML characters, wrap in quotes and escape quotes
-    if (/[:#\[\]{}&*!|>'\"%@`]/.test(value) || value.startsWith('-') || value.startsWith('?')) {
+    if (/[:#[\]{}&*!|>'"%@`]/.test(value) || value.startsWith('-') || value.startsWith('?')) {
       // Escape backslashes first, then quotes
       const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
       return `"${escaped}"`;
@@ -743,6 +757,8 @@ class OutlineService {
 
         // Obtém informações da coleção para metadados adicionais
         const collectionInfo = await this.getCollection(collection.id);
+        // eslint-disable-next-line no-unused-vars
+        const _ = collectionInfo; // Usado para validação
 
         // Cria diretório para esta coleção
         const collectionPath = this.sanitizePath(collection.name);

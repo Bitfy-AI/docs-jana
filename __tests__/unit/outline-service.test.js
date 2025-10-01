@@ -589,10 +589,9 @@ describe('OutlineService', () => {
       expect(result2).not.toContain('..');
       expect(result2).not.toContain('/');
 
-      // Note: OutlineService's sanitizeFilename doesn't check Windows reserved names
-      // That's handled by FileManager's more comprehensive sanitization
+      // Note: OutlineService's sanitizeFilename now checks Windows reserved names
       const result3 = outlineService.sanitizeFilename('CON');
-      expect(result3).toBe('con'); // Lowercase, but not 'untitled'
+      expect(result3).toBe('untitled'); // Windows reserved name
     });
 
     it('should handle null/undefined filenames', () => {
