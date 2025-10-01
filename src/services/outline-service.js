@@ -206,7 +206,8 @@ class OutlineService {
 
       const document = response.data;
 
-      // Implementa eviction LRU se o cache estiver cheio
+      // FIX: Evict BEFORE adding to prevent exceeding maxCacheSize
+      // Check if adding one more would exceed the limit
       if (this.documentCache.size >= this.maxCacheSize) {
         // Map mantém ordem de inserção, então o primeiro é o mais antigo
         const oldestKey = this.documentCache.keys().next().value;
@@ -216,11 +217,11 @@ class OutlineService {
         this.logger.debug(
           `Cache EVICTION: removido documento ${oldestKey} ` +
           `(evictions: ${this.cacheStats.evictions}, ` +
-          `tamanho: ${this.documentCache.size}/${this.maxCacheSize})`
+          `tamanho após eviction: ${this.documentCache.size}/${this.maxCacheSize})`
         );
       }
 
-      // Cache the document for future requests
+      // Cache the document for future requests (now guaranteed not to exceed limit)
       this.documentCache.set(documentId, document);
 
       this.logger.debug(
@@ -501,16 +502,32 @@ class OutlineService {
    * @returns {Promise<void>}
    */
   async _downloadChildDocuments(children, parentDir, collectionName, stats) {
-    for (const child of children) {
-      const childStats = await this.downloadDocument(child, collectionName, parentDir);
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
 
-      // Agregação de estatísticas dos downloads filhos
-      stats.success += childStats.success;
-      stats.failed += childStats.failed;
-      stats.errors.push(...childStats.errors);
+      try {
+        // FIX: Wrap individual download in try-catch to handle errors gracefully
+        // This allows the loop to continue even if one child document fails
+        const childStats = await this.downloadDocument(child, collectionName, parentDir);
 
-      // Aplica delay configurável para evitar rate limiting
-      if (this.config.delay && this.config.delay > 0) {
+        // Agregação de estatísticas dos downloads filhos
+        stats.success += childStats.success;
+        stats.failed += childStats.failed;
+        stats.errors.push(...childStats.errors);
+      } catch (error) {
+        // FIX: Track failed downloads in stats and continue with remaining children
+        // This prevents one failure from stopping the entire document tree download
+        this.logger.error(`Failed to download child document "${child.title}": ${error.message}`);
+        stats.failed += 1;
+        stats.errors.push({
+          title: child.title,
+          error: error.message
+        });
+      }
+
+      // FIX: Only apply delay if NOT the last child to avoid unnecessary wait
+      // This optimizes the download process by skipping delay after the final item
+      if (this.config.delay && this.config.delay > 0 && i < children.length - 1) {
         await new Promise(resolve => setTimeout(resolve, this.config.delay));
       }
     }
