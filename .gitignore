@@ -24,3 +24,8 @@ Thumbs.db
 
 # Downloaded documentation
 docs/
+
+# Test output
+test-results/
+coverage/
+*.test.js.snap
