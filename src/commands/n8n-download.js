@@ -91,15 +91,17 @@ USAGE:
   docs-jana n8n:download [options]
 
 OPTIONS:
-  --source              Download from N8N_URL_SOURCE instead of N8N_URL
+  --source              Download from SOURCE_N8N_URL instead of N8N_URL
   --tag, -t <tag>       Filter workflows by tag
   --no-tag-filter       Ignore N8N_TAG from .env and download all workflows
   --output, -o <dir>    Output directory (default: ./n8n-workflows-TIMESTAMP)
   --help, -h            Show this help message
 
 ENVIRONMENT VARIABLES:
-  N8N_URL               N8N instance URL (required)
-  N8N_API_KEY           N8N API key (required)
+  SOURCE_N8N_URL        Source N8N instance URL (for download)
+  SOURCE_N8N_API_KEY    Source N8N API key (for download)
+  N8N_URL               Fallback N8N instance URL (if SOURCE not set)
+  N8N_API_KEY           Fallback N8N API key (if SOURCE not set)
   N8N_USERNAME          N8N username (for basic auth)
   N8N_PASSWORD          N8N password (for basic auth)
   N8N_TAG               Filter workflows by tag (optional)
@@ -138,10 +140,10 @@ EXAMPLES:
     this.config.tagFilter = this.config.tag;
 
     // Override with command-line args
-    if (this.useSource) {
-      // Use SOURCE credentials from .env
-      this.config.baseUrl = process.env.N8N_URL_SOURCE;
-      this.config.apiKey = process.env.N8N_API_KEY_SOURCE;
+    if (this.useSource && this.config.sourceN8nUrl) {
+      // Use SOURCE credentials from .env (already applied by ConfigManager)
+      // ConfigManager automatically uses SOURCE_N8N_URL and SOURCE_N8N_API_KEY
+      this.logger.debug('Using SOURCE N8N instance from config');
     }
     if (this.noTagFilter) {
       this.config.tagFilter = null;

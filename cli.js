@@ -39,6 +39,11 @@ const COMMANDS = {
     handler: () => require('./src/commands/n8n-upload'),
     aliases: ['upload:n8n', 'n8n:restore']
   },
+  'n8n:configure-target': {
+    description: 'Configure target N8N instance for uploads',
+    handler: () => require('./src/commands/n8n-configure-target'),
+    aliases: ['n8n:config', 'config:n8n']
+  },
   'outline:download': {
     description: 'Download documentation from Outline',
     handler: () => require('./src/commands/outline-download'),
@@ -149,6 +154,8 @@ GLOBAL OPTIONS:
   --help, -h            Show command-specific help
   --verbose, -v         Enable verbose logging
   --config <file>       Use specific config file
+  --interactive, -i     Force interactive menu mode
+  --no-interactive      Disable interactive menu (use direct command mode)
 
 CONFIGURATION:
   Create a .env file in the project root with your configuration:
@@ -204,9 +211,60 @@ function printError(message, exitCode = 1) {
 // ===== MAIN CLI LOGIC =====
 
 /**
- * Show interactive menu
+ * Check if enhanced menu should be used
+ * @returns {boolean}
  */
-async function showInteractiveMenu() {
+function shouldUseEnhancedMenu() {
+  // Feature flag check
+  const useEnhanced = process.env.USE_ENHANCED_MENU !== 'false'; // default true
+
+  // Check if terminal is interactive
+  const isInteractive = process.stdin.isTTY && process.stdout.isTTY;
+
+  return useEnhanced && isInteractive;
+}
+
+/**
+ * Show enhanced interactive menu (new implementation)
+ */
+async function showEnhancedMenu() {
+  try {
+    const MenuOrchestrator = require('./src/ui/menu');
+    const menuOrchestrator = new MenuOrchestrator();
+
+    // Show menu and wait for selection
+    const result = await menuOrchestrator.show();
+
+    // Handle result
+    if (result.action === 'exit' || result.action === 'cancelled') {
+      console.log('\n👋 Até logo!\n');
+      process.exit(0);
+    }
+
+    if (result.action === 'executed') {
+      // Command was executed through menu
+      if (result.success) {
+        process.exit(0);
+      } else {
+        process.exit(1);
+      }
+    }
+
+    // Return selected command if menu only selected (didn't execute)
+    return result.option?.command || null;
+
+  } catch (error) {
+    // If enhanced menu fails, fall back to legacy menu
+    console.error(`\n⚠️  Enhanced menu failed: ${error.message}`);
+    console.error('Falling back to legacy menu...\n');
+    return showLegacyMenu();
+  }
+}
+
+/**
+ * Show legacy interactive menu (fallback)
+ */
+async function showLegacyMenu() {
   const readline = require('readline');
 
   const menuOptions = [
@@ -261,6 +319,17 @@ async function showInteractiveMenu() {
 }
 
 /**
+ * Show interactive menu (routes to enhanced or legacy)
+ */
+async function showInteractiveMenu() {
+  if (shouldUseEnhancedMenu()) {
+    return showEnhancedMenu();
+  } else {
+    return showLegacyMenu();
+  }
+}
+
+/**
  * Parse command line arguments into structured format
  *
  * @param {string[]} argv - Process arguments
@@ -297,8 +366,27 @@ function parseArguments(argv) {
 async function main() {
   const args = process.argv.slice(2);
 
-  // No arguments - show interactive menu
-  if (args.length === 0) {
+  // Check for --interactive or -i flag
+  const hasInteractiveFlag = args.includes('--interactive') || args.includes('-i');
+  const hasNoInteractiveFlag = args.includes('--no-interactive');
+
+  // Remove interactive flags from args for command parsing
+  const filteredArgs = args.filter(arg =>
+    arg !== '--interactive' &&
+    arg !== '-i' &&
+    arg !== '--no-interactive'
+  );
+
+  // Show interactive menu if:
+  // 1. No arguments provided, OR
+  // 2. --interactive/-i flag is present (even with command), OR
+  // 3. Only flags provided (no command)
+  const shouldShowMenu =
+    (args.length === 0) ||
+    (hasInteractiveFlag && !hasNoInteractiveFlag) ||
+    (filteredArgs.length === 0 && !hasNoInteractiveFlag);
+
+  if (shouldShowMenu) {
     const selectedCommand = await showInteractiveMenu();
 
     if (!selectedCommand) {
@@ -340,7 +428,8 @@ async function main() {
     }
   }
 
-  const commandInput = args[0];
+  // Direct command mode - use filteredArgs
+  const commandInput = filteredArgs[0];
 
   // Find command
   const commandName = findCommand(commandInput);

@@ -42,7 +42,7 @@ const n8nUploadConfigSchema = {
    * Example: https://n8n.refrisol.com.br
    *
    * Can be provided via:
-   * - Environment variable: N8N_URL
+   * - Environment variable: N8N_URL (fallback to TARGET_N8N_URL)
    * - CLI argument: First positional argument
    */
   n8nUrl: {
@@ -54,6 +54,22 @@ const n8nUploadConfigSchema = {
   },
 
   /**
+   * TARGET N8N instance URL (for upload/restore operations)
+   *
+   * The base URL of the target N8N instance.
+   * Takes precedence over N8N_URL for upload operations.
+   *
+   * Can be provided via:
+   * - Environment variable: TARGET_N8N_URL
+   */
+  targetN8nUrl: {
+    type: 'string',
+    required: false,
+    env: 'TARGET_N8N_URL',
+    description: 'URL do n8n de destino (TARGET)',
+  },
+
+  /**
    * N8N API Key
    *
    * API key for authenticating with N8N.
@@ -61,7 +77,7 @@ const n8nUploadConfigSchema = {
    * This is the preferred authentication method.
    *
    * Can be provided via:
-   * - Environment variable: N8N_API_KEY
+   * - Environment variable: N8N_API_KEY (fallback to TARGET_N8N_API_KEY)
    * - CLI argument: Second positional argument
    *
    * Note: Either apiKey OR (username + password) must be provided.
@@ -71,6 +87,23 @@ const n8nUploadConfigSchema = {
     required: false,
     env: 'N8N_API_KEY',
     description: 'API Key do n8n',
+    secret: true,
+  },
+
+  /**
+   * TARGET N8N API Key (for upload/restore operations)
+   *
+   * API key for the target N8N instance.
+   * Takes precedence over N8N_API_KEY for upload operations.
+   *
+   * Can be provided via:
+   * - Environment variable: TARGET_N8N_API_KEY
+   */
+  targetApiKey: {
+    type: 'string',
+    required: false,
+    env: 'TARGET_N8N_API_KEY',
+    description: 'API Key do n8n de destino (TARGET)',
     secret: true,
   },
 
@@ -128,14 +161,14 @@ const n8nUploadConfigSchema = {
    */
   inputDir: {
     type: 'string',
-    required: true,
+    required: false,
     env: 'N8N_INPUT_DIR',
     flag: '--input',
     positional: 2,
     description: 'Diretório contendo os arquivos JSON dos workflows',
     validator: (value) => {
       if (!value) {
-        return 'Input directory is required';
+        return null; // Allow empty if not provided (will be checked later)
       }
 
       // Resolve relative paths

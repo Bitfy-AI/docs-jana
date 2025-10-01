@@ -1,8 +1,8 @@
 {
   "name": "docs-jana",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "description": "Unified CLI for documentation and workflow management (N8N + Outline)",
-  "main": "cli.js",
+  "main": "index.js",
   "bin": {
     "docs-jana": "./cli.js"
   },
@@ -20,6 +20,13 @@
     "test:integration": "jest __tests__/integration",
     "test:e2e": "jest __tests__/e2e",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:menu:unit": "jest __tests__/unit/ui/menu --verbose",
+    "test:menu:integration": "jest __tests__/integration/ui/menu --verbose",
+    "test:menu:e2e": "jest __tests__/e2e/menu-e2e.test.js --verbose",
+    "test:menu:performance": "jest __tests__/performance/menu-performance.test.js --verbose",
+    "test:menu:accessibility": "jest __tests__/accessibility/menu-accessibility.test.js --verbose",
+    "test:menu:coverage": "jest __tests__/unit/ui/menu __tests__/integration/ui/menu --coverage --coverageDirectory=coverage/menu",
+    "test:menu:all": "node scripts/test/run-all-menu-tests.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky"
@@ -40,8 +47,12 @@
   },
   "packageManager": "pnpm@8.15.0",
   "dependencies": {
+    "chalk": "^5.6.2",
     "cli-progress": "^3.12.0",
-    "dotenv": "^16.0.3"
+    "cli-table3": "^0.6.5",
+    "dotenv": "^16.0.3",
+    "inquirer": "^12.9.6",
+    "ora": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^8.50.0",

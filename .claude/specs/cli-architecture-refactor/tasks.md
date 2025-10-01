@@ -1048,7 +1048,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ## Phase 5: Documentação
 
-### Task 34: Criar /docs/architecture/CLI-ARCHITECTURE.md
+### ✅ Task 34: Criar /docs/architecture/CLI-ARCHITECTURE.md (COMPLETED)
 
 **Objetivo**: Documentar nova arquitetura cli.js → index.js com diagramas e explicações.
 
@@ -1080,7 +1080,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 35: Criar /docs/architecture/SERVICE-FACTORY.md
+### ✅ Task 35: Criar /docs/architecture/SERVICE-FACTORY.md (COMPLETED)
 
 **Objetivo**: Documentar uso de ServiceFactory e ServiceContainer com exemplos.
 
@@ -1112,7 +1112,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 36: Atualizar README.md com seção Architecture
+### ✅ Task 36: Atualizar README.md com seção Architecture (COMPLETED)
 
 **Objetivo**: Adicionar seção "Architecture" em README.md explicando nova estrutura.
 
@@ -1143,7 +1143,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 37: Atualizar /src/commands/README.md (se existir)
+### ✅ Task 37: Atualizar /src/commands/README.md (se existir) (COMPLETED)
 
 **Objetivo**: Atualizar documentação de comandos para refletir nova arquitetura.
 
@@ -1173,7 +1173,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 38: Criar MIGRATION.md se houver breaking changes
+### ✅ Task 38: Criar MIGRATION.md se houver breaking changes (COMPLETED)
 
 **Objetivo**: Documentar breaking changes (se houver) e guia de migração para usuários externos.
 
@@ -1206,7 +1206,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 39: Atualizar JSDoc comments em código refatorado
+### ✅ Task 39: Atualizar JSDoc comments em código refatorado (COMPLETED)
 
 **Objetivo**: Revisar e melhorar JSDoc comments em cli.js e index.js.
 
@@ -1238,7 +1238,7 @@ Este documento contém o plano de implementação para a refatoração completa 
 
 ---
 
-### Task 40: Criar CHANGELOG.md entry para refatoração
+### ✅ Task 40: Criar CHANGELOG.md entry para refatoração (COMPLETED)
 
 **Objetivo**: Documentar refatoração em CHANGELOG.md com versão e data.
 

@@ -81,7 +81,19 @@ class ConfigManager {
     const cliConfig = this.parseArguments();
     Object.assign(config, cliConfig);
 
-    // Step 4: Type conversion and validation
+    // Step 4: Apply SOURCE/TARGET fallback logic for N8N
+    if (this._isN8nSchema()) {
+      // If sourceN8nUrl is set, use it as primary n8nUrl for downloads
+      if (config.sourceN8nUrl) {
+        config.n8nUrl = config.sourceN8nUrl;
+      }
+      // If sourceApiKey is set, use it as primary apiKey for downloads
+      if (config.sourceApiKey) {
+        config.apiKey = config.sourceApiKey;
+      }
+    }
+
+    // Step 5: Type conversion and validation
     this.config = this.validateAndTransform(config);
 
     return this.config;

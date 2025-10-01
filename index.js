@@ -294,6 +294,7 @@ class CommandOrchestrator {
     const commandMap = {
       'n8n:download': './src/commands/n8n-download',
       'n8n:upload': './src/commands/n8n-upload',
+      'n8n:configure-target': './src/commands/n8n-configure-target',
       'outline:download': './src/commands/outline-download'
     };
 

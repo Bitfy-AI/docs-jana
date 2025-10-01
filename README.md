@@ -17,6 +17,84 @@
 - **⚡ Modern CLI**: Unified interface with intuitive commands
 - **🎨 Clean Architecture**: Factory patterns, DI, and service layers
 - **🔒 Secure**: Environment-based configuration, no hardcoded secrets
+- **✨ Interactive Menu**: Beautiful keyboard-driven interface with themes, animations, and history
+
+---
+
+## ✨ Interactive Menu (NEW!)
+
+Experience a modern, keyboard-driven interactive menu with rich visual feedback and productivity features.
+
+### Quick Start
+
+```bash
+# Launch interactive menu (no arguments)
+docs-jana
+
+# Or explicitly
+docs-jana --interactive
+```
+
+![Interactive Menu Preview](docs/interactive-menu/preview.png)
+
+### Key Features
+
+- **🎯 Keyboard Navigation**: Arrow keys, Enter, Esc - no mouse needed
+- **🎨 4 Beautiful Themes**: Default, Dark, Light, High-Contrast (WCAG AA compliant)
+- **⚡ Keyboard Shortcuts**: Single-key shortcuts for instant access
+- **📜 Command History**: Track and re-run previous executions
+- **🔍 Command Preview**: See exactly what will execute before running
+- **⚙️ Customizable**: Configure themes, animations, icons, and more
+- **♿ Accessible**: Full keyboard support, contrast validation, fallback modes
+
+### Navigation Shortcuts
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `↑↓` | Navigate | Move through options |
+| `Enter` | Select | Execute highlighted command |
+| `1-6` or `d/u/o` | Quick Select | Jump to specific commands |
+| `h` | History | View execution history |
+| `s` | Settings | Configure preferences |
+| `?` | Help | Show all shortcuts |
+| `q` | Quit | Exit application |
+
+### Menu Modes
+
+- **Navigation Mode**: Browse and select commands
+- **Preview Mode**: Detailed command information with warnings
+- **History Mode**: View last 10 executions with stats
+- **Config Mode**: Customize theme, animations, and behavior
+- **Help Mode**: Complete keyboard reference
+
+### Configuration
+
+Settings are persisted to `~/.docs-jana/config.json`:
+
+```json
+{
+  "theme": "default",
+  "animationsEnabled": true,
+  "animationSpeed": "normal",
+  "iconsEnabled": true,
+  "showDescriptions": true,
+  "showPreviews": true,
+  "historySize": 50
+}
+```
+
+### Documentation
+
+- **[User Guide](docs/interactive-menu/USER_GUIDE.md)** - Complete usage guide
+- **[Developer Guide](docs/interactive-menu/DEVELOPER_GUIDE.md)** - Architecture and extension guide
+- **[API Reference](docs/interactive-menu/API_REFERENCE.md)** - Full API documentation
+- **[Migration Guide](docs/interactive-menu/MIGRATION_GUIDE.md)** - Upgrade guide
+
+### Requirements
+
+- **Terminal**: Modern terminal with color support (Windows Terminal, iTerm2, etc.)
+- **Node.js**: 16+ (same as main CLI)
+- **Environment**: Interactive terminal (auto-detects CI/CD and falls back)
 
 ---
 
