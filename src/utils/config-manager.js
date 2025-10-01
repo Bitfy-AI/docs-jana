@@ -36,6 +36,8 @@
  * const config = configManager.load();
  */
 
+const n8nConfigSchema = require('../config/n8n-config-schema');
+
 class ConfigManager {
   /**
    * Create a ConfigManager
@@ -44,71 +46,16 @@ class ConfigManager {
    * @param {Object} env - Environment variables (default: process.env)
    */
   constructor(schema = null, argv = process.argv, env = process.env) {
-    this.schema = schema;
     this.argv = argv;
     this.env = env;
     this.config = null;
 
     // For backward compatibility with N8N script (no schema provided)
     if (!schema) {
-      this.schema = this._createN8nSchema();
+      this.schema = n8nConfigSchema;
+    } else {
+      this.schema = schema;
     }
-  }
-
-  /**
-   * Create default N8N schema for backward compatibility
-   * @private
-   */
-  _createN8nSchema() {
-    return {
-      n8nUrl: {
-        type: 'string',
-        required: true,
-        env: 'N8N_URL',
-        positional: 0,
-        description: 'URL do n8n',
-      },
-      apiKey: {
-        type: 'string',
-        required: false,
-        env: 'N8N_API_KEY',
-        positional: 1,
-        description: 'API Key do n8n',
-        secret: true,
-      },
-      username: {
-        type: 'string',
-        required: false,
-        env: 'N8N_USERNAME',
-        description: 'Usuário do n8n',
-      },
-      password: {
-        type: 'string',
-        required: false,
-        env: 'N8N_PASSWORD',
-        description: 'Senha do n8n',
-        secret: true,
-      },
-      tag: {
-        type: 'string',
-        required: false,
-        env: 'N8N_TAG',
-        positional: 2,
-        description: 'Tag para filtrar workflows',
-      },
-      logLevel: {
-        type: 'string',
-        required: false,
-        default: 'info',
-        env: 'LOG_LEVEL',
-        flag: '--log-level',
-        description: 'Nível de log: debug, info, warn, error',
-        validator: (value) => {
-          const validLevels = ['debug', 'info', 'warn', 'error'];
-          return validLevels.includes(value) ? null : `Log level deve ser um de: ${validLevels.join(', ')}`;
-        },
-      },
-    };
   }
 
   /**
@@ -473,49 +420,6 @@ class ConfigManager {
     return this.config;
   }
 
-  // Legacy methods for backward compatibility with N8N script
-
-  /**
-   * Get n8n URL (backward compatibility)
-   */
-  getN8nUrl() {
-    return this.argv[2] || this.env.N8N_URL || null;
-  }
-
-  /**
-   * Get API Key (backward compatibility)
-   */
-  getApiKey() {
-    return this.argv[3] || this.env.N8N_API_KEY || null;
-  }
-
-  /**
-   * Get username (backward compatibility)
-   */
-  getUsername() {
-    return this.env.N8N_USERNAME || null;
-  }
-
-  /**
-   * Get password (backward compatibility)
-   */
-  getPassword() {
-    return this.env.N8N_PASSWORD || null;
-  }
-
-  /**
-   * Get tag filter (backward compatibility)
-   */
-  getTag() {
-    return this.argv[4] || this.env.N8N_TAG || null;
-  }
-
-  /**
-   * Get log level (backward compatibility)
-   */
-  getLogLevel() {
-    return this.env.LOG_LEVEL || 'info';
-  }
 }
 
 module.exports = ConfigManager;

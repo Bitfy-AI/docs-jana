@@ -10,6 +10,8 @@
     "start": "node cli.js",
     "n8n:download": "node cli.js n8n:download",
     "download:n8n": "node cli.js n8n:download",
+    "outline:download": "node cli.js outline:download",
+    "download:outline": "node cli.js outline:download",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

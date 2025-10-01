@@ -455,7 +455,7 @@ class OutlineService {
   }
 
   /**
-   * Gera nome de arquivo sanitizado com sufixo de ID
+   * Gera nome de arquivo sanitizado
    *
    * @private
    * @param {object} doc - Objeto do documento
@@ -463,8 +463,7 @@ class OutlineService {
    */
   _generateDocumentFilename(doc) {
     const sanitizedTitle = this.sanitizeFilename(doc.title);
-    const docIdSuffix = doc.id.substring(0, 8);
-    return `${sanitizedTitle}-${docIdSuffix}.md`;
+    return `${sanitizedTitle}.md`;
   }
 
   /**
