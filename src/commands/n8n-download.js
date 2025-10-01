@@ -19,7 +19,9 @@ class N8nDownloadCommand {
    * @param {string[]} args - Command-line arguments
    */
   static async execute(args) {
-    const app = new N8nBackupApp();
+    // Pass argv starting from the actual command arguments
+    // to prevent ConfigManager from picking up the command name
+    const app = new N8nBackupApp(process.argv.slice(0, 2).concat(args));
     app.parseArgs(args);
 
     if (app.showHelp) {
@@ -35,8 +37,8 @@ class N8nDownloadCommand {
  * N8N Backup Application
  */
 class N8nBackupApp {
-  constructor() {
-    this.configManager = new ConfigManager();
+  constructor(argv = process.argv) {
+    this.configManager = new ConfigManager(null, argv);
     this.config = null;
     this.logger = null;
     this.workflowService = null;
@@ -86,10 +88,11 @@ OPTIONS:
   --help, -h            Show this help message
 
 ENVIRONMENT VARIABLES:
-  N8N_BASE_URL          N8N instance URL (required)
+  N8N_URL               N8N instance URL (required)
   N8N_API_KEY           N8N API key (required)
   N8N_USERNAME          N8N username (for basic auth)
   N8N_PASSWORD          N8N password (for basic auth)
+  N8N_TAG               Filter workflows by tag (optional)
 
 EXAMPLES:
   # Download all workflows
@@ -114,10 +117,15 @@ EXAMPLES:
       console.error('❌ Failed to load configuration:', error.message);
       console.error('\n💡 Tip: Make sure you have a .env file with N8N configuration');
       console.error('   Example:\n');
-      console.error('   N8N_BASE_URL=https://n8n.example.com');
+      console.error('   N8N_URL=https://n8n.example.com');
       console.error('   N8N_API_KEY=your-api-key\n');
       throw error;
     }
+
+    // Map config from ConfigManager schema to expected format
+    // ConfigManager uses 'n8nUrl' but our code expects 'baseUrl'
+    this.config.baseUrl = this.config.n8nUrl;
+    this.config.tagFilter = this.config.tag;
 
     // Override with command-line args
     if (this.tagFilter) {
@@ -157,7 +165,7 @@ EXAMPLES:
     );
 
     this.fileManager = new FileManager(this.logger);
-    this.workflowService = new WorkflowService(httpClient, this.logger);
+    this.workflowService = new WorkflowService(httpClient, authStrategy, this.logger);
   }
 
   /**
@@ -189,7 +197,7 @@ EXAMPLES:
     }
 
     // Create output directory
-    const outputDir = this.config.outputDir || this.fileManager.createTimestampedDir('n8n-workflows');
+    const outputDir = this.config.outputDir || this.fileManager.createBackupDirectory(process.cwd(), 'n8n-workflows');
     this.logger.info(`📁 Output directory: ${outputDir}`);
 
     // Download workflows with progress
