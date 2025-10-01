@@ -264,13 +264,20 @@ class CommandOrchestrator {
   loadConfiguration(context) {
     const ConfigManager = this.container.resolve('configManager');
 
+    // Construct argv-compatible array: ['node', 'script', 'command', ...args]
+    const argv = ['node', 'cli.js', context.command, ...(context.args || [])];
+
     // Load based on command type
     if (context.command.startsWith('n8n:')) {
-      return ConfigManager.loadN8NConfig();
+      const n8nConfigSchema = require('./src/config/n8n-config-schema');
+      const configManager = new ConfigManager(n8nConfigSchema, argv, context.env);
+      return configManager.load();
     }
 
     if (context.command.startsWith('outline:')) {
-      return ConfigManager.loadOutlineConfig();
+      const outlineConfigSchema = require('./src/config/outline-config-schema');
+      const configManager = new ConfigManager(outlineConfigSchema, argv, context.env);
+      return configManager.load();
     }
 
     return {};
