@@ -50,19 +50,20 @@ class N8NConfigureTargetApp {
     const ora = (await import('ora')).default;
     const chalk = this.chalk;
 
-    console.log(chalk.bold.cyan('\n🎯 Configure Target N8N Instance\n'));
-    console.log(chalk.dim('This will configure where workflows will be uploaded.\n'));
+    console.log(chalk.bold.cyan('\n🎯 Configurar Instância N8N de Destino\n'));
+    console.log(chalk.dim('Configure onde os workflows serão enviados.\n'));
 
     try {
       // Ler configuração atual do .env
       const currentConfig = await this.readCurrentConfig();
 
-      // Prompt para dados do n8n
-      const answers = await inquirer.prompt([
+      // Passo 1: Solicitar URL
+      console.log(chalk.bold('📝 Passo 1/3: URL da Instância N8N\n'));
+      const urlAnswer = await inquirer.prompt([
         {
           type: 'input',
           name: 'url',
-          message: 'URL do N8N de Destino:',
+          message: 'Digite a URL do N8N de Destino:',
           default: currentConfig.TARGET_N8N_URL || 'https://sua-instancia-n8n.com',
           validate: (input) => {
             if (!input || input.trim() === '') {
@@ -76,11 +77,17 @@ class N8NConfigureTargetApp {
             }
           },
           filter: (input) => input.trim().replace(/\/$/, '') // Remove trailing slash
-        },
+        }
+      ]);
+
+      // Passo 2: Solicitar API Key
+      console.log(chalk.bold('\n🔑 Passo 2/3: Chave API\n'));
+      console.log(chalk.dim('💡 Obtenha sua chave em: Settings → API → Create API Key\n'));
+      const apiKeyAnswer = await inquirer.prompt([
         {
           type: 'password',
           name: 'apiKey',
-          message: 'Chave API do N8N de Destino:',
+          message: 'Digite a Chave API do N8N de Destino:',
           default: currentConfig.TARGET_N8N_API_KEY || '',
           validate: (input) => {
             if (!input || input.trim() === '') {
@@ -91,54 +98,54 @@ class N8NConfigureTargetApp {
             }
             return true;
           }
-        },
+        }
+      ]);
+
+      // Combinar respostas
+      const answers = {
+        url: urlAnswer.url,
+        apiKey: apiKeyAnswer.apiKey
+      };
+
+      // Passo 3: Confirmar dados antes de testar
+      console.log(chalk.bold('\n✅ Passo 3/3: Confirmar Dados\n'));
+      console.log(chalk.dim('─'.repeat(60)));
+      console.log(`${chalk.bold('URL de Destino:')} ${chalk.cyan(answers.url)}`);
+      console.log(`${chalk.bold('Chave API:')} ${chalk.dim('*'.repeat(20) + answers.apiKey.slice(-6))}`);
+      console.log(chalk.dim('─'.repeat(60)));
+
+      const confirmAnswer = await inquirer.prompt([
         {
           type: 'confirm',
-          name: 'testConnection',
-          message: 'Deseja testar a conexão antes de salvar?',
+          name: 'confirm',
+          message: '\nOs dados estão corretos?',
           default: true
         }
       ]);
 
-      // Testar conexão se solicitado
-      if (answers.testConnection) {
-        const spinner = ora('Testando conexão com a instância N8N...').start();
+      if (!confirmAnswer.confirm) {
+        console.log(chalk.yellow('\n⚠️  Configuração cancelada. Execute o comando novamente para tentar outra vez.\n'));
+        return {
+          success: false,
+          message: 'Configuração cancelada pelo usuário',
+          exitCode: 0
+        };
+      }
 
-        try {
-          const isValid = await this.testN8NConnection(answers.url, answers.apiKey);
+      // Testar conexão automaticamente
+      console.log('');
+      const spinner = ora('Testando conexão com a instância N8N...').start();
 
-          if (!isValid) {
-            spinner.fail(chalk.red('❌ Falha na conexão!'));
-            console.log(chalk.yellow('\n💡 Por favor, verifique:'));
-            console.log(chalk.dim('  • A URL está correta e acessível'));
-            console.log(chalk.dim('  • A chave API é válida e tem as permissões corretas'));
-            console.log(chalk.dim('  • A instância N8N está rodando e acessível'));
-            console.log(chalk.dim('  • Não há firewall bloqueando o acesso\n'));
+      try {
+        const connectionInfo = await this.testN8NConnection(answers.url, answers.apiKey);
 
-            const retry = await inquirer.prompt([{
-              type: 'confirm',
-              name: 'saveAnyway',
-              message: 'Deseja salvar a configuração mesmo assim?',
-              default: false
-            }]);
-
-            if (!retry.saveAnyway) {
-              return {
-                success: false,
-                message: 'Configuração cancelada pelo usuário',
-                exitCode: 1
-              };
-            }
-          } else {
-            spinner.succeed(chalk.green('✅ Conexão bem-sucedida!'));
-          }
-        } catch (error) {
-          spinner.fail(chalk.red('❌ Erro ao testar conexão'));
-          console.log(chalk.yellow(`\n⚠️  Detalhes do erro: ${error.message}`));
-          console.log(chalk.dim('\n💡 Possíveis causas:'));
-          console.log(chalk.dim('  • A URL pode estar incorreta'));
-          console.log(chalk.dim('  • A chave API pode estar expirada ou inválida'));
-          console.log(chalk.dim('  • A instância N8N pode estar inacessível\n'));
+        if (!connectionInfo.success) {
+          spinner.fail(chalk.red('❌ Falha na conexão!'));
+          console.log(chalk.yellow('\n💡 Por favor, verifique:'));
+          console.log(chalk.dim('  • A URL está correta e acessível'));
+          console.log(chalk.dim('  • A chave API é válida e tem as permissões corretas'));
+          console.log(chalk.dim('  • A instância N8N está rodando e acessível'));
+          console.log(chalk.dim('  • Não há firewall bloqueando o acesso\n'));
 
           const retry = await inquirer.prompt([{
             type: 'confirm',
@@ -148,12 +155,51 @@ class N8NConfigureTargetApp {
           }]);
 
           if (!retry.saveAnyway) {
+            console.log(chalk.yellow('\n⚠️  Configuração cancelada.\n'));
             return {
               success: false,
               message: 'Configuração cancelada pelo usuário',
               exitCode: 1
             };
           }
+        } else {
+          spinner.succeed(chalk.green('✅ Conexão bem-sucedida!'));
+
+          // Mostrar informações da instância
+          if (connectionInfo.instanceInfo) {
+            console.log(chalk.dim('\n📊 Informações da Instância:'));
+            console.log(chalk.dim('─'.repeat(60)));
+            if (connectionInfo.instanceInfo.version) {
+              console.log(chalk.dim(`   Versão N8N: ${chalk.cyan(connectionInfo.instanceInfo.version)}`));
+            }
+            if (connectionInfo.instanceInfo.workflowCount !== undefined) {
+              console.log(chalk.dim(`   Workflows disponíveis: ${chalk.cyan(connectionInfo.instanceInfo.workflowCount)}`));
+            }
+            console.log(chalk.dim('─'.repeat(60)));
+          }
+        }
+      } catch (error) {
+        spinner.fail(chalk.red('❌ Erro ao testar conexão'));
+        console.log(chalk.yellow(`\n⚠️  Detalhes do erro: ${error.message}`));
+        console.log(chalk.dim('\n💡 Possíveis causas:'));
+        console.log(chalk.dim('  • A URL pode estar incorreta'));
+        console.log(chalk.dim('  • A chave API pode estar expirada ou inválida'));
+        console.log(chalk.dim('  • A instância N8N pode estar inacessível\n'));
+
+        const retry = await inquirer.prompt([{
+          type: 'confirm',
+          name: 'saveAnyway',
+          message: 'Deseja salvar a configuração mesmo assim?',
+          default: false
+        }]);
+
+        if (!retry.saveAnyway) {
+          console.log(chalk.yellow('\n⚠️  Configuração cancelada.\n'));
+          return {
+            success: false,
+            message: 'Configuração cancelada pelo usuário',
+            exitCode: 1
+          };
         }
       }
 
@@ -236,10 +282,10 @@ class N8NConfigureTargetApp {
   }
 
   /**
-   * Testa a conexão com o N8N usando API key
+   * Testa a conexão com o N8N usando API key e retorna informações da instância
    * @param {string} url - URL do N8N
    * @param {string} apiKey - API Key
-   * @returns {Promise<boolean>} True se conexão bem-sucedida
+   * @returns {Promise<Object>} Objeto com success e informações da instância
    */
   async testN8NConnection(url, apiKey) {
     try {
@@ -254,11 +300,51 @@ class N8NConfigureTargetApp {
         timeout: 10000
       });
 
-      return response.ok;
+      if (!response.ok) {
+        return { success: false };
+      }
+
+      // Tentar obter informações adicionais da instância
+      const instanceInfo = {};
+
+      try {
+        const data = await response.json();
+
+        // Contar workflows se disponível
+        if (data && data.data && Array.isArray(data.data)) {
+          instanceInfo.workflowCount = data.data.length;
+        }
+
+        // Tentar obter versão do N8N (disponível em algumas instâncias)
+        try {
+          const versionResponse = await fetch(`${url}/api/v1/`, {
+            method: 'GET',
+            headers: {
+              'X-N8N-API-KEY': apiKey,
+              'Accept': 'application/json'
+            },
+            timeout: 5000
+          });
+
+          if (versionResponse.ok) {
+            const versionData = await versionResponse.json();
+            if (versionData && versionData.data && versionData.data.version) {
+              instanceInfo.version = versionData.data.version;
+            }
+          }
+        } catch {
+          // Versão não disponível, ignorar
+        }
+      } catch {
+        // Dados adicionais não disponíveis, apenas confirmar conexão
+      }
+
+      return {
+        success: true,
+        instanceInfo: Object.keys(instanceInfo).length > 0 ? instanceInfo : null
+      };
     } catch (error) {
-      const errorChalk = this.chalk;
-      console.error(errorChalk.dim(`Connection error: ${error.message}`));
-      return false;
+      throw new Error(`Erro de conexão: ${error.message}`);
     }
   }
 
