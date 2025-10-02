@@ -62,17 +62,17 @@ class N8NConfigureTargetApp {
         {
           type: 'input',
           name: 'url',
-          message: 'Target N8N URL:',
-          default: currentConfig.TARGET_N8N_URL || 'https://your-n8n-instance.com',
+          message: 'URL do N8N de Destino:',
+          default: currentConfig.TARGET_N8N_URL || 'https://sua-instancia-n8n.com',
           validate: (input) => {
             if (!input || input.trim() === '') {
-              return 'URL is required';
+              return '❌ A URL é obrigatória. Por favor, informe a URL da sua instância N8N.';
             }
             try {
               new URL(input);
               return true;
             } catch {
-              return 'Please enter a valid URL (e.g., https://your-n8n-instance.com)';
+              return '❌ URL inválida. Use o formato: https://sua-instancia-n8n.com';
             }
           },
           filter: (input) => input.trim().replace(/\/$/, '') // Remove trailing slash
@@ -80,14 +80,14 @@ class N8NConfigureTargetApp {
         {
           type: 'password',
           name: 'apiKey',
-          message: 'Target N8N API Key:',
+          message: 'Chave API do N8N de Destino:',
           default: currentConfig.TARGET_N8N_API_KEY || '',
           validate: (input) => {
             if (!input || input.trim() === '') {
-              return 'API Key is required';
+              return '❌ A chave API é obrigatória. Obtenha em: Settings → API → Create API Key';
             }
             if (input.length < 20) {
-              return 'API Key seems too short. Please verify.';
+              return '⚠️  A chave API parece muito curta. Verifique se copiou corretamente.';
             }
             return true;
           }
@@ -95,57 +95,62 @@ class N8NConfigureTargetApp {
         {
           type: 'confirm',
           name: 'testConnection',
-          message: 'Test connection before saving?',
+          message: 'Deseja testar a conexão antes de salvar?',
           default: true
         }
       ]);
 
       // Testar conexão se solicitado
       if (answers.testConnection) {
-        const spinner = ora('Testing connection to N8N instance...').start();
+        const spinner = ora('Testando conexão com a instância N8N...').start();
 
         try {
           const isValid = await this.testN8NConnection(answers.url, answers.apiKey);
 
           if (!isValid) {
-            spinner.fail(chalk.red('Connection failed!'));
-            console.log(chalk.yellow('\nPlease verify:'));
-            console.log(chalk.dim('  • URL is correct and accessible'));
-            console.log(chalk.dim('  • API Key is valid and has proper permissions'));
-            console.log(chalk.dim('  • N8N instance is running'));
+            spinner.fail(chalk.red('❌ Falha na conexão!'));
+            console.log(chalk.yellow('\n💡 Por favor, verifique:'));
+            console.log(chalk.dim('  • A URL está correta e acessível'));
+            console.log(chalk.dim('  • A chave API é válida e tem as permissões corretas'));
+            console.log(chalk.dim('  • A instância N8N está rodando e acessível'));
+            console.log(chalk.dim('  • Não há firewall bloqueando o acesso\n'));
 
             const retry = await inquirer.prompt([{
               type: 'confirm',
               name: 'saveAnyway',
-              message: 'Save configuration anyway?',
+              message: 'Deseja salvar a configuração mesmo assim?',
               default: false
             }]);
 
             if (!retry.saveAnyway) {
               return {
                 success: false,
-                message: 'Configuration cancelled by user',
+                message: 'Configuração cancelada pelo usuário',
                 exitCode: 1
               };
             }
           } else {
-            spinner.succeed(chalk.green('Connection successful!'));
+            spinner.succeed(chalk.green('✅ Conexão bem-sucedida!'));
           }
         } catch (error) {
-          spinner.fail(chalk.red('Connection test failed'));
-          console.log(chalk.dim(`Error: ${error.message}`));
+          spinner.fail(chalk.red('❌ Erro ao testar conexão'));
+          console.log(chalk.yellow(`\n⚠️  Detalhes do erro: ${error.message}`));
+          console.log(chalk.dim('\n💡 Possíveis causas:'));
+          console.log(chalk.dim('  • A URL pode estar incorreta'));
+          console.log(chalk.dim('  • A chave API pode estar expirada ou inválida'));
+          console.log(chalk.dim('  • A instância N8N pode estar inacessível\n'));
 
           const retry = await inquirer.prompt([{
             type: 'confirm',
             name: 'saveAnyway',
-            message: 'Save configuration anyway?',
+            message: 'Deseja salvar a configuração mesmo assim?',
             default: false
           }]);
 
           if (!retry.saveAnyway) {
             return {
               success: false,
-              message: 'Configuration cancelled by user',
+              message: 'Configuração cancelada pelo usuário',
               exitCode: 1
             };
           }
@@ -153,24 +158,24 @@ class N8NConfigureTargetApp {
       }
 
       // Salvar no .env
-      const saveSpinner = ora('Saving configuration to .env file...').start();
+      const saveSpinner = ora('Salvando configuração no arquivo .env...').start();
 
       await this.saveToEnv(answers.url, answers.apiKey);
 
-      saveSpinner.succeed(chalk.green('Configuration saved successfully!'));
+      saveSpinner.succeed(chalk.green('✅ Configuração salva com sucesso!'));
 
       // Mostrar resumo
-      console.log(chalk.bold('\n📋 Configuration Summary:'));
+      console.log(chalk.bold('\n📋 Resumo da Configuração:'));
       console.log(chalk.dim('─'.repeat(50)));
-      console.log(`${chalk.bold('Target URL:')} ${chalk.cyan(answers.url)}`);
-      console.log(`${chalk.bold('API Key:')} ${chalk.dim('*'.repeat(20) + answers.apiKey.slice(-10))}`);
+      console.log(`${chalk.bold('URL de Destino:')} ${chalk.cyan(answers.url)}`);
+      console.log(`${chalk.bold('Chave API:')} ${chalk.dim('*'.repeat(20) + answers.apiKey.slice(-10))}`);
       console.log(chalk.dim('─'.repeat(50)));
-      console.log(chalk.green('\n✅ Target N8N instance configured!'));
-      console.log(chalk.dim('You can now use the "Upload workflows to N8N" option.\n'));
+      console.log(chalk.green('\n✅ Instância N8N de destino configurada!'));
+      console.log(chalk.cyan('🚀 Agora você pode usar a opção "Enviar Workflows para N8N".\n'));
 
       return {
         success: true,
-        message: 'Target N8N configured successfully',
+        message: 'N8N de destino configurado com sucesso',
         data: {
           url: answers.url,
           apiKeyConfigured: true
@@ -180,16 +185,18 @@ class N8NConfigureTargetApp {
 
     } catch (error) {
       if (error.isTtyError) {
-        console.error(chalk.red('Prompt couldn\'t be rendered in the current environment'));
+        console.error(chalk.red('❌ O prompt não pôde ser renderizado no ambiente atual'));
+        console.log(chalk.yellow('\n💡 Dica: Execute este comando em um terminal interativo (não em scripts ou CI/CD)'));
       } else if (error.message.includes('User force closed')) {
-        console.log(chalk.yellow('\nConfiguration cancelled.'));
+        console.log(chalk.yellow('\n⚠️  Configuração cancelada pelo usuário.'));
         return {
           success: false,
-          message: 'Configuration cancelled by user',
+          message: 'Configuração cancelada pelo usuário',
           exitCode: 130
         };
       } else {
-        console.error(chalk.red(`Error: ${error.message}`));
+        console.error(chalk.red(`❌ Erro: ${error.message}`));
+        console.log(chalk.yellow('\n💡 Dica: Execute com --help para ver as opções disponíveis'));
       }
 
       return {
@@ -323,42 +330,46 @@ class N8NConfigureTargetApp {
   printHelp() {
     const chalk = this.chalk;
     console.log(`
-${chalk.bold.cyan('n8n:configure-target')} - Configure Target N8N Instance
+${chalk.bold.cyan('n8n:configure-target')} - Configurar Instância N8N de Destino
 
-${chalk.bold('USAGE:')}
+${chalk.bold('USO:')}
   docs-jana n8n:configure-target
 
-${chalk.bold('DESCRIPTION:')}
-  Interactively configure the target N8N instance where workflows will be uploaded.
-  This command will:
-  - Prompt for target N8N URL
-  - Prompt for target N8N API Key (not username/password)
-  - Test the connection (optional)
-  - Save configuration to .env file
+${chalk.bold('DESCRIÇÃO:')}
+  Configure interativamente a instância N8N de destino onde os workflows serão enviados.
+  Este comando vai:
+  - Solicitar a URL do N8N de destino
+  - Solicitar a chave API do N8N de destino (não usa usuário/senha)
+  - Testar a conexão (opcional)
+  - Salvar a configuração no arquivo .env
 
-${chalk.bold('CONFIGURATION:')}
-  The following variables will be updated in .env:
-  - TARGET_N8N_URL
-  - TARGET_N8N_API_KEY
+${chalk.bold('CONFIGURAÇÃO:')}
+  As seguintes variáveis serão atualizadas no .env:
+  - TARGET_N8N_URL     (URL da instância de destino)
+  - TARGET_N8N_API_KEY (Chave API da instância de destino)
 
-${chalk.bold('HOW TO GET API KEY:')}
-  1. Login to your N8N instance
-  2. Go to Settings → API
-  3. Click "Create API Key"
-  4. Copy the key (it will only be shown once!)
+${chalk.bold('COMO OBTER A CHAVE API:')}
+  1. Faça login na sua instância N8N
+  2. Vá em Settings → API
+  3. Clique em "Create API Key"
+  4. Copie a chave (ela só será mostrada uma vez!)
 
-${chalk.bold('OPTIONS:')}
-  -h, --help     Show this help message
+${chalk.bold('OPÇÕES:')}
+  -h, --help     Mostra esta mensagem de ajuda
 
-${chalk.bold('EXAMPLES:')}
-  # Configure target N8N instance
+${chalk.bold('EXEMPLOS:')}
+  # Configurar instância N8N de destino
   docs-jana n8n:configure-target
 
-${chalk.bold('NOTES:')}
-  - Uses API Key authentication (NOT username/password)
-  - API keys are stored in .env file (never commit to version control)
-  - Connection test is optional but recommended
-  - You can configure multiple instances (SOURCE and TARGET)
+  # Ver esta ajuda
+  docs-jana n8n:configure-target --help
+
+${chalk.bold('OBSERVAÇÕES:')}
+  - Usa autenticação por chave API (NÃO usa usuário/senha)
+  - As chaves API são armazenadas no arquivo .env (nunca faça commit deste arquivo)
+  - O teste de conexão é opcional mas recomendado
+  - Você pode configurar múltiplas instâncias (SOURCE e TARGET)
+  - A instância SOURCE é usada para download, TARGET para upload
     `);
   }
 }

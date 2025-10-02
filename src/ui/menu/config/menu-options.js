@@ -18,9 +18,24 @@
 const MENU_OPTIONS = [
   {
     key: '1',
+    command: 'n8n:configure-target',
+    label: 'Configurar N8N de Destino',
+    description: 'Configure a instância N8N de destino onde os workflows serão enviados. Você vai informar a URL e a chave API, testar a conexão e salvar automaticamente no arquivo .env. Esta configuração é necessária antes de fazer upload de workflows.',
+    icon: '🎯',
+    category: 'action',
+    shortcut: 't',
+    preview: {
+      shellCommand: 'Configurar TARGET_N8N_URL e TARGET_N8N_API_KEY',
+      affectedPaths: ['Arquivo .env será atualizado'],
+      estimatedDuration: 2,
+      warning: '⚠️  As chaves API serão armazenadas no arquivo .env. Mantenha este arquivo seguro e nunca faça commit dele no controle de versão.'
+    }
+  },
+  {
+    key: '2',
     command: 'n8n:download',
-    label: 'Download workflows from N8N',
-    description: 'Download and backup all workflows from your N8N instance. Supports filtering by tags and output directory selection. The downloaded workflows will be saved in a timestamped directory with preserved structure and metadata.',
+    label: 'Baixar Workflows do N8N',
+    description: 'Faça download e backup de todos os workflows da sua instância N8N de origem. Suporta filtragem por tags e seleção de diretório de saída. Os workflows baixados serão salvos em um diretório com timestamp, preservando estrutura e metadados.',
     icon: '📥',
     category: 'action',
     shortcut: 'd',
@@ -32,25 +47,25 @@ const MENU_OPTIONS = [
     }
   },
   {
-    key: '2',
+    key: '3',
     command: 'n8n:upload',
-    label: 'Upload workflows to N8N',
-    description: 'Upload workflows to your N8N instance with preserved IDs. Supports dry-run mode for testing without making changes. WARNING: This will modify workflows on your N8N instance. Use --dry-run first to verify changes.',
+    label: 'Enviar Workflows para N8N',
+    description: 'Envie workflows para sua instância N8N de destino com IDs preservados. Suporta modo dry-run para testar sem fazer alterações. ATENÇÃO: Este comando vai modificar workflows na sua instância N8N. Use --dry-run primeiro para verificar as mudanças.',
     icon: '📤',
     category: 'action',
     shortcut: 'u',
     preview: {
       shellCommand: 'docs-jana n8n:upload --input {path}',
-      affectedPaths: ['N8N Instance - Remote workflows will be modified'],
+      affectedPaths: ['Instância N8N - Workflows remotos serão modificados'],
       estimatedDuration: 8,
-      warning: '⚠️  This command will modify workflows on your N8N instance. Always use --dry-run first to verify changes before uploading.'
+      warning: '⚠️  Este comando vai modificar workflows na sua instância N8N. Sempre use --dry-run primeiro para verificar as mudanças antes de enviar.'
     }
   },
   {
-    key: '3',
+    key: '4',
     command: 'outline:download',
-    label: 'Download documentation from Outline',
-    description: 'Download all documentation from your Outline instance. Supports collection filtering and custom output paths. Documents will be saved in markdown format with preserved hierarchy and metadata.',
+    label: 'Baixar Documentação do Outline',
+    description: 'Faça download de toda documentação da sua instância Outline. Suporta filtragem por coleção e caminhos de saída personalizados. Os documentos serão salvos em formato markdown com hierarquia e metadados preservados.',
     icon: '📚',
     category: 'action',
     shortcut: 'o',
@@ -62,35 +77,20 @@ const MENU_OPTIONS = [
     }
   },
   {
-    key: '4',
+    key: '5',
     command: 'history',
-    label: 'View command history',
-    description: 'View the history of recently executed commands with timestamps and status. Re-execute previous commands or clear history. Shows the last 10 executions with success/failure indicators and duration.',
+    label: 'Ver Histórico de Comandos',
+    description: 'Visualize o histórico dos comandos executados recentemente com timestamps e status. Re-execute comandos anteriores ou limpe o histórico. Mostra as últimas 10 execuções com indicadores de sucesso/falha e duração.',
     icon: '📜',
     category: 'info',
     shortcut: 'h',
     preview: null
   },
   {
-    key: '5',
-    command: 'n8n:configure-target',
-    label: 'Configure Target N8N Instance',
-    description: 'Configure the target N8N instance where workflows will be uploaded. Enter URL and API key, test connection, and save to .env file. This is required before uploading workflows.',
-    icon: '🎯',
-    category: 'action',
-    shortcut: 't',
-    preview: {
-      shellCommand: 'Configure TARGET_N8N_URL and TARGET_N8N_API_KEY',
-      affectedPaths: ['.env file will be updated'],
-      estimatedDuration: 2,
-      warning: '⚠️  API keys will be stored in .env file. Keep this file secure and never commit it to version control.'
-    }
-  },
-  {
     key: '6',
     command: 'config',
-    label: 'Menu Settings',
-    description: 'Configure menu preferences: theme (default, dark, light, high-contrast), animations (enabled/disabled), icons, and more. All settings are persisted to ~/.docs-jana/config.json and applied immediately.',
+    label: 'Configurações do Menu',
+    description: 'Configure as preferências do menu: tema (padrão, escuro, claro, alto contraste), animações (ativadas/desativadas), ícones e mais. Todas as configurações são salvas em ~/.docs-jana/config.json e aplicadas imediatamente.',
     icon: '⚙️',
     category: 'utility',
     shortcut: 's',
@@ -99,8 +99,8 @@ const MENU_OPTIONS = [
   {
     key: '7',
     command: 'help',
-    label: 'Help & Shortcuts',
-    description: 'Show all available commands, keyboard shortcuts, and usage examples. Learn how to navigate the menu efficiently using arrow keys, Enter, Escape, and shortcut keys.',
+    label: 'Ajuda e Atalhos',
+    description: 'Exibe todos os comandos disponíveis, atalhos de teclado e exemplos de uso. Aprenda a navegar no menu de forma eficiente usando setas, Enter, Escape e teclas de atalho.',
     icon: '❓',
     category: 'info',
     shortcut: '?',
@@ -109,8 +109,8 @@ const MENU_OPTIONS = [
   {
     key: '0',
     command: 'exit',
-    label: 'Exit',
-    description: 'Exit the CLI application. All history and configuration will be saved automatically before exiting.',
+    label: 'Sair',
+    description: 'Encerra a aplicação CLI. Todo o histórico e configurações serão salvos automaticamente antes de sair.',
     icon: '🚪',
     category: 'utility',
     shortcut: 'q',
