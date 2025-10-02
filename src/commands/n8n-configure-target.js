@@ -12,6 +12,10 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+// Load environment variables
+const EnvLoader = require('../utils/env-loader');
+EnvLoader.load();
+
 class N8NConfigureTargetCommand {
   /**
    * Execute the configure-target command
@@ -50,8 +54,57 @@ class N8NConfigureTargetApp {
     const ora = (await import('ora')).default;
     const chalk = this.chalk;
 
+    // Introdução explicativa
     console.log(chalk.bold.cyan('\n🎯 Configurar Instância N8N de Destino\n'));
-    console.log(chalk.dim('Configure onde os workflows serão enviados.\n'));
+    console.log(chalk.dim('─'.repeat(70)));
+
+    console.log(chalk.bold('\n📖 O que é este comando?\n'));
+    console.log(chalk.dim('Este comando configura a instância N8N de destino onde seus workflows'));
+    console.log(chalk.dim('serão enviados. É necessário configurar antes de fazer upload de workflows.\n'));
+
+    console.log(chalk.bold('🔧 O que você vai precisar?\n'));
+    console.log(chalk.dim('  1. URL da sua instância N8N de destino'));
+    console.log(chalk.dim('     Exemplo: https://flows.aibotize.com\n'));
+    console.log(chalk.dim('  2. Chave API da instância N8N'));
+    console.log(chalk.dim('     💡 Como obter:'));
+    console.log(chalk.dim('        • Faça login na sua instância N8N'));
+    console.log(chalk.dim('        • Vá em Settings → API'));
+    console.log(chalk.dim('        • Clique em "Create API Key"'));
+    console.log(chalk.dim('        • Copie a chave (será mostrada apenas uma vez!)\n'));
+
+    console.log(chalk.bold('📋 Como funciona?\n'));
+    console.log(chalk.dim('  Passo 1/3: Você digita a URL da instância'));
+    console.log(chalk.dim('  Passo 2/3: Você digita a chave API'));
+    console.log(chalk.dim('  Passo 3/3: Você confirma os dados'));
+    console.log(chalk.dim('  ↓ Sistema testa a conexão automaticamente'));
+    console.log(chalk.dim('  ✅ Configuração salva no arquivo .env\n'));
+
+    console.log(chalk.bold.yellow('⚠️  Importante:\n'));
+    console.log(chalk.dim('  • A chave API será armazenada no arquivo .env'));
+    console.log(chalk.dim('  • NUNCA faça commit do arquivo .env no controle de versão'));
+    console.log(chalk.dim('  • Mantenha suas chaves API seguras e privadas\n'));
+
+    console.log(chalk.dim('─'.repeat(70)));
+
+    const startAnswer = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'start',
+        message: '\n✨ Pronto para começar a configuração?',
+        default: true
+      }
+    ]);
+
+    if (!startAnswer.start) {
+      console.log(chalk.yellow('\n⚠️  Configuração cancelada. Execute o comando novamente quando estiver pronto.\n'));
+      return {
+        success: false,
+        message: 'Configuração cancelada pelo usuário',
+        exitCode: 0
+      };
+    }
+
+    console.log(''); // Espaço em branco
 
     try {
       // Ler configuração atual do .env
@@ -69,16 +122,71 @@ class N8NConfigureTargetApp {
             if (!input || input.trim() === '') {
               return '❌ A URL é obrigatória. Por favor, informe a URL da sua instância N8N.';
             }
+
+            let url;
             try {
-              new URL(input);
-              return true;
+              url = new URL(input);
             } catch {
               return '❌ URL inválida. Use o formato: https://sua-instancia-n8n.com';
             }
+
+            // Validar protocolo (apenas https ou http)
+            if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+              return '❌ Apenas URLs HTTP ou HTTPS são permitidas.';
+            }
+
+            // Bloquear IPs privados e localhost (SSRF protection)
+            const hostname = url.hostname.toLowerCase();
+            const privateIpPatterns = [
+              /^localhost$/i,
+              /^127\./,
+              /^10\./,
+              /^172\.(1[6-9]|2\d|3[01])\./,
+              /^192\.168\./,
+              /^169\.254\./
+            ];
+
+            if (privateIpPatterns.some(pattern => pattern.test(hostname))) {
+              return '⚠️  URLs de rede interna (localhost/IPs privados) não são permitidas por segurança.';
+            }
+
+            return true;
           },
           filter: (input) => input.trim().replace(/\/$/, '') // Remove trailing slash
         }
       ]);
+
+      // Warning de segurança para HTTP
+      let urlObj;
+      try {
+        urlObj = new URL(urlAnswer.url);
+      } catch {
+        // Já validado anteriormente
+      }
+
+      if (urlObj && urlObj.protocol === 'http:') {
+        console.log(chalk.bold.yellow('\n⚠️  AVISO DE SEGURANÇA:\n'));
+        console.log(chalk.dim('  Você está usando HTTP (não criptografado).'));
+        console.log(chalk.dim('  Sua API Key será transmitida sem criptografia.'));
+        console.log(chalk.dim('  Recomendamos fortemente usar HTTPS.\n'));
+
+        const confirmHttp = await inquirer.prompt([{
+          type: 'confirm',
+          name: 'continue',
+          message: 'Deseja continuar mesmo assim?',
+          default: false
+        }]);
+
+        if (!confirmHttp.continue) {
+          console.log(chalk.yellow('\n⚠️  Configuração cancelada por segurança. Use HTTPS para proteger sua API Key.\n'));
+          return {
+            success: false,
+            message: 'Configuração cancelada por questões de segurança',
+            exitCode: 0
+          };
+        }
+        console.log(''); // Espaço em branco
+      }
 
       // Passo 2: Solicitar API Key
       console.log(chalk.bold('\n🔑 Passo 2/3: Chave API\n'));
@@ -96,6 +204,13 @@ class N8NConfigureTargetApp {
             if (input.length < 20) {
               return '⚠️  A chave API parece muito curta. Verifique se copiou corretamente.';
             }
+
+            // Validar formato JWT básico (header.payload.signature)
+            const jwtPattern = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+            if (!jwtPattern.test(input.trim())) {
+              return '⚠️  A chave API não parece ser um token JWT válido. Verifique se copiou corretamente da página de API Keys do N8N.';
+            }
+
             return true;
           }
         }
@@ -111,7 +226,7 @@ class N8NConfigureTargetApp {
       console.log(chalk.bold('\n✅ Passo 3/3: Confirmar Dados\n'));
       console.log(chalk.dim('─'.repeat(60)));
       console.log(`${chalk.bold('URL de Destino:')} ${chalk.cyan(answers.url)}`);
-      console.log(`${chalk.bold('Chave API:')} ${chalk.dim('*'.repeat(20) + answers.apiKey.slice(-6))}`);
+      console.log(`${chalk.bold('Chave API:')} ${chalk.dim('*'.repeat(35) + answers.apiKey.slice(-3))}`);
       console.log(chalk.dim('─'.repeat(60)));
 
       const confirmAnswer = await inquirer.prompt([
@@ -214,7 +329,7 @@ class N8NConfigureTargetApp {
       console.log(chalk.bold('\n📋 Resumo da Configuração:'));
       console.log(chalk.dim('─'.repeat(50)));
       console.log(`${chalk.bold('URL de Destino:')} ${chalk.cyan(answers.url)}`);
-      console.log(`${chalk.bold('Chave API:')} ${chalk.dim('*'.repeat(20) + answers.apiKey.slice(-10))}`);
+      console.log(`${chalk.bold('Chave API:')} ${chalk.dim('*'.repeat(35) + answers.apiKey.slice(-3))}`);
       console.log(chalk.dim('─'.repeat(50)));
       console.log(chalk.green('\n✅ Instância N8N de destino configurada!'));
       console.log(chalk.cyan('🚀 Agora você pode usar a opção "Enviar Workflows para N8N".\n'));
@@ -405,8 +520,20 @@ class N8NConfigureTargetApp {
       // Salvar
       await fs.writeFile(envPath, lines.join('\n'), 'utf-8');
 
+      // Definir permissões seguras em sistemas Unix (apenas owner pode ler/escrever)
+      if (process.platform !== 'win32') {
+        try {
+          await fs.chmod(envPath, 0o600);
+        } catch (chmodError) {
+          // Se falhar chmod, apenas avisar (não bloquear)
+          const errorChalk = this.chalk;
+          console.warn(errorChalk.yellow(`⚠️  Não foi possível definir permissões seguras para o arquivo .env: ${chmodError.message}`));
+          console.warn(errorChalk.yellow('   Recomendamos executar manualmente: chmod 600 .env'));
+        }
+      }
+
     } catch (error) {
-      throw new Error(`Failed to save .env file: ${error.message}`);
+      throw new Error(`Falha ao salvar arquivo .env: ${error.message}`);
     }
   }
 
