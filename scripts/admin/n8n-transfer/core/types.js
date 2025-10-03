@@ -173,6 +173,7 @@ const { z } = require('zod');
  * @property {number} [duplicates] - Number of workflows skipped due to duplication
  * @property {number} duration - Total transfer duration in milliseconds
  * @property {Array<{workflow: string, error: string, code: string}>} [errors] - Detailed error list for failed transfers
+ * @property {ReportFile[]} [reports] - Array of generated report files
  *
  * @example
  * const summary = {
@@ -193,7 +194,126 @@ const { z } = require('zod');
  *       error: 'Network timeout while transferring',
  *       code: 'NETWORK_TIMEOUT'
  *     }
+ *   ],
+ *   reports: [
+ *     {
+ *       reporter: 'markdown-reporter',
+ *       path: '/path/to/report.md',
+ *       format: 'markdown'
+ *     }
  *   ]
+ * };
+ */
+
+/**
+ * Report File
+ *
+ * Represents a generated report file from a reporter plugin.
+ *
+ * @typedef {Object} ReportFile
+ * @property {string} reporter - Nome do reporter que gerou o arquivo
+ * @property {string} path - Caminho completo do arquivo de relatório
+ * @property {string} format - Formato do relatório (markdown, json, csv, etc)
+ *
+ * @example
+ * const reportFile = {
+ *   reporter: 'markdown-reporter',
+ *   path: '/path/to/transfer-report-2025-10-03.md',
+ *   format: 'markdown'
+ * };
+ */
+
+/**
+ * Validation Result
+ *
+ * Resultado de uma operação de validação standalone de workflows.
+ * Retornado pelo método TransferManager.validate().
+ *
+ * @typedef {Object} ValidationResult
+ * @property {number} total - Total de workflows validados
+ * @property {number} valid - Workflows válidos (sem issues)
+ * @property {number} invalid - Workflows inválidos (com issues)
+ * @property {number} errors - Total de erros encontrados
+ * @property {number} warnings - Total de warnings encontrados
+ * @property {Array<Object>} issues - Lista de issues por workflow
+ * @property {string} issues[].workflow - Nome do workflow
+ * @property {string} issues[].workflowId - ID do workflow
+ * @property {Array<Object>} issues[].issues - Issues encontrados no workflow
+ * @property {string[]} validators - Nomes dos validators utilizados
+ *
+ * @example
+ * const result = {
+ *   total: 10,
+ *   valid: 8,
+ *   invalid: 2,
+ *   errors: 3,
+ *   warnings: 1,
+ *   issues: [
+ *     {
+ *       workflow: 'Problematic Workflow',
+ *       workflowId: '123',
+ *       issues: [
+ *         {
+ *           validator: 'integrity-validator',
+ *           phase: 'standalone',
+ *           message: 'Missing required node: Start',
+ *           severity: 'error'
+ *         },
+ *         {
+ *           validator: 'integrity-validator',
+ *           phase: 'standalone',
+ *           message: 'Deprecated node type detected',
+ *           severity: 'warning'
+ *         }
+ *       ]
+ *     }
+ *   ],
+ *   validators: ['integrity-validator', 'schema-validator']
+ * };
+ */
+
+/**
+ * Transfer Options
+ *
+ * Configuration options for workflow transfer operations. Allows filtering
+ * workflows by various criteria and customizing transfer behavior.
+ *
+ * @typedef {Object} TransferOptions
+ * @property {Object} [filters] - Filtros de seleção de workflows
+ * @property {string[]} [filters.workflowIds] - IDs específicos de workflows para transferir
+ * @property {string[]} [filters.workflowNames] - Nomes específicos de workflows para transferir
+ * @property {string[]} [filters.tags] - Incluir apenas workflows com essas tags
+ * @property {string[]} [filters.excludeTags] - Excluir workflows com essas tags
+ * @property {boolean} [dryRun=false] - Modo simulação (valida mas não transfere de fato)
+ * @property {number} [parallelism=3] - Número de transferências paralelas (1-10)
+ * @property {string} [deduplicator='standard-deduplicator'] - Nome do plugin deduplicator a usar
+ * @property {string[]} [validators=['integrity-validator']] - Nomes dos plugins validators a usar
+ * @property {string[]} [reporters=['markdown-reporter']] - Nomes dos plugins reporters a usar
+ * @property {boolean} [skipCredentials=false] - Pular workflows com credenciais (evita falhas de auth)
+ *
+ * @example
+ * // Transferência simples com defaults
+ * const options = {};
+ *
+ * @example
+ * // Transferência com filtros
+ * const options = {
+ *   filters: {
+ *     tags: ['production'],
+ *     excludeTags: ['deprecated']
+ *   },
+ *   dryRun: false
+ * };
+ *
+ * @example
+ * // Transferência customizada
+ * const options = {
+ *   filters: { workflowIds: ['123', '456'] },
+ *   parallelism: 5,
+ *   deduplicator: 'fuzzy-deduplicator',
+ *   validators: ['integrity-validator', 'schema-validator'],
+ *   reporters: ['markdown-reporter', 'json-reporter'],
+ *   skipCredentials: true
  * };
  */
 
@@ -288,6 +408,24 @@ const TransferSummarySchema = z.object({
     error: z.string(),
     code: z.string(),
   })).optional(),
+}).strict();
+
+/**
+ * Zod schema for validating TransferOptions objects
+ */
+const TransferOptionsSchema = z.object({
+  filters: z.object({
+    workflowIds: z.array(z.string()).optional(),
+    workflowNames: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    excludeTags: z.array(z.string()).optional(),
+  }).optional().default({}),
+  dryRun: z.boolean().default(false),
+  parallelism: z.number().int().min(1).max(10).default(3),
+  deduplicator: z.string().default('standard-deduplicator'),
+  validators: z.array(z.string()).default(['integrity-validator']),
+  reporters: z.array(z.string()).default(['markdown-reporter']),
+  skipCredentials: z.boolean().default(false),
 }).strict();
 
 // =============================================================================
@@ -397,6 +535,28 @@ function validateTransferSummary(data) {
   return TransferSummarySchema.safeParse(data);
 }
 
+/**
+ * Validates a TransferOptions object against the TransferOptionsSchema
+ *
+ * @param {any} data - Data to validate
+ * @returns {{success: true, data: TransferOptions} | {success: false, error: z.ZodError}} Validation result
+ *
+ * @example
+ * const result = validateTransferOptions({
+ *   filters: { tags: ['production'] },
+ *   dryRun: true,
+ *   parallelism: 5
+ * });
+ * if (result.success) {
+ *   console.log('Valid options:', result.data);
+ * } else {
+ *   console.error('Validation errors:', result.error.issues);
+ * }
+ */
+function validateTransferOptions(data) {
+  return TransferOptionsSchema.safeParse(data);
+}
+
 // =============================================================================
 // EXPORTS
 // =============================================================================
@@ -409,6 +569,7 @@ module.exports = {
   TagSchema,
   TransferStateSchema,
   TransferSummarySchema,
+  TransferOptionsSchema,
 
   // Validation Functions
   validateWorkflow,
@@ -417,4 +578,5 @@ module.exports = {
   validateTag,
   validateTransferState,
   validateTransferSummary,
+  validateTransferOptions,
 };

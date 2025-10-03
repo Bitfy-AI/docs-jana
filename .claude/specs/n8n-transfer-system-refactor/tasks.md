@@ -198,7 +198,7 @@ Implementar o core business logic de transferência, orquestrando plugins e coor
 
 ---
 
-- [ ] **19. Implementar TransferManager - estrutura base**
+- [x] **19. Implementar TransferManager - estrutura base**
   - Criar `core/transfer-manager.js` com classe `TransferManager`
   - Implementar constructor que inicializa ConfigLoader, PluginRegistry, HttpClient, Logger
   - Implementar método `getProgress()` retornando estado atual
@@ -207,7 +207,7 @@ Implementar o core business logic de transferência, orquestrando plugins e coor
   - _Requisitos: Todos (orquestrador central)_
   - _Deliverable: Estrutura do TransferManager_
 
-- [ ] **20. Implementar TransferManager.transfer() - validação inicial**
+- [x] **20. Implementar TransferManager.transfer() - validação inicial**
   - Implementar método `transfer(options)` - parte 1: validação
   - Validar `TransferOptions` usando Zod/Joi
   - Carregar configuração via ConfigLoader
@@ -216,7 +216,7 @@ Implementar o core business logic de transferência, orquestrando plugins e coor
   - _Requisitos: 5 (configuração), 6 (tratamento de erros)_
   - _Deliverable: Validação inicial robusta_
 
-- [ ] **21. Implementar TransferManager.transfer() - carregamento de plugins**
+- [x] **21. Implementar TransferManager.transfer() - carregamento de plugins**
   - Implementar parte 2: carregamento de plugins
   - Carregar deduplicator via PluginRegistry (default: StandardDeduplicator)
   - Carregar validators via PluginRegistry (default: IntegrityValidator)
@@ -225,7 +225,7 @@ Implementar o core business logic de transferência, orquestrando plugins e coor
   - _Requisitos: Todos (uso de plugins)_
   - _Deliverable: Carregamento dinâmico de plugins_
 
-- [ ] **22. Implementar TransferManager.transfer() - fetching de workflows**
+- [x] **22. Implementar TransferManager.transfer() - fetching de workflows**
   - Implementar parte 3: fetching de workflows
   - Buscar workflows do SOURCE via HttpClient com filtros aplicados
   - Buscar workflows do TARGET via HttpClient (para deduplicação)
@@ -245,7 +245,7 @@ Implementar o core business logic de transferência, orquestrando plugins e coor
   - _Requisitos: 2 (deduplicação), 10 (validação), 12 (workflows com credenciais)_
   - _Deliverable: Loop de processamento completo_
 
-- [ ] **24. Implementar dry-run mode**
+- [x] **24. Implementar dry-run mode**
   - Adicionar flag `dryRun` em `TransferOptions`
   - Implementar simulação de transferência: rodar todas validações mas não chamar `createWorkflow()`
   - Marcar workflows transferidos como `simulated: true` em dry-run
