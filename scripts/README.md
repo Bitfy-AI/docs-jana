@@ -115,6 +115,44 @@ node scripts/test/test-workflow-id-preservation.js
 
 **ATENÇÃO**: Scripts administrativos que fazem modificações no sistema. Use com cuidado!
 
+### `update-workflow-names.js` ⭐ NEW
+Atualiza nomes de workflows em massa usando mapeamento.
+
+```bash
+# Dry-run (recomendado primeiro)
+node scripts/admin/update-workflow-names.js --dry-run
+
+# Executar atualização
+node scripts/admin/update-workflow-names.js
+
+# Com logs verbose
+node scripts/admin/update-workflow-names.js --verbose
+```
+
+**Propósito**: Renomear workflows na instância SOURCE conforme `rename-mapping-atualizado.json`.
+
+**Requer**:
+- `.env` configurado com `SOURCE_N8N_URL` e `SOURCE_N8N_API_KEY`
+- Arquivo `rename-mapping-atualizado.json` na raiz do projeto
+
+**Features**:
+- ✅ Modo dry-run para testar sem modificar
+- ✅ Rate limiting automático (100ms entre requests)
+- ✅ Log de erros detalhado (`update-workflow-names-errors.log`)
+- ✅ Progress tracking em tempo real
+- ✅ Estatísticas ao final (success/skipped/failed)
+- ✅ Skip automático de workflows que não mudaram
+
+**Documentação**: [UPDATE_WORKFLOW_NAMES.md](../docs/technical/UPDATE_WORKFLOW_NAMES.md)
+
+**⚠️ Recomendações**:
+1. SEMPRE executar `--dry-run` primeiro
+2. Fazer backup antes: `node cli.js n8n:download --source --output ./backup`
+3. Verificar log de erros após execução
+4. Testar em ambiente não-produtivo primeiro
+
+---
+
 ### `cleanup-duplicates.js`
 Remove workflows duplicados no N8N.
 
@@ -264,6 +302,7 @@ cat .env
 
 ⚠️ **CUIDADO**:
 - `cleanup-duplicates.js` - Deleta workflows
+- `update-workflow-names.js` - Modifica nomes de workflows (use --dry-run primeiro!)
 - `unarchive-*.js` - Modifica estado de workflows
 
 ✅ **SEGURO**:
