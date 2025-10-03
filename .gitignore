@@ -39,6 +39,12 @@ downloaded-docs/
 scripts/temp/
 scripts/*/node_modules
 
+# N8N Transfer System - Runtime directories
+scripts/admin/n8n-transfer/logs/*
+!scripts/admin/n8n-transfer/logs/.gitkeep
+scripts/admin/n8n-transfer/reports/*
+!scripts/admin/n8n-transfer/reports/.gitkeep
+
 # Test output
 test-results/
 coverage/
