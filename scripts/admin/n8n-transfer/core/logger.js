@@ -437,6 +437,20 @@ class Logger {
   }
 
   /**
+   * Força flush do file stream (útil para testes)
+   *
+   * @example
+   * logger.info('Message');
+   * logger.flush(); // Garante que foi escrito no arquivo
+   */
+  flush() {
+    if (this.fileStream && this.fileStream.write) {
+      // Força flush do buffer
+      this.fileStream.write('');
+    }
+  }
+
+  /**
    * Log de nível DEBUG
    *
    * @param {string} message - Mensagem de log

@@ -65,7 +65,7 @@ Estabelecer a fundação arquitetural com core components, interfaces TypeScript
   - _Requisitos: 6 (tratamento de erros), Requisitos Não-Funcionais (performance)_
   - _Deliverable: Cliente HTTP robusto com retry e logging_
 
-- [ ] **6. Implementar ErrorReporter**
+- [x] **6. Implementar ErrorReporter**
   - Criar `core/error-reporter.js` com utilitários de formatação de erros
   - Implementar método `format()` que converte erros em formato padronizado com code, message, suggestion
   - Implementar detecção de tipos de erro específicos: autenticação, rede, timeout, storage cheio
