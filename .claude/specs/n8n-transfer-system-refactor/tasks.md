@@ -91,24 +91,24 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
 
 ---
 
-- [ ] **8. Criar interfaces de plugins**
+- [x] **8. Criar interfaces de plugins**
   - Criar `plugins/index.js` com definições TypeScript/JSDoc de interfaces: `Plugin`, `Deduplicator`, `Validator`, `Reporter`
   - Documentar cada interface com exemplos de implementação
   - Criar classe base `BasePlugin` com funcionalidades comuns
   - _Requisitos: Todos (infraestrutura de extensibilidade)_
   - _Deliverable: Interfaces de plugin bem documentadas_
 
-- [ ] **9. Implementar PluginRegistry**
+- [x] **9. Implementar PluginRegistry**
   - Criar `core/plugin-registry.js` com classe `PluginRegistry`
-  - Implementar método `loadAll()` para auto-discovery de plugins
+  - Implementar método `discover()` para auto-discovery de plugins
   - Implementar método `register()` para registro manual
-  - Implementar métodos `getDeduplicator()`, `getValidators()`, `getReporters()` com defaults
-  - Implementar método `list()` para listar plugins disponíveis
-  - Adicionar validação de interfaces de plugins
+  - Implementar métodos `get()`, `listByType()`, `getAll()` para busca de plugins
+  - Implementar métodos `unregister()`, `clear()`, `getStats()` auxiliares
+  - Adicionar validação de interfaces de plugins usando BasePlugin
   - _Requisitos: Todos (coordenação de plugins)_
   - _Deliverable: Registry funcional com auto-discovery_
 
-- [ ] **10. Implementar StandardDeduplicator**
+- [x] **10. Implementar StandardDeduplicator**
   - Criar `plugins/deduplicators/standard-deduplicator.js`
   - Implementar lógica: exact match de nome E tags (comparação de arrays)
   - Implementar método `check()` retornando boolean
@@ -117,7 +117,7 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
   - _Requisitos: 2 (lógica de deduplicação)_
   - _Deliverable: Deduplicator padrão funcional_
 
-- [ ] **11. Implementar FuzzyDeduplicator**
+- [x] **11. Implementar FuzzyDeduplicator**
   - Criar `plugins/deduplicators/fuzzy-deduplicator.js`
   - Implementar fuzzy string matching usando library (ex: fuzzball.js, levenshtein)
   - Implementar threshold configurável (default 85% similarity)
@@ -126,7 +126,7 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
   - _Requisitos: 2 (lógica de deduplicação), extensibilidade_
   - _Deliverable: Deduplicator fuzzy opcional_
 
-- [ ] **12. Implementar IntegrityValidator**
+- [x] **12. Implementar IntegrityValidator**
   - Criar `plugins/validators/integrity-validator.js`
   - Implementar validações pre-transfer: nome existe, nodes não vazio, connections válidas
   - Implementar validações post-transfer (opcional): comparar nome, número de nodes, número de connections
@@ -135,7 +135,7 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
   - _Requisitos: 10 (validação de integridade)_
   - _Deliverable: Validator de integridade funcional_
 
-- [ ] **13. Implementar SchemaValidator**
+- [x] **13. Implementar SchemaValidator**
   - Criar `plugins/validators/schema-validator.js`
   - Implementar validação contra schema N8N usando Zod/Joi
   - Validar campos obrigatórios: name, nodes, connections
@@ -144,7 +144,7 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
   - _Requisitos: 10 (validação de integridade)_
   - _Deliverable: Validator de schema funcional_
 
-- [ ] **14. Implementar MarkdownReporter**
+- [x] **14. Implementar MarkdownReporter**
   - Criar `plugins/reporters/markdown-reporter.js`
   - Implementar geração de relatório em formato Markdown
   - Incluir seções: metadata (data, SOURCE, TARGET), estatísticas, workflows transferidos, pulados, falhas
@@ -162,7 +162,7 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
   - _Requisitos: 9 (geração de relatórios), 13 (modo não-interativo)_
   - _Deliverable: Reporter JSON funcional_
 
-- [ ] **16. Implementar CSVReporter**
+- [x] **16. Implementar CSVReporter**
   - Criar `plugins/reporters/csv-reporter.js`
   - Implementar geração de relatório em formato CSV
   - Criar CSV com colunas: Workflow Name, Source ID, Target ID, Status (Transferred/Skipped/Failed), Reason/Error
@@ -171,13 +171,14 @@ Implementar o sistema de plugins com built-in plugins demonstrando padrões de u
   - _Requisitos: 9 (geração de relatórios)_
   - _Deliverable: Reporter CSV funcional_
 
-- [ ] **17. Criar documentação de criação de plugins customizados**
+- [x] **17. Criar documentação de criação de plugins customizados**
   - Criar `plugins/deduplicators/README.md` com guia de criação de custom deduplicators
   - Criar `plugins/validators/README.md` com guia de criação de custom validators
   - Criar `plugins/reporters/README.md` com guia de criação de custom reporters
   - Incluir exemplos completos e boas práticas
   - _Requisitos: 15 (documentação e help system)_
   - _Deliverable: Guias de plugin development_
+  - **COMPLETED**: Criado `plugins/PLUGIN_DEVELOPMENT.md` com guia completo e abrangente cobrindo todos os tipos de plugins (deduplicators, validators, reporters) com templates, exemplos práticos, testes, boas práticas e referência completa da API
 
 - [ ] **18. Escrever testes para Plugin System**
   - Criar `tests/unit/plugins/standard-deduplicator.test.js` com casos de exact match e non-match

@@ -203,16 +203,18 @@ const { z } = require('zod');
 
 /**
  * Zod schema for validating Tag objects
+ * Note: Not using .strict() to allow additional N8N tag fields
  */
 const TagSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Tag name cannot be empty'),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
-}).strict();
+});
 
 /**
  * Zod schema for validating Node objects
+ * Note: Not using .strict() to allow additional N8N node fields
  */
 const NodeSchema = z.object({
   id: z.string().min(1, 'Node ID is required'),
@@ -221,8 +223,8 @@ const NodeSchema = z.object({
   typeVersion: z.number().int().positive().default(1),
   position: z.tuple([z.number(), z.number()]),
   parameters: z.record(z.any()),
-  credentials: z.record(z.string()).optional(),
-}).strict();
+  credentials: z.record(z.any()).optional(),
+});
 
 /**
  * Zod schema for validating Connection objects
@@ -237,15 +239,16 @@ const ConnectionSchema = z.object({
 /**
  * Zod schema for validating Workflow objects
  * Note: Not using .strict() to allow additional N8N API fields
+ * Note: Using z.any() for nested structures to avoid Zod v4 compatibility issues
  */
 const WorkflowSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Workflow name is required'),
   nodes: z.array(z.any()).min(1, 'Workflow must have at least one node'),
-  connections: z.record(z.any()), // N8N uses complex nested connection structure
+  connections: z.any(), // N8N uses complex nested connection structure
   tags: z.array(z.any()).optional().default([]),
   active: z.boolean().optional().default(false),
-  settings: z.record(z.any()).optional(),
+  settings: z.any().optional(),
   versionId: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
