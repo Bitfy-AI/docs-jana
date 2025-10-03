@@ -73,7 +73,7 @@ Estabelecer a fundação arquitetural com core components, interfaces TypeScript
   - _Requisitos: 6 (tratamento de erros), 3 (melhorias de UX)_
   - _Deliverable: Sistema de error reporting padronizado_
 
-- [ ] **7. Escrever testes unitários para Core Components**
+- [x] **7. Escrever testes unitários para Core Components**
   - Criar `tests/unit/core/config-loader.test.js` com testes de validação e connectivity
   - Criar `tests/unit/core/logger.test.js` com testes de mascaramento e níveis de log
   - Criar `tests/unit/core/http-client.test.js` com mocks de API e testes de retry
