@@ -14,6 +14,13 @@ const { isNonInteractive, getFlag, outputJSON } = require('../utils/non-interact
  * @returns {Promise<void>}
  */
 async function validate() {
+  // Check for help flag
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    const { renderCommandHelp } = require('../utils/help-renderer');
+    console.log(renderCommandHelp('validate'));
+    process.exit(0);
+  }
+
   const nonInteractive = isNonInteractive();
 
   if (nonInteractive) {

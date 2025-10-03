@@ -38,6 +38,13 @@ const ProgressBar = require('../ui/progress-bar');
  * await transfer();
  */
 async function transfer() {
+  // Check for help flag
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    const { renderCommandHelp } = require('../utils/help-renderer');
+    console.log(renderCommandHelp('transfer'));
+    process.exit(0);
+  }
+
   console.log(title(t('prompts.transferWizard.title')));
   console.log('');
 

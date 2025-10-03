@@ -45,6 +45,13 @@ const { isNonInteractive, getFlag, outputJSON } = require('../utils/non-interact
  * await listPlugins();
  */
 async function listPlugins() {
+  // Check for help flag
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    const { renderCommandHelp } = require('../utils/help-renderer');
+    console.log(renderCommandHelp('list-plugins'));
+    process.exit(0);
+  }
+
   const nonInteractive = isNonInteractive();
   const filterType = getFlag('type'); // deduplicator|validator|reporter
 

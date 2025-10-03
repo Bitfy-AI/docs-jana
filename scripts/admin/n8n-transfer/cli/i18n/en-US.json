@@ -1,0 +1,107 @@
+{
+  "errors": {
+    "configNotFound": "Configuration file not found: {{path}}",
+    "invalidConfig": "Invalid configuration: {{message}}",
+    "connectionFailed": "Failed to connect to {{server}}: {{error}}",
+    "transferFailed": "Transfer failed: {{error}}",
+    "validationFailed": "Validation failed: {{error}}",
+    "pluginNotFound": "Plugin not found: {{name}}",
+    "noWorkflows": "No workflows found",
+    "cancelled": "Operation cancelled by user"
+  },
+  "prompts": {
+    "configWizard": {
+      "title": "N8N Transfer System Configuration",
+      "sourceUrl": "SOURCE server URL (origin):",
+      "sourceApiKey": "SOURCE API Key:",
+      "targetUrl": "TARGET server URL (destination):",
+      "targetApiKey": "TARGET API Key:",
+      "testConnection": "Test connectivity now?",
+      "saveConfig": "Save configuration to .env?"
+    },
+    "transferWizard": {
+      "title": "Transfer Wizard - Transfer Workflows",
+      "selectFilters": "Select filters for transfer:",
+      "filterByIds": "Filter by specific IDs?",
+      "filterByNames": "Filter by specific names?",
+      "filterByTags": "Filter by tags (include)?",
+      "filterByExcludeTags": "Filter by tags (exclude)?",
+      "dryRun": "Run in dry-run mode (simulation)?",
+      "parallelism": "Number of parallel transfers (1-10):",
+      "skipCredentials": "Skip workflows with credentials?",
+      "selectDeduplicator": "Select deduplicator:",
+      "selectValidators": "Select validators (multiple):",
+      "selectReporters": "Select reporters (multiple):",
+      "confirm": "Confirm transfer?"
+    },
+    "validateWizard": {
+      "title": "Validation Wizard - Validate Workflows",
+      "selectFilters": "Select filters for validation:",
+      "selectValidators": "Select validators:"
+    }
+  },
+  "messages": {
+    "welcome": "🚀 N8N Transfer System - Welcome!",
+    "configSaved": "✓ Configuration saved successfully to {{path}}",
+    "connectionSuccess": "✓ Connection to {{server}} successful",
+    "transferStarted": "Starting transfer of {{count}} workflow(s)...",
+    "transferComplete": "✓ Transfer complete! {{transferred}} transferred, {{skipped}} skipped, {{failed}} failed",
+    "dryRunComplete": "🔍 Dry-run complete. No changes were made.",
+    "validationComplete": "Validation complete. {{valid}} valid, {{invalid}} invalid",
+    "reportGenerated": "✓ Report generated: {{path}}",
+    "cancelled": "⚠️ Operation cancelled",
+    "noWorkflowsFound": "No workflows found matching specified filters"
+  },
+  "help": {
+    "configure": {
+      "description": "Configure SOURCE and TARGET URLs and API keys",
+      "usage": "npm run configure [options]",
+      "examples": [
+        "npm run configure",
+        "npm run configure --non-interactive"
+      ]
+    },
+    "transfer": {
+      "description": "Transfer workflows from SOURCE to TARGET",
+      "usage": "npm run transfer [options]",
+      "flags": {
+        "dryRun": "Run simulation without transferring",
+        "filters": "Apply filters (tags, names, ids)",
+        "parallelism": "Set concurrency (1-10)"
+      },
+      "examples": [
+        "npm run transfer",
+        "npm run transfer --dry-run",
+        "npm run transfer --filters.tags=production"
+      ]
+    },
+    "validate": {
+      "description": "Validate workflows without transferring",
+      "usage": "npm run validate [options]",
+      "examples": [
+        "npm run validate",
+        "npm run validate --filters.tags=production"
+      ]
+    },
+    "listPlugins": {
+      "description": "List available plugins",
+      "usage": "npm run list-plugins [options]",
+      "flags": {
+        "type": "Filter by type (deduplicator|validator|reporter)"
+      },
+      "examples": [
+        "npm run list-plugins",
+        "npm run list-plugins --type=validator"
+      ]
+    }
+  },
+  "plugins": {
+    "types": {
+      "deduplicator": "Deduplicator",
+      "validator": "Validator",
+      "reporter": "Reporter"
+    },
+    "builtIn": "Built-in",
+    "custom": "Custom"
+  }
+}

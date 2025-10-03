@@ -34,8 +34,38 @@ function outputJSON(data) {
   console.log(JSON.stringify(data, null, 2));
 }
 
+/**
+ * Exit codes para CLI
+ */
+const EXIT_CODES = {
+  SUCCESS: 0,
+  PARTIAL_FAILURE: 1,
+  TOTAL_FAILURE: 2
+};
+
+/**
+ * Determina exit code baseado no resultado da transferência
+ * @param {Object} result - Resultado da transferência
+ * @param {number} result.transferred - Número de workflows transferidos com sucesso
+ * @param {number} result.failed - Número de workflows que falharam
+ * @returns {number} Exit code apropriado
+ */
+function getExitCode(result) {
+  if (result.failed === 0) {
+    return EXIT_CODES.SUCCESS;
+  }
+
+  if (result.transferred > 0 && result.failed > 0) {
+    return EXIT_CODES.PARTIAL_FAILURE;
+  }
+
+  return EXIT_CODES.TOTAL_FAILURE;
+}
+
 module.exports = {
   isNonInteractive,
   getFlag,
-  outputJSON
+  outputJSON,
+  EXIT_CODES,
+  getExitCode
 };

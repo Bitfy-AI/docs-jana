@@ -303,7 +303,7 @@ Criar CLI interativa com wizards guiados, UX de primeira classe em PT-BR, e feed
 
 ---
 
-- [ ] **30. Criar sistema de internacionalização (i18n)**
+- [x] **30. Criar sistema de internacionalização (i18n)**
   - Criar `cli/i18n/pt-BR.json` com todas as strings em português (textos gramaticalmente corretos)
   - Criar `cli/i18n/en-US.json` com todas as strings em inglês
   - Criar `cli/i18n/index.js` com função de carregamento de idioma baseado em env var `LANGUAGE` ou default pt-BR

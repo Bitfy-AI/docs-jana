@@ -32,6 +32,13 @@ const HttpClient = require('../../core/http-client');
  * 3. Confirmar e salvar em .env
  */
 async function configure() {
+  // Check for help flag
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    const { renderCommandHelp } = require('../utils/help-renderer');
+    console.log(renderCommandHelp('configure'));
+    process.exit(0);
+  }
+
   console.log(title(t('prompts.configWizard.title')));
   console.log('');
 
