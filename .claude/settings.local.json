@@ -11,7 +11,8 @@
       "Bash(dd:*)",
       "Bash(tee:*)",
       "Bash(apt:*)",
-      "Bash(apt install:*)"
+      "Bash(apt install:*)",
+      "Bash(node cli.js --help)"
     ],
     "deny": [],
     "ask": []
