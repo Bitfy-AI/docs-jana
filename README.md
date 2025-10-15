@@ -679,20 +679,60 @@ The project follows a **three-layer architecture** that separates concerns and i
 
 ## 📚 Documentation
 
-Comprehensive documentation for all aspects of the project.
+Comprehensive documentation for all aspects of the project, organized for easy navigation.
 
-### Documentation Hub
-- **[Documentation Index](docs/README.md)** - Central documentation hub with links to all docs
+### 📖 Documentation Hub
+- **[📚 Complete Documentation Index](docs/README.md)** - Central hub with links to all documentation
 
-### Key Documentation
-- **[Technical Documentation](docs/technical/)** - Implementation guides and technical reports
-- **[CLI Learning Guide](LEARNING-CLI.md)** - How the CLI works internally
+### 🎯 Quick Access by Role
+
+#### For Users
+- **[🚀 How to Use the CLI](docs/guides/como-usar-cli.md)** - Complete usage guide
+- **[📖 Getting Started](docs/guides/MIGRATION.md)** - Migration and setup guide
+
+#### For Developers
+- **[🏗️ System Architecture](docs/architecture/ARCHITECTURE.md)** - Complete system design
+- **[🎨 Visual Components](docs/components/VISUAL-COMPONENTS.md)** - UI component system
+- **[⚖️ Architecture Decisions (ADRs)](docs/decisions/README.md)** - Key architectural decisions
+
+#### For Project Management
+- **[📊 Project Summary](docs/project/PROJECT_SUMMARY.md)** - Executive overview
+- **[✅ Completion Report](docs/reports/completion/PROJECT_COMPLETION_REPORT.md)** - Final delivery
+- **[🧪 QA Reports](docs/reports/qa/)** - Quality assurance reports
+- **[📝 Implementation Reports](docs/reports/implementation/)** - Technical implementation details
+
+### 📂 Documentation Structure
+
+```
+docs/
+├── README.md                    # Documentation index
+├── architecture/                # System architecture
+│   └── ARCHITECTURE.md
+├── components/                  # Component documentation
+│   └── VISUAL-COMPONENTS.md
+├── guides/                      # User and developer guides
+│   ├── como-usar-cli.md
+│   ├── MIGRATION.md
+│   └── MIGRATION-GUIDE.md
+├── decisions/                   # Architecture Decision Records (ADRs)
+│   ├── README.md
+│   └── TEMPLATE.md
+├── project/                     # Project management docs
+│   └── PROJECT_SUMMARY.md
+├── reports/                     # Technical reports
+│   ├── qa/
+│   ├── testing/
+│   ├── implementation/
+│   └── completion/
+└── archive/                     # Deprecated documentation
+```
+
+### 🔍 Additional Resources
+
 - **[Scripts Documentation](scripts/README.md)** - Utility scripts guide
-- **[Examples](examples/)** - CLI examples and templates
-
-### Specs & Architecture
-- **[KFC Specs](.claude/specs/)** - Feature specifications
-- **[CLI Architecture Refactor](.claude/specs/cli-architecture-refactor/)** - Current refactoring spec
+- **[Test Documentation](__tests__/README.md)** - Testing strategy and results
+- **[KFC Specs](.claude/specs/)** - Feature specifications (internal)
+- **[CHANGELOG](CHANGELOG.md)** - Version history
 
 ---
 

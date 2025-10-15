@@ -61,7 +61,7 @@ technical_terms_keep_english:
   - JavaScript
   - React
   - Next.js
-  - Payload CMS
+
 
 # Mapeamento de comandos
 command_mapping:
@@ -92,7 +92,7 @@ system_messages:
 
 # Configurações de documentação
 documentation:
-  auto_translate: false # Não traduzir automaticamente código e documentação técnica
+  auto_translate: true # Não traduzir automaticamente código e documentação técnica
   preserve_code_comments: true # Preservar comentários em código em inglês
   stories_path: 'docs/stories/README.md'
   primary_language: pt-BR
