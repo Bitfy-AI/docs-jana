@@ -104,11 +104,150 @@ function findCommand(input) {
  * Print help message
  */
 function printHelp() {
+  try {
+    // Try to use enhanced visual components
+    const { TerminalDetector, BorderRenderer } = require('./src/ui/menu/visual');
+    const visualConstants = require('./src/ui/menu/config/visual-constants');
+    const ThemeEngine = require('./src/ui/menu/utils/ThemeEngine');
+    const defaultTheme = require('./src/ui/menu/themes/default');
+
+    // Initialize visual components
+    const detector = new TerminalDetector();
+    const capabilities = detector.detect();
+    const themeEngine = new ThemeEngine(defaultTheme);
+    const borderRenderer = new BorderRenderer(detector, visualConstants, themeEngine);
+
+    // Detect if non-interactive mode (CI, piped output)
+    const isNonInteractive = !capabilities.isInteractive || process.env.CI === 'true';
+
+    if (isNonInteractive) {
+      // Fallback to plain text help
+      printHelpPlain();
+      return;
+    }
+
+    // Use BorderRenderer for modern visual help
+    const width = Math.min(capabilities.width, 90); // Max 90 columns for readability
+
+    // Header with borders
+    console.log('\n');
+    console.log(borderRenderer.renderBox([
+      `📚 Docs-Jana CLI v${CLI_VERSION}`,
+      'Unified tool for documentation and workflow management'
+    ], {
+      style: 'double',
+      padding: 1,
+      align: 'center',
+      color: 'primary'
+    }));
+
+    console.log('');
+
+    // Usage section
+    console.log(themeEngine.applyTheme('USAGE:', 'highlight'));
+    console.log(`  ${CLI_NAME} <command> [options]`);
+    console.log('');
+
+    // Commands section with separator
+    console.log(borderRenderer.renderSeparator(width, 'single'));
+    console.log('');
+    console.log(themeEngine.applyTheme('COMMANDS:', 'highlight'));
+    console.log('');
+
+    console.log(themeEngine.applyTheme('  N8N Workflows:', 'info'));
+    console.log(`    ${themeEngine.applyTheme('n8n:download', 'primary')}          Download workflows from N8N instance`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} n8n:backup, download:n8n`);
+    console.log('');
+    console.log(`    ${themeEngine.applyTheme('n8n:upload', 'primary')}            Upload workflows to N8N with preserved IDs`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} upload:n8n, n8n:restore`);
+    console.log('');
+
+    console.log(themeEngine.applyTheme('  Outline Documentation:', 'info'));
+    console.log(`    ${themeEngine.applyTheme('outline:download', 'primary')}      Download documentation from Outline`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} download:outline`);
+    console.log('');
+
+    console.log(themeEngine.applyTheme('  Utility:', 'info'));
+    console.log(`    ${themeEngine.applyTheme('help', 'primary')}                  Show this help message`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} -h, --help`);
+    console.log('');
+    console.log(`    ${themeEngine.applyTheme('version', 'primary')}               Show version information`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} -v, --version`);
+    console.log('');
+
+    // Examples section with separator
+    console.log(borderRenderer.renderSeparator(width, 'single'));
+    console.log('');
+    console.log(themeEngine.applyTheme('EXAMPLES:', 'highlight'));
+    console.log('');
+
+    console.log(`  ${themeEngine.applyTheme('# Download N8N workflows with filtering', 'muted')}`);
+    console.log(`  ${CLI_NAME} n8n:download --tag production --output ./workflows`);
+    console.log('');
+    console.log(`  ${themeEngine.applyTheme('# Upload N8N workflows with preserved IDs', 'muted')}`);
+    console.log(`  ${CLI_NAME} n8n:upload --input ./n8n-workflows-2025-10-01T13-27-51`);
+    console.log('');
+    console.log(`  ${themeEngine.applyTheme('# Test upload without making changes', 'muted')}`);
+    console.log(`  ${CLI_NAME} n8n:upload --input ./workflows --dry-run`);
+    console.log('');
+    console.log(`  ${themeEngine.applyTheme('# Download Outline documentation', 'muted')}`);
+    console.log(`  ${CLI_NAME} outline:download --output ./docs`);
+    console.log('');
+
+    // Global options section with separator
+    console.log(borderRenderer.renderSeparator(width, 'single'));
+    console.log('');
+    console.log(themeEngine.applyTheme('GLOBAL OPTIONS:', 'highlight'));
+    console.log(`  ${themeEngine.applyTheme('--help, -h', 'primary')}            Show command-specific help`);
+    console.log(`  ${themeEngine.applyTheme('--verbose, -v', 'primary')}         Enable verbose logging`);
+    console.log(`  ${themeEngine.applyTheme('--config <file>', 'primary')}       Use specific config file`);
+    console.log(`  ${themeEngine.applyTheme('--interactive, -i', 'primary')}     Force interactive menu mode`);
+    console.log(`  ${themeEngine.applyTheme('--no-interactive', 'primary')}      Disable interactive menu`);
+    console.log('');
+
+    // Configuration section with box
+    console.log(borderRenderer.renderBox([
+      'CONFIGURATION:',
+      'Create a .env file in the project root:',
+      '',
+      '  # N8N Configuration',
+      '  N8N_URL=https://n8n.example.com',
+      '  N8N_API_KEY=your-api-key',
+      '',
+      '  # Outline Configuration',
+      '  OUTLINE_URL=https://outline.example.com',
+      '  OUTLINE_API_TOKEN=your-api-token'
+    ], {
+      style: 'single',
+      padding: 1,
+      align: 'left',
+      color: 'muted'
+    }));
+
+    console.log('');
+
+    // Footer
+    console.log(themeEngine.applyTheme('MORE INFO:', 'highlight'));
+    console.log(`  Documentation: ${themeEngine.applyTheme('https://github.com/jana-team/docs-jana', 'info')}`);
+    console.log(`  Issues: ${themeEngine.applyTheme('https://github.com/jana-team/docs-jana/issues', 'info')}`);
+    console.log('');
+
+  } catch (error) {
+    // Fallback to plain text if visual components fail
+    if (process.env.DEBUG) {
+      console.error(`Visual help failed: ${error.message}, falling back to plain text`);
+    }
+    printHelpPlain();
+  }
+}
+
+/**
+ * Print plain text help (fallback for non-interactive mode or errors)
+ */
+function printHelpPlain() {
   console.log(`
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                        📚 Docs-Jana CLI v${CLI_VERSION}                        ║
-║           Unified tool for documentation and workflow management          ║
-╚═══════════════════════════════════════════════════════════════════════════╝
+Docs-Jana CLI v${CLI_VERSION}
+Unified tool for documentation and workflow management
 
 USAGE:
   ${CLI_NAME} <command> [options]
@@ -215,13 +354,15 @@ function printError(message, exitCode = 1) {
  * @returns {boolean}
  */
 function shouldUseEnhancedMenu() {
-  // Feature flag check
-  const useEnhanced = process.env.USE_ENHANCED_MENU !== 'false'; // default true
+  // Feature flag check - allow explicit disable only
+  if (process.env.USE_ENHANCED_MENU === 'false') {
+    return false;
+  }
 
-  // Check if terminal is interactive
-  const isInteractive = process.stdin.isTTY && process.stdout.isTTY;
-
-  return useEnhanced && isInteractive;
+  // Default to TRUE (use enhanced menu)
+  // Git Bash on Windows often has undefined process.stdin.isTTY
+  // so we default to true and let showEnhancedMenu() handle errors
+  return true;
 }
 
 /**
