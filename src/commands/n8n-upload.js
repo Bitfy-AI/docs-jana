@@ -723,6 +723,155 @@ NOTES:
   }
 
   /**
+   * Compara workflows locais com workflows no N8N target
+   * Mostra quais workflows serão criados, atualizados ou são idênticos
+   *
+   * @param {Array} localWorkflows - Workflows locais a comparar
+   * @returns {Promise<Object>} Resultado da comparação
+   */
+  async compareWorkflowsWithTarget(localWorkflows) {
+    this.logger.info('\n🔍 Comparando workflows locais com N8N target...\n');
+
+    try {
+      // Busca workflows do target N8N
+      const targetWorkflows = await this.workflowService.listWorkflows();
+
+      // Cria mapa de workflows target por nome (para encontrar versões)
+      const targetMap = new Map();
+      targetWorkflows.forEach(wf => {
+        targetMap.set(wf.name, wf);
+      });
+
+      const comparison = {
+        new: [],
+        updated: [],
+        identical: [],
+        versionChanges: []
+      };
+
+      for (const localWf of localWorkflows) {
+        const targetWf = targetMap.get(localWf.name);
+
+        if (!targetWf) {
+          // Workflow novo
+          comparison.new.push({
+            name: localWf.name,
+            localId: localWf.id,
+            version: this.extractVersion(localWf.id)
+          });
+        } else {
+          // Workflow existe no target
+          const localVersion = this.extractVersion(localWf.id);
+          const targetVersion = this.extractVersion(targetWf.id);
+
+          if (localWf.id === targetWf.id) {
+            // IDs idênticos - provavelmente sem mudanças
+            comparison.identical.push({
+              name: localWf.name,
+              id: localWf.id,
+              version: localVersion
+            });
+          } else {
+            // IDs diferentes - workflow foi atualizado
+            comparison.updated.push({
+              name: localWf.name,
+              localId: localWf.id,
+              targetId: targetWf.id,
+              localVersion,
+              targetVersion
+            });
+
+            if (localVersion && targetVersion && localVersion !== targetVersion) {
+              comparison.versionChanges.push({
+                name: localWf.name,
+                from: targetVersion,
+                to: localVersion
+              });
+            }
+          }
+        }
+      }
+
+      // Exibe resultado da comparação
+      this.logger.info('📊 Resultado da Comparação:\n');
+
+      if (comparison.new.length > 0) {
+        this.logger.info(`✨ Novos workflows (${comparison.new.length}):`);
+        comparison.new.forEach(wf => {
+          const versionInfo = wf.version ? ` (${wf.version})` : '';
+          this.logger.info(`   + ${wf.name}${versionInfo}`);
+        });
+        this.logger.info('');
+      }
+
+      if (comparison.updated.length > 0) {
+        this.logger.warn(`🔄 Workflows com mudanças (${comparison.updated.length}):`);
+        comparison.updated.forEach(wf => {
+          const localVer = wf.localVersion || wf.localId;
+          const targetVer = wf.targetVersion || wf.targetId;
+          this.logger.warn(`   ~ ${wf.name}`);
+          this.logger.warn(`     Target: ${targetVer}`);
+          this.logger.warn(`     Local:  ${localVer}`);
+        });
+        this.logger.info('');
+      }
+
+      if (comparison.identical.length > 0) {
+        this.logger.success(`✓ Workflows idênticos (${comparison.identical.length}):`);
+        comparison.identical.slice(0, 5).forEach(wf => {
+          const versionInfo = wf.version ? ` (${wf.version})` : '';
+          this.logger.success(`   = ${wf.name}${versionInfo}`);
+        });
+        if (comparison.identical.length > 5) {
+          this.logger.success(`   ... e mais ${comparison.identical.length - 5} workflows`);
+        }
+        this.logger.info('');
+      }
+
+      if (comparison.versionChanges.length > 0) {
+        this.logger.info(`📌 Mudanças de versão detectadas (${comparison.versionChanges.length}):`);
+        comparison.versionChanges.forEach(change => {
+          this.logger.info(`   ${change.name}: ${change.from} → ${change.to}`);
+        });
+        this.logger.info('');
+      }
+
+      return comparison;
+    } catch (error) {
+      throw new Error(`Failed to compare workflows: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extrai versão do ID do workflow
+   * Suporta padrões como: (AAA-AAA-001), (v1), (v2.0), etc.
+   *
+   * @param {string} workflowId - ID do workflow
+   * @returns {string|null} Versão extraída ou null
+   */
+  extractVersion(workflowId) {
+    if (!workflowId || typeof workflowId !== 'string') {
+      return null;
+    }
+
+    // Procura por padrões de versão em parênteses
+    // Ex: (AAA-AAA-001), (v1), (v2.0), (version-123)
+    const versionMatch = workflowId.match(/\(([^)]+)\)/);
+    if (versionMatch) {
+      return versionMatch[1];
+    }
+
+    // Procura por padrões de versão sem parênteses no final
+    // Ex: workflow-v1, workflow-v2.0, workflow-001
+    const suffixMatch = workflowId.match(/[-_](v?\d+(?:\.\d+)*|[A-Z]{3}-[A-Z]{3}-\d{3})$/i);
+    if (suffixMatch) {
+      return suffixMatch[1];
+    }
+
+    return null;
+  }
+
+  /**
    * Run the upload
    */
   async run() {
@@ -757,9 +906,17 @@ NOTES:
       return;
     }
 
-    // Dry-run mode: validate only
+    // Dry-run mode: validate and compare
     if (this.config.dryRun) {
       this.validateWorkflows(workflows);
+
+      // Compare workflows with target N8N
+      try {
+        await this.compareWorkflowsWithTarget(workflows);
+      } catch (error) {
+        this.logger.warn(`⚠️  Could not compare with target: ${error.message}`);
+      }
+
       this.logger.info('\n✅ Dry-run complete. Use without --dry-run to upload.');
       return;
     }

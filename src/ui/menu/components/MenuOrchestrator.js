@@ -82,7 +82,9 @@ class MenuOrchestrator {
    * @param {Object} [options.config] - Configuração customizada (sobrescreve preferências do usuário)
    */
   constructor(options = {}) {
-    this.menuOptions = options.menuOptions || getAllOptions();
+    // Detect environment and filter options accordingly
+    const environment = this.detectEnvironment();
+    this.menuOptions = options.menuOptions || getAllOptions(environment);
     this.customConfig = options.config || {};
 
     // Componentes (inicializados em initialize())
@@ -845,6 +847,38 @@ class MenuOrchestrator {
    */
   isActive() {
     return this.isRunning;
+  }
+
+  /**
+   * Detecta ambiente atual (prod/dev)
+   * Verifica variáveis de ambiente na seguinte ordem de precedência:
+   * 1. JANA_ENV (específico da aplicação)
+   * 2. NODE_ENV (padrão Node.js)
+   * 3. APP_ENV (alternativa)
+   *
+   * @returns {string} 'prod' ou 'dev' (padrão: 'dev')
+   * @private
+   */
+  detectEnvironment() {
+    const janaEnv = (process.env.JANA_ENV || '').toLowerCase();
+    const nodeEnv = (process.env.NODE_ENV || '').toLowerCase();
+    const appEnv = (process.env.APP_ENV || '').toLowerCase();
+
+    // Check in order of precedence
+    if (janaEnv === 'production' || janaEnv === 'prod') {
+      return 'prod';
+    }
+
+    if (nodeEnv === 'production' || nodeEnv === 'prod') {
+      return 'prod';
+    }
+
+    if (appEnv === 'production' || appEnv === 'prod') {
+      return 'prod';
+    }
+
+    // Default to development
+    return 'dev';
   }
 }
 

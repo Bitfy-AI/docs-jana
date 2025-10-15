@@ -1,69 +1,69 @@
-# Comando: /executar-testes
+# Command: /execute-tests
 
-## Descrição
+## Description
 
-Executa testes de uma feature usando agente testador, garantindo qualidade e conformidade com requisitos.
+Executa testes de uma feature usando spec-test agent, garantindo qualidade e conformidade com requirements.
 
-## Uso
+## Usage
 
 ```
-/executar-testes [nome-feature] [escopo-teste]
+/execute-tests [feature-name] [test-scope]
 ```
 
-## Parâmetros
+## Parameters
 
-- `nome-feature` (opcional): Nome da feature (kebab-case). Se não fornecido, testa última feature
-- `escopo-teste` (opcional): Escopo dos testes
+- `feature-name` (opcional): Nome da feature (kebab-case). Se não fornecido, testa última feature
+- `test-scope` (opcional): Escopo dos testes
   - `all` (padrão): Todos os testes (unit + integration + e2e)
   - `unit`: Apenas testes unitários
   - `integration`: Apenas testes de integração
   - `e2e`: Apenas testes end-to-end
   - `coverage`: Análise de cobertura detalhada
 
-## O Que Faz
+## What It Does
 
-1. Lê requisitos e design da feature
+1. Lê requirements e design da feature
 2. Identifica código implementado
-3. Chama agente testador para criar/executar testes
+3. Chama agente testador-specs para criar/executar testes
 4. Verifica cobertura de testes
-5. Valida conformidade com requisitos
+5. Valida conformidade com requirements
 6. Gera relatório de testes
 
-## Estratégia de Testes
+## Test Strategy
 
 - **Unit Tests**: Testa componentes isolados
 - **Integration Tests**: Testa integração entre componentes
 - **E2E Tests**: Testa fluxos completos de usuário
 - **Coverage Target**: 80%+ line coverage
 
-## Exemplos
+## Examples
 
 ```bash
 # Executar todos os testes
-/executar-testes export-markdown
+/execute-tests export-markdown
 
 # Apenas testes unitários
-/executar-testes export-markdown unit
+/execute-tests export-markdown unit
 
 # Análise de cobertura
-/executar-testes export-markdown coverage
+/execute-tests export-markdown coverage
 
 # Executar testes de todas features
-/executar-testes all
+/execute-tests all
 ```
 
-## Fluxo Esperado
+## Expected Flow
 
 ```
-User: /executar-testes export-markdown
+User: /execute-tests export-markdown
 Assistant: Executando testes para 'export-markdown'...
 
 📋 Contexto:
 - Feature: export-markdown
-- Requisitos: 12 (8 funcionais, 4 não-funcionais)
+- Requirements: 12 (8 functional, 4 non-functional)
 - Implementação: 100% completa
 
-🔍 Chamando agente testador...
+🔍 Chamando agente testador-specs...
 
 [Agente cria e executa testes]
 
@@ -222,9 +222,9 @@ Para passar nos quality gates:
 - Triggera code-review após testes passarem
 - Atualiza status em tasks.md
 
-## Comandos Relacionados
+## Related Commands
 
 - `/revisar-implementacao` - Próximo passo após testes
 - `/executar-tarefas` - Implementa código testado
-- `/validar-especificacao` - Valida conformidade
+- `/validar-spec` - Valida conformidade
 - `/analisar-riscos` - Analisa riscos se testes falharem

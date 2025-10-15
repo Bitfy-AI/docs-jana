@@ -132,7 +132,7 @@ function printHelp() {
     // Header with borders
     console.log('\n');
     console.log(borderRenderer.renderBox([
-      `📚 Docs-Jana CLI v${CLI_VERSION}`,
+      `JANA WORKFLOWS v${CLI_VERSION}`,
       'Unified tool for documentation and workflow management'
     ], {
       style: 'double',
@@ -342,7 +342,7 @@ License: MIT
  * @param {number} exitCode - Exit code (default: 1)
  */
 function printError(message, exitCode = 1) {
-  console.error(`\n❌ Error: ${message}\n`);
+  console.error(`\n[ERROR] ${message}\n`);
   console.error(`Run '${CLI_NAME} help' for usage information.\n`);
   process.exit(exitCode);
 }
@@ -378,7 +378,7 @@ async function showEnhancedMenu() {
 
     // Handle result
     if (result.action === 'exit' || result.action === 'cancelled') {
-      console.log('\n👋 Até logo!\n');
+      console.log('\nAté logo!\n');
       process.exit(0);
     }
 
@@ -396,7 +396,7 @@ async function showEnhancedMenu() {
 
   } catch (error) {
     // If enhanced menu fails, fall back to legacy menu
-    console.error(`\n⚠️  Enhanced menu failed: ${error.message}`);
+    console.error(`\n[AVISO] Enhanced menu failed: ${error.message}`);
     console.error('Falling back to legacy menu...\n');
     return showLegacyMenu();
   }
@@ -407,23 +407,45 @@ async function showEnhancedMenu() {
  */
 async function showLegacyMenu() {
   const readline = require('readline');
+  const fs = require('fs');
+  const path = require('path');
+
+  // Detecta ambiente
+  const isProduction = (process.env.NODE_ENV || process.env.JANA_ENV || '').toLowerCase() === 'production';
+
+  // Lê N8N configurado atual do .env
+  let currentN8n = 'Nenhum configurado';
+  try {
+    const envPath = path.join(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8');
+      const urlMatch = envContent.match(/TARGET_N8N_URL=(.+)/);
+      if (urlMatch) {
+        currentN8n = urlMatch[1].trim();
+      }
+    }
+  } catch (error) {
+    // Ignora erros ao ler .env
+  }
 
   const menuOptions = [
-    { key: '1', command: 'n8n:download', label: 'Download workflows from N8N' },
-    { key: '2', command: 'n8n:upload', label: 'Upload workflows to N8N' },
-    { key: '3', command: 'outline:download', label: 'Download documentation from Outline' },
-    { key: '4', command: 'version', label: 'Show version information' },
-    { key: '5', command: 'help', label: 'Show help (all commands)' },
-    { key: '0', command: 'exit', label: 'Exit' }
-  ];
+    { key: '1', command: 'n8n:configure-target', label: `Configurar N8N Destino (atual: ${currentN8n})` },
+    { key: '2', command: 'n8n:download', label: 'Baixar Workflows do N8N Source (salva em: n8n/workflows/)', visible: !isProduction },
+    { key: '3', command: 'n8n:compare', label: 'Comparar Workflows (Local vs N8N Target)' },
+    { key: '4', command: 'n8n:dry-run', label: 'Simular Envio (Dry Run - não modifica nada)' },
+    { key: '5', command: 'n8n:upload', label: 'Enviar Workflows para N8N (ATENÇÃO: modifica workflows!)' },
+    { key: '6', command: 'outline:download', label: 'Baixar Documentação do Outline', visible: !isProduction },
+    { key: '7', command: 'history', label: 'Ver Histórico' },
+    { key: '0', command: 'exit', label: 'Sair' }
+  ].filter(opt => opt.visible !== false);
 
   console.log(`
 ╔═══════════════════════════════════════════════════════════════════════════╗
-║                        📚 Docs-Jana CLI v${CLI_VERSION}                        ║
+║                        JANA WORKFLOWS v${CLI_VERSION}                         ║
 ║           Unified tool for documentation and workflow management          ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
-📋 MENU PRINCIPAL - Selecione uma opção:
+MENU PRINCIPAL - Selecione uma opção:
 `);
 
   menuOptions.forEach(option => {
@@ -444,13 +466,13 @@ async function showLegacyMenu() {
       const selected = menuOptions.find(opt => opt.key === answer.trim());
 
       if (!selected) {
-        console.log('\n❌ Opção inválida! Tente novamente.\n');
+        console.log('\n[ERRO] Opção inválida! Tente novamente.\n');
         resolve(null);
         return;
       }
 
       if (selected.command === 'exit') {
-        console.log('\n👋 Até logo!\n');
+        console.log('\nAté logo!\n');
         process.exit(0);
       }
 
@@ -548,7 +570,7 @@ async function main() {
     // Execute selected command via orchestration layer
     const { executeCommand } = require('./index');
 
-    console.log(`\n🚀 Executing: ${selectedCommand}\n`);
+    console.log(`\n[EXECUTANDO] ${selectedCommand}\n`);
 
     const result = await executeCommand({
       command: selectedCommand,
@@ -558,10 +580,10 @@ async function main() {
     });
 
     if (result.success) {
-      console.log(`\n✅ ${result.message}\n`);
+      console.log(`\n[SUCESSO] ${result.message}\n`);
       process.exit(0);
     } else {
-      console.error(`\n❌ ${result.message}\n`);
+      console.error(`\n[ERRO] ${result.message}\n`);
       if (result.error && process.env.DEBUG) {
         console.error('Error details:', result.error);
       }
@@ -595,15 +617,15 @@ async function main() {
   const context = parseArguments(process.argv);
   context.command = commandName; // Override with canonical command name
 
-  console.log(`\n🚀 Executing: ${commandName}\n`);
+  console.log(`\n[EXECUTANDO] ${commandName}\n`);
 
   const result = await executeCommand(context);
 
   if (result.success) {
-    console.log(`\n✅ ${result.message}\n`);
+    console.log(`\n[SUCESSO] ${result.message}\n`);
     process.exit(0);
   } else {
-    console.error(`\n❌ ${result.message}\n`);
+    console.error(`\n[ERRO] ${result.message}\n`);
     if (result.error && (process.env.DEBUG || context.flags.verbose)) {
       console.error('Error details:', result.error);
     }
@@ -630,7 +652,7 @@ function gracefulShutdown(reason, exitCode = 1) {
 
   isShuttingDown = true;
 
-  console.error(`\n❌ ${reason}`);
+  console.error(`\n[ERRO] ${reason}`);
 
   // FIX: Give 100ms for cleanup (flush logs, close connections, etc.)
   setTimeout(() => {

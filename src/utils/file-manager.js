@@ -155,6 +155,34 @@ class FileManager {
   }
 
   /**
+   * Converte nome técnico em nome amigável
+   * Remove underscores e hífens, capitaliza palavras
+   *
+   * @param {string} technicalName - Nome técnico com _ ou -
+   * @returns {string} Nome amigável e legível
+   *
+   * @example
+   * makeFriendlyName('my_workflow_name') // => 'My Workflow Name'
+   * makeFriendlyName('test-workflow-123') // => 'Test Workflow 123'
+   * makeFriendlyName('API_Integration_v2') // => 'API Integration V2'
+   */
+  makeFriendlyName(technicalName) {
+    if (!technicalName || typeof technicalName !== 'string') {
+      return 'Untitled';
+    }
+
+    return technicalName
+      // Substitui underscores e hífens por espaços
+      .replace(/[_-]+/g, ' ')
+      // Capitaliza primeira letra de cada palavra
+      .replace(/\b\w/g, char => char.toUpperCase())
+      // Remove espaços múltiplos
+      .replace(/\s+/g, ' ')
+      // Trim
+      .trim();
+  }
+
+  /**
    * Save workflow to JSON file
    * @param {string} directory - Target directory
    * @param {object} workflow - Workflow data
@@ -166,8 +194,12 @@ class FileManager {
     const id = workflow.id || workflowData.id;
     const name = workflow.name || workflowData.name;
 
-    const safeName = this.sanitizeFilename(name || `workflow-${id}`);
-    const filename = `${safeName}-${id}.json`;
+    // Cria nome amigável COM ESPAÇOS (sem _ ou -)
+    const friendlyName = this.makeFriendlyName(name || `workflow-${id}`);
+    // NÃO sanitiza demais - apenas remove caracteres realmente inválidos
+    // Mantém ESPAÇOS para nome legível
+    const safeName = friendlyName.replace(/[<>:"/\\|?*\x00-\x1F]/g, '').trim();
+    const filename = `${safeName} (${id}).json`;
     const filePath = path.join(directory, filename);
 
     try {

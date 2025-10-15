@@ -12,6 +12,8 @@ const FileManager = require('../utils/file-manager');
 const ConfigManager = require('../utils/config-manager');
 const AuthFactory = require('../auth/auth-factory');
 const WorkflowService = require('../services/workflow-service');
+const fs = require('fs');
+const path = require('path');
 
 class N8nDownloadCommand {
   /**
@@ -221,9 +223,18 @@ EXAMPLES:
       return;
     }
 
-    // Create output directory
-    const outputDir = this.config.outputDir || this.fileManager.createBackupDirectory(process.cwd(), 'n8n-workflows');
-    this.logger.info(`📁 Output directory: ${outputDir}`);
+    // Create output directory - SEMPRE usa n8n/workflows/ (pasta fixa, substitui anterior)
+    const outputDir = this.config.outputDir || path.join(process.cwd(), 'n8n', 'workflows');
+
+    // Remove pasta anterior se existir (para substituir)
+    if (fs.existsSync(outputDir)) {
+      this.logger.info(`Removendo pasta anterior: ${outputDir}`);
+      fs.rmSync(outputDir, { recursive: true, force: true });
+    }
+
+    // Cria pasta nova
+    fs.mkdirSync(outputDir, { recursive: true });
+    this.logger.info(`Salvando workflows em: ${outputDir}`);
 
     // Download workflows with progress
     for (let i = 0; i < filteredWorkflows.length; i++) {

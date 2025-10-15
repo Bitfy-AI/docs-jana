@@ -68,9 +68,11 @@ class CommandHistory {
    * @param {number} record.exitCode - Código de saída
    * @param {number} [record.duration] - Duração em ms
    * @param {string} [record.error] - Mensagem de erro
+   * @param {string} [record.errorStack] - Stack trace do erro
+   * @param {string} [record.errorCode] - Código de erro específico
    * @returns {ExecutionRecord} Registro adicionado com timestamp
    */
-  add({ commandName, exitCode, duration = 0, error }) {
+  add({ commandName, exitCode, duration = 0, error, errorStack, errorCode }) {
     // Validação de entrada
     if (!commandName || typeof commandName !== 'string') {
       throw new Error('commandName is required and must be a string');
@@ -89,9 +91,34 @@ class CommandHistory {
       exitCode,
     };
 
-    // Adicionar mensagem de erro se houver
-    if (error && typeof error === 'string') {
-      record.error = error;
+    // Adicionar informações de erro detalhadas se houver falha
+    if (exitCode !== 0) {
+      if (error) {
+        // Suportar tanto string quanto objeto Error
+        if (typeof error === 'string') {
+          record.error = error;
+        } else if (error instanceof Error) {
+          record.error = error.message;
+          if (!errorStack && error.stack) {
+            record.errorStack = error.stack;
+          }
+        } else if (error && typeof error === 'object') {
+          record.error = error.message || JSON.stringify(error);
+        }
+      }
+
+      if (errorStack && typeof errorStack === 'string') {
+        record.errorStack = errorStack;
+      }
+
+      if (errorCode && typeof errorCode === 'string') {
+        record.errorCode = errorCode;
+      }
+
+      // Adicionar contexto adicional do erro se não houver mensagem
+      if (!record.error) {
+        record.error = `Command failed with exit code ${exitCode}`;
+      }
     }
 
     // Adicionar ao início da lista (mais recente primeiro)

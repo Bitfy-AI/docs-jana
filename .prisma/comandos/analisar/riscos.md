@@ -1,19 +1,19 @@
-# Comando: /analisar-riscos
+# Command: /analyze-risks
 
-## Descrição
+## Description
 
-Executa análise profunda de riscos técnicos, arquiteturais e de negócio usando agente avaliador de riscos.
+Executa análise profunda de riscos técnicos, arquiteturais e de negócio usando avaliador-riscos agent.
 
-## Uso
+## Usage
 
 ```
-/analisar-riscos [nome-feature] [categoria-risco] [profundidade]
+/analyze-risks [feature-name] [risk-category] [depth]
 ```
 
-## Parâmetros
+## Parameters
 
-- `nome-feature` (opcional): Nome da feature (kebab-case). Se não fornecido, analisa última feature
-- `categoria-risco` (opcional): Categoria de risco
+- `feature-name` (opcional): Nome da feature (kebab-case). Se não fornecido, analisa última feature
+- `risk-category` (opcional): Categoria de risco
   - `all` (padrão): Análise completa de todos os riscos
   - `technical`: Riscos técnicos (performance, escalabilidade, débito técnico)
   - `security`: Riscos de segurança e vulnerabilidades

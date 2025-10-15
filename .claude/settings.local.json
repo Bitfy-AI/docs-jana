@@ -5,7 +5,11 @@
       "Bash(git log:*)",
       "Bash(git reset:*)",
       "Bash(git commit:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "SlashCommand(/prisma:implementacao:paralela temos que criar um sistema de menu MUITO mais simples e claro\n\nRequisitos CORRETOS:\n\nMenu quando roda `pnpm start`:\n\n```\nJANA WORKFLOWS\n\n[1] Configurar N8N Destino (atual: https://flows.example.com)\n[2] Baixar Workflows do N8N Source (salva em: n8n/workflows/)\n[3] Comparar Workflows (Local vs N8N Target)\n[4] Simular Envio (Dry Run - não modifica nada)\n[5] Enviar Workflows para N8N (ATENÇÃO: modifica workflows!)\n[6] Baixar Documentação do Outline (apenas DEV)\n[7] Ver Histórico\n[0] Sair\n```\n\nDetalhes:\n\n1. **Configurar N8N**: Mostrar URL configurada SEMPRE entre parênteses\n2. **Baixar Workflows**: SEMPRE salva em `n8n/workflows/` (sem timestamp), SEMPRE substitui pasta anterior\n3. **Comparar**: Nova opção que mostra diffs de versões (AAA-AAA-001 vs AAA-AAA-002)\n4. **Dry Run**: Nova opção separada, roda `n8n:upload --dry-run` internamente\n5. **Enviar**: Roda `n8n:upload` (sem dry-run)\n6. **Outline**: Só aparece se NODE_ENV !== 'production'\n7. **Histórico**: Melhorado com stack traces de erros\n\nImplementar comandos:\n- `n8n:compare` - compara local vs target\n- `n8n:dry-run` - wrapper para n8n:upload --dry-run\n\nE corrigir:\n- Nomes de arquivos COM ESPAÇOS (não underscores)\n- Sempre mesma pasta n8n/workflows/)",
+      "SlashCommand(/prisma:implementacao:paralela:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

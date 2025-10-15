@@ -1,14 +1,17 @@
 # Command: /execute-tasks
 
 ## Description
+
 Executa tarefas de uma especificação criada.
 
 ## Usage
+
 ```
 /execute-tasks [feature-name] [task-id] [mode]
 ```
 
 ## Parameters
+
 - `feature-name`: Nome da feature (kebab-case)
 - `task-id` (opcional): ID da tarefa específica (ex: 2.1). Se não fornecido, executa próxima tarefa pendente
 - `mode` (opcional): Modo de execução
@@ -17,6 +20,7 @@ Executa tarefas de uma especificação criada.
   - `auto`: Análise de dependências e execução automática
 
 ## What It Does
+
 1. Lê tasks.md da feature
 2. Identifica tarefa(s) a executar
 3. Executa conforme o modo selecionado
@@ -26,32 +30,41 @@ Executa tarefas de uma especificação criada.
 ## Execution Modes
 
 ### Sequential (Default)
+
 ```
 /execute-tasks export-markdown
 ```
+
 Executa a próxima tarefa pendente, espera aprovação, continua.
 
 ### Specific Task
+
 ```
 /execute-tasks export-markdown 2.1
 ```
+
 Executa apenas a tarefa 2.1.
 
 ### Parallel Execution
+
 ```
 /execute-tasks export-markdown 2.1,2.2 parallel
 ```
-Executa tarefas 2.1 e 2.2 em paralelo usando spec-impl agents.
+
+Executa tarefas 2.1 e 2.2 em paralelo usando agentes implementadores.
 
 ### Auto Mode
+
 ```
 /execute-tasks export-markdown all auto
 ```
+
 Analisa dependências em tasks.md e executa todas as tarefas automaticamente, respeitando dependências.
 
 ## Expected Flow
 
 ### Sequential Mode
+
 ```
 User: /execute-tasks export-markdown
 Assistant: Lendo tasks.md...
@@ -73,6 +86,7 @@ Deseja executar a próxima tarefa (2.2)? (sim/não)
 ```
 
 ### Auto Mode
+
 ```
 User: /execute-tasks export-markdown all auto
 Assistant: Analisando dependências em tasks.md...
@@ -87,5 +101,5 @@ Total estimado: 24h
 Iniciar execução automática? (sim/não)
 
 User: sim
-Assistant: [Orquestra spec-impl agents conforme plano]
+Assistant: [Orquestra agentes implementadores conforme plano]
 ```

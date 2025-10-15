@@ -1,34 +1,34 @@
-# Comando: /nova-especificacao
+# Command: /nova-especificacao
 
-## Descrição
+## Description
 
-Inicia o processo de criação de uma nova especificação usando o Workflow Prisma.
+Inicia o processo de criação de uma nova especificação usando o KFC Workflow.
 
-## Uso
+## Usage
 
 ```
 /nova-especificacao
 ```
 
-## O Que Faz
+## What It Does
 
-1. Carrega o system prompt do iniciador de workflow
+1. Carrega o system prompt do spec-workflow-starter
 2. Solicita ao usuário a descrição da feature
 3. Inicia o workflow completo de especificação:
-   - Coleta de requisitos
-   - Criação do documento de design
-   - Planejamento de tarefas
+   - Requirements gathering
+   - Design document creation
+   - Task planning
 
-## Fluxo Esperado
+## Expected Flow
 
 1. Usuário executa `/nova-especificacao`
 2. Sistema solicita: "Descreva a feature que você quer criar"
 3. Usuário fornece descrição
 4. Sistema sugere um nome de feature (kebab-case)
-5. Sistema pergunta quantos agentes de requisitos usar
+5. Sistema pergunta quantos agentes de requirements usar
 6. Workflow de especificação inicia
 
-## Exemplo
+## Example
 
 ```
 User: /nova-especificacao

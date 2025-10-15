@@ -55,10 +55,24 @@ class N8NConfigureTargetApp {
     const chalk = this.chalk;
 
     // Introdução explicativa
-    console.log(chalk.bold.cyan('\n🎯 Configurar Instância N8N de Destino\n'));
+    console.log(chalk.bold.cyan('\nConfigurar Instância N8N de Destino\n'));
     console.log(chalk.dim('─'.repeat(70)));
 
-    console.log(chalk.bold('\n📖 O que é este comando?\n'));
+    // Show current configuration if exists
+    const currentConfig = await this.readCurrentConfig();
+    if (currentConfig.TARGET_N8N_URL) {
+      console.log(chalk.bold('\nN8N ATUAL CONFIGURADO:\n'));
+      console.log(chalk.cyan(`  URL: ${currentConfig.TARGET_N8N_URL}`));
+      if (currentConfig.TARGET_N8N_API_KEY) {
+        const maskedKey = '*'.repeat(35) + currentConfig.TARGET_N8N_API_KEY.slice(-3);
+        console.log(chalk.dim(`  API Key: ${maskedKey}`));
+      }
+      console.log('');
+    } else {
+      console.log(chalk.yellow('\nNenhum N8N de destino configurado ainda.\n'));
+    }
+
+    console.log(chalk.bold('O que é este comando?\n'));
     console.log(chalk.dim('Este comando configura a instância N8N de destino onde seus workflows'));
     console.log(chalk.dim('serão enviados. É necessário configurar antes de fazer upload de workflows.\n'));
 

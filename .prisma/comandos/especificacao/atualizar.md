@@ -1,29 +1,29 @@
-# Comando: /atualizar-especificacao
+# Command: /atualizar-especificacao
 
-## Descrição
+## Description
 
 Atualiza uma especificação existente (requisitos, design ou tarefas).
 
-## Uso
+## Usage
 
 ```
 /atualizar-especificacao [nome-feature] [tipo-documento]
 ```
 
-## Parâmetros
+## Parameters
 
 - `nome-feature` (opcional): Nome da feature (kebab-case). Se não fornecido, lista features disponíveis
 - `tipo-documento` (opcional): Tipo de documento (requisitos, design, tarefas). Se não fornecido, mostra opções
 
-## O Que Faz
+## What It Does
 
 1. Localiza a especificação existente
 2. Lê o documento atual
 3. Solicita as mudanças desejadas ao usuário
-4. Chama o agente apropriado para atualizar o documento
+4. Chama o sub-agente apropriado para atualizar o documento
 5. Solicita aprovação do usuário
 
-## Exemplos
+## Examples
 
 ```
 # Lista features disponíveis
@@ -36,7 +36,7 @@ Atualiza uma especificação existente (requisitos, design ou tarefas).
 /atualizar-especificacao export-markdown design
 ```
 
-## Fluxo Esperado
+## Expected Flow
 
 ```
 User: /atualizar-especificacao export-markdown requisitos
