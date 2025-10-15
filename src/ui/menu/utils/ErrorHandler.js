@@ -10,11 +10,42 @@
  * Requirements: Confiabilidade.1 (Error Handling)
  */
 
+/**
+ * @class ErrorHandler
+ * @description Sistema centralizado de tratamento de erros com categorização automática,
+ * mensagens amigáveis, e estratégias de recuperação. Suporta 4 categorias de erro:
+ * user-input, system, command-execution, e runtime.
+ *
+ * @example
+ * // Criar handler com logger
+ * const handler = new ErrorHandler({
+ *   debug: true,
+ *   logger: new MenuLogger()
+ * });
+ *
+ * // Tratar erro
+ * try {
+ *   throw new Error('Invalid input: email required');
+ * } catch (error) {
+ *   const response = handler.handle(error, { field: 'email' });
+ *   console.log(handler.formatUserMessage(response));
+ *   // Output: ❌ Invalid input: email required
+ *   //         💡 Verifique os dados informados e tente novamente.
+ * }
+ *
+ * // Recuperar de erro com fallback
+ * const result = await handler.recover(error, async () => {
+ *   return await loadFromCache();
+ * });
+ */
 class ErrorHandler {
   /**
+   * Cria instância do ErrorHandler
    * @param {Object} options - Opções do error handler
-   * @param {boolean} [options.debug=false] - Habilitar modo debug
-   * @param {Function} [options.logger=null] - Logger opcional
+   * @param {boolean} [options.debug=false] - Habilitar modo debug (mostra detalhes técnicos)
+   * @param {Object} [options.logger=null] - Logger opcional para registro de erros
+   * @example
+   * const handler = new ErrorHandler({ debug: true });
    */
   constructor(options = {}) {
     this.debug = options.debug || process.env.DEBUG === 'true';
@@ -57,18 +88,33 @@ class ErrorHandler {
   }
 
   /**
-   * Trata erro e retorna resposta estruturada
+   * Trata erro e retorna resposta estruturada com mensagem amigável e sugestão de ação
    *
    * @param {Error} error - Erro a tratar
-   * @param {Object} context - Contexto do erro
-   * @returns {ErrorResponse} Resposta de erro
+   * @param {Object} [context={}] - Contexto adicional do erro (ex: {command: 'upload', file: 'data.json'})
+   * @returns {ErrorResponse} Resposta de erro estruturada
    *
    * @typedef {Object} ErrorResponse
-   * @property {string} category - Categoria do erro
-   * @property {string} message - Mensagem amigável
-   * @property {string} suggestion - Sugestão de ação
-   * @property {boolean} recoverable - Se é recuperável
-   * @property {Object} [details] - Detalhes técnicos (apenas em debug)
+   * @property {string} category - Categoria do erro (user-input, system, command-execution, runtime)
+   * @property {string} message - Mensagem amigável ao usuário
+   * @property {string} suggestion - Sugestão de ação para resolver
+   * @property {boolean} recoverable - Indica se erro é recuperável
+   * @property {Object} [details] - Detalhes técnicos (apenas em modo debug)
+   *
+   * @example
+   * // Tratar erro de arquivo não encontrado
+   * try {
+   *   await fs.readFile('/path/to/missing.json');
+   * } catch (error) {
+   *   const response = handler.handle(error, { file: 'config.json' });
+   *   console.log(response);
+   *   // {
+   *   //   category: 'system',
+   *   //   message: 'Arquivo ou diretório não encontrado',
+   *   //   suggestion: 'Verifique o caminho do arquivo e tente novamente.',
+   *   //   recoverable: true
+   *   // }
+   * }
    */
   handle(error, context = {}) {
     const category = this.categorizeError(error);
@@ -169,12 +215,29 @@ class ErrorHandler {
   }
 
   /**
-   * Tenta recuperar de erro executando fallback
+   * Tenta recuperar de erro executando função de fallback
    *
-   * @param {Error} error - Erro a recuperar
-   * @param {Function} fallback - Função de fallback
-   * @returns {any} Resultado do fallback
+   * @param {Error} error - Erro original do qual tentar recuperar
+   * @param {Function} fallback - Função async de fallback a executar
+   * @returns {Promise<any>} Resultado da função de fallback
    * @throws {Error} Se fallback também falhar
+   *
+   * @example
+   * // Recuperar de erro de API usando cache local
+   * try {
+   *   const data = await fetchFromAPI();
+   * } catch (error) {
+   *   const cachedData = await handler.recover(error, async () => {
+   *     return await loadFromCache();
+   *   });
+   *   return cachedData;
+   * }
+   *
+   * @example
+   * // Recuperar com valor padrão
+   * const config = await handler.recover(error, async () => {
+   *   return { theme: 'default', lang: 'en' };
+   * });
    */
   async recover(error, fallback) {
     if (this.logger) {
@@ -199,10 +262,18 @@ class ErrorHandler {
   }
 
   /**
-   * Cria mensagem de erro user-friendly
+   * Formata resposta de erro em mensagem user-friendly com emojis e formatação
    *
-   * @param {ErrorResponse} errorResponse - Resposta de erro
-   * @returns {string} Mensagem formatada
+   * @param {ErrorResponse} errorResponse - Resposta de erro do método handle()
+   * @returns {string} Mensagem formatada pronta para exibir ao usuário
+   *
+   * @example
+   * const response = handler.handle(error, { command: 'upload' });
+   * const message = handler.formatUserMessage(response);
+   * console.error(message);
+   * // Output:
+   * // ❌ Falha ao executar comando
+   * // 💡 Verifique a configuração e conexão com o serviço.
    */
   formatUserMessage(errorResponse) {
     const lines = [];
@@ -222,23 +293,36 @@ class ErrorHandler {
   }
 
   /**
-   * Habilita modo debug
+   * Habilita modo debug para exibir detalhes técnicos nos erros
+   *
+   * @example
+   * handler.enableDebug();
+   * // Agora ErrorResponse.details será incluído
    */
   enableDebug() {
     this.debug = true;
   }
 
   /**
-   * Desabilita modo debug
+   * Desabilita modo debug para ocultar detalhes técnicos
+   *
+   * @example
+   * handler.disableDebug();
+   * // Agora apenas mensagens amigáveis serão exibidas
    */
   disableDebug() {
     this.debug = false;
   }
 
   /**
-   * Define logger
+   * Define ou atualiza instância do logger
    *
-   * @param {Object} logger - Logger instance
+   * @param {Object} logger - Instância de logger com métodos error(), warn(), info()
+   *
+   * @example
+   * const logger = new MenuLogger({ level: 'debug' });
+   * handler.setLogger(logger);
+   * // Agora todos os erros serão registrados via logger
    */
   setLogger(logger) {
     this.logger = logger;

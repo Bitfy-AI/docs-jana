@@ -1,20 +1,39 @@
 /**
- * StateManager - Gerenciamento de estado do menu interativo
+ * @class StateManager
+ * @description Gerenciamento centralizado de estado do menu com pattern Observer.
+ * Notifica automaticamente observers quando estado muda.
  *
- * Responsável por manter e atualizar o estado do menu, incluindo:
+ * Responsável por manter e atualizar:
  * - Opções disponíveis
- * - Índice selecionado
- * - Modo atual (navegação, preview, histórico, configuração)
- * - Estado de execução
+ * - Índice selecionado (com navegação circular)
+ * - Modo atual (navigation, preview, history, config, help)
+ * - Estado de execução de comandos
  *
- * Implementa pattern Observer para notificar mudanças de estado.
+ * @example
+ * // Criar e usar StateManager
+ * const state = new StateManager([
+ *   { command: 'download', label: 'Download' },
+ *   { command: 'upload', label: 'Upload' }
+ * ]);
  *
- * Requirements: 1.1, 1.2, 1.3, 1.4
+ * // Observar mudanças
+ * state.subscribe((event, data) => {
+ *   console.log(`Estado mudou: ${event}`, data);
+ * });
+ *
+ * state.moveDown(); // Navega para próxima opção
+ * // Output: Estado mudou: selectedIndexChanged { index: 1 }
+ *
+ * @example
+ * // Executar comando
+ * state.setExecuting('download');
+ * // ... executa comando ...
+ * state.clearExecuting();
  */
-
 class StateManager {
   /**
-   * @param {Object[]} options - Array de opções do menu
+   * Cria instância do StateManager
+   * @param {Object[]} [options=[]] - Array de opções do menu
    */
   constructor(options = []) {
     this.state = {
@@ -136,9 +155,21 @@ class StateManager {
   }
 
   /**
-   * Registra um observer
+   * Registra observer para receber notificações de mudança de estado
+   *
    * @param {Function} observer - Callback que recebe (eventType, data)
-   * @returns {Function} Função para remover o observer
+   * @returns {Function} Função para remover o observer (cleanup)
+   * @throws {Error} Se observer não for função
+   *
+   * @example
+   * const unsubscribe = state.subscribe((eventType, data) => {
+   *   if (eventType === 'selectedIndexChanged') {
+   *     console.log('Índice mudou para:', data.index);
+   *   }
+   * });
+   *
+   * // Depois, remover observer
+   * unsubscribe();
    */
   subscribe(observer) {
     if (typeof observer !== 'function') {

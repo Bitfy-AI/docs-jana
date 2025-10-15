@@ -34,11 +34,52 @@ const ErrorHandler = require('../utils/ErrorHandler');
 const MenuLogger = require('../utils/MenuLogger');
 const { getAllOptions } = require('../config/menu-options');
 
+/**
+ * @class MenuOrchestrator
+ * @description Coordenador central do menu interativo que integra e orquestra todos os 8 componentes
+ * do sistema de menu. Gerencia o ciclo de vida completo: inicialização → navegação → execução → cleanup.
+ *
+ * Componentes integrados:
+ * - StateManager: Gerenciamento de estado
+ * - ConfigManager: Configurações do usuário
+ * - CommandHistory: Histórico de execução
+ * - ThemeEngine: Sistema de temas e cores
+ * - AnimationEngine: Animações e spinners
+ * - KeyboardMapper: Mapeamento de atalhos
+ * - InputHandler: Captura de entrada
+ * - UIRenderer: Renderização de interface
+ *
+ * @example
+ * // Uso básico
+ * const menu = new MenuOrchestrator({
+ *   menuOptions: [
+ *     { command: 'download', label: 'Download workflows', icon: '📥' },
+ *     { command: 'upload', label: 'Upload workflows', icon: '📤' }
+ *   ]
+ * });
+ *
+ * await menu.initialize();
+ * const result = await menu.show();
+ * console.log('Selected:', result.option.command);
+ * await menu.shutdown();
+ *
+ * @example
+ * // Uso com configuração customizada
+ * const menu = new MenuOrchestrator({
+ *   menuOptions: getAllOptions(),
+ *   config: {
+ *     theme: 'dark',
+ *     animationsEnabled: false,
+ *     verbose: true
+ *   }
+ * });
+ */
 class MenuOrchestrator {
   /**
-   * @param {Object} options - Opções de configuração
-   * @param {Array} options.menuOptions - Array de opções do menu
-   * @param {Object} options.config - Configuração customizada (opcional)
+   * Cria instância do MenuOrchestrator
+   * @param {Object} [options={}] - Opções de configuração
+   * @param {Array} [options.menuOptions] - Array de opções do menu (usa padrão se omitido)
+   * @param {Object} [options.config] - Configuração customizada (sobrescreve preferências do usuário)
    */
   constructor(options = {}) {
     this.menuOptions = options.menuOptions || getAllOptions();
@@ -71,8 +112,17 @@ class MenuOrchestrator {
   }
 
   /**
-   * Inicializa todos os componentes do menu
+   * Inicializa todos os 9 componentes do menu na ordem correta
+   * Sequência: Logger → ErrorHandler → ConfigManager → CommandHistory → ThemeEngine →
+   * AnimationEngine → KeyboardMapper → StateManager → InputHandler → UIRenderer → CommandExecutor
+   *
    * @returns {Promise<void>}
+   * @throws {Error} Se inicialização falhar (ex: erro ao carregar tema)
+   *
+   * @example
+   * const menu = new MenuOrchestrator({ menuOptions });
+   * await menu.initialize();
+   * // Menu pronto para uso com todos os componentes carregados
    */
   async initialize() {
     if (this.isRunning) {
@@ -229,11 +279,36 @@ class MenuOrchestrator {
   }
 
   /**
-   * Exibe o menu e aguarda seleção do usuário
-   * Main entry point
+   * Exibe o menu interativo e aguarda seleção do usuário (main entry point)
    *
-   * @param {Object} options - Opções de exibição
-   * @returns {Promise<Object>} Promise que resolve com opção selecionada
+   * @param {Object} [options={}] - Opções de exibição
+   * @param {Array} [options.menuOptions] - Sobrescreve opções do menu temporariamente
+   * @returns {Promise<Object>} Promise que resolve quando usuário selecionar ou cancelar
+   * @returns {Promise<{action: string, option?: Object, success?: boolean}>}
+   * @throws {Error} Se terminal não for interativo
+   *
+   * @example
+   * // Uso básico
+   * const menu = new MenuOrchestrator({ menuOptions });
+   * await menu.initialize();
+   * const result = await menu.show();
+   *
+   * if (result.action === 'executed') {
+   *   console.log(`Executou: ${result.option.command}`);
+   * } else if (result.action === 'cancelled') {
+   *   console.log('Usuário cancelou');
+   * } else if (result.action === 'exit') {
+   *   console.log('Usuário saiu');
+   * }
+   *
+   * @example
+   * // Com opções temporárias
+   * const result = await menu.show({
+   *   menuOptions: [
+   *     { command: 'option1', label: 'Opção 1' },
+   *     { command: 'option2', label: 'Opção 2' }
+   *   ]
+   * });
    */
   async show(options = {}) {
     // Inicializa se necessário
@@ -396,8 +471,17 @@ class MenuOrchestrator {
   }
 
   /**
-   * Muda modo do menu
-   * @param {string} mode - Novo modo (navigation, preview, history, config, help)
+   * Muda o modo de exibição do menu
+   *
+   * @param {string} mode - Novo modo ('navigation', 'preview', 'history', 'config', 'help')
+   *
+   * @example
+   * // Mostrar histórico de comandos
+   * menu.switchMode('history');
+   *
+   * @example
+   * // Voltar para navegação normal
+   * menu.switchMode('navigation');
    */
   switchMode(mode) {
     // Prepara dados específicos do modo antes de mudar
@@ -429,9 +513,19 @@ class MenuOrchestrator {
   }
 
   /**
-   * Executa comando selecionado
+   * Executa comando selecionado com spinner, logging e tratamento de erros
+   *
    * @param {Object} option - Opção do menu selecionada
+   * @param {string} option.command - Nome do comando a executar
+   * @param {string} option.label - Label amigável do comando
    * @returns {Promise<void>}
+   *
+   * @example
+   * // Executado automaticamente quando usuário pressiona Enter em uma opção
+   * // Mas pode ser chamado manualmente:
+   * const option = { command: 'download', label: 'Download workflows' };
+   * await menu.executeCommand(option);
+   * // Exibe spinner, executa comando, registra no histórico, mostra resultado
    */
   async executeCommand(option) {
     const startTime = Date.now();
@@ -615,7 +709,20 @@ class MenuOrchestrator {
   }
 
   /**
-   * Encerra o menu graciosamente
+   * Encerra o menu graciosamente salvando estado e limpando recursos
+   * Salva histórico, configurações, para animações, remove signal handlers
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * const menu = new MenuOrchestrator({ menuOptions });
+   * await menu.initialize();
+   * await menu.show();
+   * await menu.shutdown(); // Sempre chamar ao final
+   *
+   * @example
+   * // Shutdown automático ao pressionar 'q' ou Escape
+   * // Ou ao receber SIGINT (Ctrl+C) ou SIGTERM
    */
   async shutdown() {
     if (this.isShuttingDown) {
@@ -662,7 +769,24 @@ class MenuOrchestrator {
   }
 
   /**
-   * Cleanup completo (para testes e error recovery)
+   * Cleanup completo incluindo remoção de referências (para testes e error recovery)
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * // Usado em testes para limpar entre execuções
+   * afterEach(async () => {
+   *   await menu.cleanup();
+   * });
+   *
+   * @example
+   * // Usado em error recovery durante inicialização
+   * try {
+   *   await menu.initialize();
+   * } catch (error) {
+   *   await menu.cleanup();
+   *   throw error;
+   * }
    */
   async cleanup() {
     await this.shutdown();
@@ -679,16 +803,34 @@ class MenuOrchestrator {
   }
 
   /**
-   * Obtém estado atual (para debugging)
-   * @returns {Object} Estado atual do menu
+   * Obtém estado atual do menu (para debugging e testes)
+   *
+   * @returns {Object|null} Estado atual ou null se não inicializado
+   * @returns {Object} state.options - Opções do menu
+   * @returns {number} state.selectedIndex - Índice selecionado
+   * @returns {string} state.mode - Modo atual
+   * @returns {boolean} state.isExecuting - Se está executando comando
+   *
+   * @example
+   * const state = menu.getState();
+   * console.log(`Modo atual: ${state.mode}`);
+   * console.log(`Opção selecionada: ${state.options[state.selectedIndex].label}`);
    */
   getState() {
     return this.stateManager?.getState() || null;
   }
 
   /**
-   * Verifica se menu está rodando
-   * @returns {boolean}
+   * Verifica se menu está rodando (inicializado e ativo)
+   *
+   * @returns {boolean} True se menu está ativo
+   *
+   * @example
+   * if (menu.isActive()) {
+   *   console.log('Menu está rodando');
+   * } else {
+   *   await menu.initialize();
+   * }
    */
   isActive() {
     return this.isRunning;

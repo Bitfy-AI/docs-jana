@@ -1,14 +1,34 @@
 /**
- * AnimationEngine - Gerencia animações e spinners para o menu interativo
+ * @class AnimationEngine
+ * @description Gerencia animações e spinners para o menu interativo usando biblioteca 'ora'.
+ * Suporta 3 velocidades (slow, normal, fast) e respeita preferências do usuário.
  *
  * Responsável por:
- * - Exibir spinners durante operações assíncronas (usando ora)
+ * - Exibir spinners durante operações assíncronas
  * - Controlar animações sutis de transição
- * - Respeitar preferências do usuário para animações
+ * - Respeitar preferências do usuário
  * - Garantir performance adequada (< 200ms)
+ *
+ * @example
+ * // Uso básico com spinner
+ * const engine = new AnimationEngine({ animationsEnabled: true });
+ * await engine.showSpinner('Carregando dados...');
+ * // ... operação assíncrona ...
+ * engine.stopSpinner('success', 'Dados carregados!');
+ *
+ * @example
+ * // Uso com wrapper conveniente
+ * const result = await engine.withSpinner('Baixando...', async () => {
+ *   return await downloadData();
+ * });
  */
-
 class AnimationEngine {
+  /**
+   * Cria instância do AnimationEngine
+   * @param {Object} [config={}] - Configuração
+   * @param {boolean} [config.animationsEnabled=true] - Habilitar animações
+   * @param {string} [config.animationSpeed='normal'] - Velocidade ('slow', 'normal', 'fast')
+   */
   constructor(config = {}) {
     this.config = {
       animationsEnabled: config.animationsEnabled !== false,
@@ -61,9 +81,16 @@ class AnimationEngine {
   }
 
   /**
-   * Exibe spinner de loading
+   * Exibe spinner de loading animado
+   *
    * @param {string} text - Texto a exibir ao lado do spinner
    * @returns {Promise<void>}
+   *
+   * @example
+   * await engine.showSpinner('Processando workflows...');
+   * // Spinner aparece com texto
+   * await performOperation();
+   * engine.stopSpinner('success', 'Concluído!');
    */
   async showSpinner(text) {
     if (!this.isEnabled()) {
@@ -110,9 +137,20 @@ class AnimationEngine {
   }
 
   /**
-   * Para o spinner com símbolo de status
-   * @param {'success'|'error'|'warning'|'info'} symbol - Tipo de símbolo
-   * @param {string} text - Mensagem final
+   * Para o spinner exibindo símbolo de status final
+   *
+   * @param {'success'|'error'|'warning'|'info'} [symbol='success'] - Tipo de símbolo final
+   * @param {string} [text=''] - Mensagem final a exibir
+   *
+   * @example
+   * // Sucesso
+   * engine.stopSpinner('success', 'Upload completo!');
+   * // ✔ Upload completo!
+   *
+   * @example
+   * // Erro
+   * engine.stopSpinner('error', 'Falha na conexão');
+   * // ✖ Falha na conexão
    */
   stopSpinner(symbol = 'success', text = '') {
     if (!this.currentSpinner) {
@@ -175,10 +213,19 @@ class AnimationEngine {
   }
 
   /**
-   * Wrapper conveniente para executar operação com spinner
+   * Wrapper conveniente para executar operação com spinner automático
+   *
    * @param {string} message - Mensagem a exibir durante operação
    * @param {Function} operation - Função assíncrona a executar
    * @returns {Promise<any>} Resultado da operação
+   * @throws {Error} Se operação falhar (mostra spinner de erro automaticamente)
+   *
+   * @example
+   * const workflows = await engine.withSpinner(
+   *   'Baixando workflows...',
+   *   async () => await api.getWorkflows()
+   * );
+   * // Spinner exibido durante operação, sucesso ou erro automático
    */
   async withSpinner(message, operation) {
     try {

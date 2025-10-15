@@ -1,23 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(awk:*)",
-      "Bash(echo \"Exit code: $?\")",
-      "Bash(DEBUG=1 node interactive-cli.js nonexistent-command)",
-      "Bash(npm run:*)",
-      "Bash(gh pr create:*)",
-      "Bash(winget install:*)",
-      "Bash(curl:*)",
-      "Bash(dd:*)",
-      "Bash(tee:*)",
-      "Bash(apt:*)",
-      "Bash(apt install:*)",
-      "Bash(node cli.js --help)",
-      "Bash(for dir in .claude/specs/*/)",
-      "Bash(ls:*)",
-      "Bash(done)",
-      "Bash(for dir in */)",
-      "Bash(do echo \"=== $dir%/ ===\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Phase 3 - Icons and Theme Extension for CLI UX Enhancement\n\nImplemented Phase 3 (Icons and Theme Extension) of cli-ux-enhancement specification.\nAll 4 tasks completed with exceptional test coverage.\n\nComponents Implemented:\n- IconMapper: Icon system with fallback cascade (emoji → unicode → ascii → plain)\n- ThemeEngine: Extended with new colors and border colorization\n\nIconMapper Features:\n- DEFAULT_ICONS with 19 IconSets (8 actions, 5 status, 2 selection, 4 categories)\n- getIcon(), getStatusIcon(), getSelectionIndicator(), getCategoryIcon()\n- registerIcon() for custom icon registration with validation\n- Intelligent cache with auto-invalidation on capability changes\n- Complete fallback chain ensuring icons work on any terminal\n\nThemeEngine Extensions:\n- New color fields: dimText, accent1, accent2\n- New borders object with 4 border colors (primary, secondary, accent, muted)\n- New method colorizeBorder() for border colorization\n- Enhanced contrast validation for WCAG compliance\n- Full backwards compatibility with legacy themes\n\nTheme Updates:\n- default.js: Vibrant colors with WCAG AA compliance\n- dark.js: Optimized palette for dark backgrounds\n- light.js: Optimized palette for light backgrounds\n- high-contrast.js: Maximum contrast for accessibility (7:1 ratio for AAA)\n\nFiles Created:\n- src/ui/menu/visual/IconMapper.js (~450 LOC)\n- __tests__/unit/ui/menu/visual/IconMapper.test.js (117 tests)\n- __tests__/unit/ui/menu/utils/ThemeEngine.test.js (129 tests)\n\nFiles Modified:\n- src/ui/menu/utils/ThemeEngine.js (colorizeBorder method)\n- src/ui/menu/themes/default.js (new fields)\n- src/ui/menu/themes/dark.js (new fields)\n- src/ui/menu/themes/light.js (new fields)\n- src/ui/menu/themes/high-contrast.js (new fields)\n\nTasks Completed:\n- Task 9: IconMapper implementation (4-5h)\n- Task 10: IconMapper tests (2-3h)\n- Task 11: ThemeEngine extensions (4-6h)\n- Task 12: ThemeEngine tests (3-4h)\n\nTest Coverage:\nIconMapper:\n- Statements: 96.51% | Branches: 94.44% | Functions: 100% | Lines: 96.47%\n- 117 tests passing\n\nThemeEngine Extensions:\n- 129 tests passing\n- 6 test suites (structure, colorizeBorder, degradation, contrast, WCAG, backwards compatibility)\n\nTotal Tests: 246 tests passing (117 + 129)\n\nSpec: .claude/specs/cli-ux-enhancement/\nPhase: 3/7 (Icons and Theme Extension)\nNext: Phase 4 (UIRenderer Integration)\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
