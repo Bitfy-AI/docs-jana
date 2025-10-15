@@ -39,12 +39,15 @@ const DEFAULT_CONFIG = {
     animationSpeed: 'normal',
     iconsEnabled: true,
     showDescriptions: true,
-    showPreviews: true,
+    showPreviews: false, // DISABLED: Execute commands directly without preview step
     historySize: 50,
     keyboardShortcuts: {
-      help: ['h', '?'],
-      exit: ['q', 'Escape'],
-      rerun: ['r']
+      // Format: key → action (KeyboardMapper expects this format)
+      // Do not override navigation keys (up, down, enter, escape, space)
+      // Examples:
+      // 'h': 'help',
+      // 'r': 'refresh',
+      // 'c': 'config'
     }
   }
 };

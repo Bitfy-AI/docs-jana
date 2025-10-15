@@ -19,14 +19,14 @@ module.exports = {
 
     // UI accent colors
     highlight: '#8b5cf6',    // violet-500
-    muted: '#6b7280',        // gray-500
-    destructive: '#dc2626',  // red-600
+    muted: '#9ca3af',        // gray-400 - lighter for WCAG AA compliance
+    destructive: '#f87171',  // red-400 - lighter for WCAG AA compliance
 
     // Text color for selected items (white for high contrast on colored backgrounds)
     selectedText: '#ffffff', // white
 
     // New color fields for enhanced visual hierarchy (optimized for terminal backgrounds)
-    dimText: '#6b7280',      // gray-500 - for secondary/subtle text
+    dimText: '#9ca3af',      // gray-400 - lighter for WCAG AA compliance (≥4.5:1)
     accent1: '#ec4899',      // pink-500 - additional accent color
     accent2: '#06b6d4'       // cyan-500 - additional accent color
   },

@@ -341,51 +341,73 @@ class TerminalDetector {
   }
 
   /**
-   * Gets current terminal width
-   * @returns {number} Terminal width in columns
+   * Gets current terminal width with validation and bounds checking
+   * @returns {number} Terminal width in columns (constrained to 60-200)
    * @private
    */
   _getCurrentWidth() {
+    const MIN_WIDTH = 60;   // Minimum readable width
+    const MAX_WIDTH = 200;  // Maximum reasonable width
+    const DEFAULT_WIDTH = 80; // Standard terminal width
+
     try {
+      let width = DEFAULT_WIDTH;
+
       if (process.stdout.getWindowSize) {
-        const [width] = process.stdout.getWindowSize();
-        return width || 80; // Fallback to 80 if width is 0
+        const [detectedWidth] = process.stdout.getWindowSize();
+        width = detectedWidth || DEFAULT_WIDTH;
+      } else if (process.stdout.columns) {
+        // Alternative: process.stdout.columns (older Node.js versions)
+        width = process.stdout.columns;
       }
 
-      // Alternative: process.stdout.columns (older Node.js versions)
-      if (process.stdout.columns) {
-        return process.stdout.columns;
+      // Sanitize: ensure it's a valid number and apply bounds
+      const sanitizedWidth = parseInt(width, 10);
+      if (isNaN(sanitizedWidth)) {
+        return DEFAULT_WIDTH;
       }
+
+      // Constrain to reasonable bounds
+      return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, sanitizedWidth));
     } catch (error) {
       // Ignore errors, use fallback
+      return DEFAULT_WIDTH;
     }
-
-    // Default fallback width
-    return 80;
   }
 
   /**
-   * Gets current terminal height
-   * @returns {number} Terminal height in rows
+   * Gets current terminal height with validation and bounds checking
+   * @returns {number} Terminal height in rows (constrained to 20-100)
    * @private
    */
   _getCurrentHeight() {
+    const MIN_HEIGHT = 20;   // Minimum readable height
+    const MAX_HEIGHT = 100;  // Maximum reasonable height
+    const DEFAULT_HEIGHT = 24; // Standard terminal height
+
     try {
+      let height = DEFAULT_HEIGHT;
+
       if (process.stdout.getWindowSize) {
-        const [, height] = process.stdout.getWindowSize();
-        return height || 24; // Fallback to 24 if height is 0
+        const [, detectedHeight] = process.stdout.getWindowSize();
+        height = detectedHeight || DEFAULT_HEIGHT;
+      } else if (process.stdout.rows) {
+        // Alternative: process.stdout.rows (older Node.js versions)
+        height = process.stdout.rows;
       }
 
-      // Alternative: process.stdout.rows (older Node.js versions)
-      if (process.stdout.rows) {
-        return process.stdout.rows;
+      // Sanitize: ensure it's a valid number and apply bounds
+      const sanitizedHeight = parseInt(height, 10);
+      if (isNaN(sanitizedHeight)) {
+        return DEFAULT_HEIGHT;
       }
+
+      // Constrain to reasonable bounds
+      return Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, sanitizedHeight));
     } catch (error) {
       // Ignore errors, use fallback
+      return DEFAULT_HEIGHT;
     }
-
-    // Default fallback height
-    return 24;
   }
 
   /**

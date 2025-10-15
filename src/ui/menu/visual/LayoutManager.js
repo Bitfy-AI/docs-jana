@@ -430,19 +430,36 @@ class LayoutManager {
       contentWidth: this.getContentWidth(),
       terminalWidth: currentWidth,
       horizontalPadding: this.getHorizontalPadding(mode),
-      verticalSpacing: {
-        beforeHeader: this.getVerticalSpacing('beforeHeader'),
-        afterHeader: this.getVerticalSpacing('afterHeader'),
-        betweenOptions: this.getVerticalSpacing('betweenOptions'),
-        beforeDescription: this.getVerticalSpacing('beforeDescription'),
-        afterDescription: this.getVerticalSpacing('afterDescription'),
-        beforeFooter: this.getVerticalSpacing('beforeFooter')
-      }
+      verticalSpacing: this._buildVerticalSpacingConfig()
     };
 
     // Cache the configuration
     this.layoutCache = config;
     this.cachedWidth = currentWidth;
+
+    return config;
+  }
+
+  /**
+   * Builds vertical spacing configuration object
+   * Extracted to reduce complexity in getLayoutConfig()
+   * @returns {Object} Vertical spacing configuration
+   * @private
+   */
+  _buildVerticalSpacingConfig() {
+    const spacingSections = [
+      'beforeHeader',
+      'afterHeader',
+      'betweenOptions',
+      'beforeDescription',
+      'afterDescription',
+      'beforeFooter'
+    ];
+
+    const config = {};
+    for (const section of spacingSections) {
+      config[section] = this.getVerticalSpacing(section);
+    }
 
     return config;
   }

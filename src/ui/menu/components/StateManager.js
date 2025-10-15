@@ -1,4 +1,25 @@
 /**
+ * Menu modes enumeration
+ * Prevents magic strings and provides autocomplete
+ * @enum {string}
+ * @readonly
+ */
+const MENU_MODES = Object.freeze({
+  /** Main menu navigation (default) */
+  NAVIGATION: 'navigation',
+  /** Showing command preview before execution */
+  PREVIEW: 'preview',
+  /** Command history view */
+  HISTORY: 'history',
+  /** Configuration editor */
+  CONFIG: 'config',
+  /** Help/documentation view */
+  HELP: 'help',
+  /** Command execution in progress (shows live logs) */
+  EXECUTING: 'executing'
+});
+
+/**
  * @class StateManager
  * @description Gerenciamento centralizado de estado do menu com pattern Observer.
  * Notifica automaticamente observers quando estado muda.
@@ -6,11 +27,12 @@
  * Responsável por manter e atualizar:
  * - Opções disponíveis
  * - Índice selecionado (com navegação circular)
- * - Modo atual (navigation, preview, history, config, help)
+ * - Modo atual (navigation, preview, history, config, help, executing)
  * - Estado de execução de comandos
  *
  * @example
  * // Criar e usar StateManager
+ * const { StateManager, MENU_MODES } = require('./StateManager');
  * const state = new StateManager([
  *   { command: 'download', label: 'Download' },
  *   { command: 'upload', label: 'Upload' }
@@ -23,6 +45,13 @@
  *
  * state.moveDown(); // Navega para próxima opção
  * // Output: Estado mudou: selectedIndexChanged { index: 1 }
+ *
+ * @example
+ * // Usar constantes de modo (recomendado)
+ * state.setMode(MENU_MODES.EXECUTING);
+ * if (state.getState().mode === MENU_MODES.NAVIGATION) {
+ *   // Navegação normal
+ * }
  *
  * @example
  * // Executar comando
@@ -39,7 +68,7 @@ class StateManager {
     this.state = {
       options: options,
       selectedIndex: 0,
-      mode: 'navigation', // 'navigation' | 'preview' | 'history' | 'config'
+      mode: MENU_MODES.NAVIGATION,
       isExecuting: false,
       executingCommand: null
     };
@@ -103,13 +132,21 @@ class StateManager {
 
   /**
    * Define o modo do menu
-   * @param {'navigation'|'preview'|'history'|'config'|'help'} mode - Novo modo
+   * @param {string} mode - Novo modo (use MENU_MODES constants)
+   * @throws {Error} Se modo inválido
+   *
+   * @example
+   * state.setMode(MENU_MODES.EXECUTING); // Recomendado
+   * state.setMode('executing');          // Também funciona (mas sem autocomplete)
    */
   setMode(mode) {
-    const validModes = ['navigation', 'preview', 'history', 'config', 'help'];
+    const validModes = Object.values(MENU_MODES);
 
     if (!validModes.includes(mode)) {
-      throw new Error(`Invalid mode: ${mode}. Must be one of: ${validModes.join(', ')}`);
+      throw new Error(
+        `Invalid mode: ${mode}. Must be one of: ${validModes.join(', ')}\n` +
+        `Use MENU_MODES constants for autocomplete.`
+      );
     }
 
     this.state.mode = mode;
@@ -212,7 +249,7 @@ class StateManager {
    */
   reset() {
     this.state.selectedIndex = 0;
-    this.state.mode = 'navigation';
+    this.state.mode = MENU_MODES.NAVIGATION;
     this.state.isExecuting = false;
     this.state.executingCommand = null;
     this.notifyObservers('stateReset', {});
@@ -220,3 +257,4 @@ class StateManager {
 }
 
 module.exports = StateManager;
+module.exports.MENU_MODES = MENU_MODES;

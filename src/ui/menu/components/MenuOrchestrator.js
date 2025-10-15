@@ -360,7 +360,15 @@ class MenuOrchestrator {
     const state = this.stateManager.getState();
     const selectedOption = state.options[state.selectedIndex];
 
-    // Se estamos em modo especial (preview, history, etc), volta para navigation
+    // FIXADO: Se estamos em modo PREVIEW, EXECUTA o comando (não volta para navigation)
+    if (state.mode === 'preview') {
+      // Volta para navigation antes de executar
+      this.switchMode('navigation');
+      await this.executeCommand(selectedOption);
+      return;
+    }
+
+    // Se estamos em outros modos especiais (history, config, help), volta para navigation
     if (state.mode !== 'navigation') {
       this.switchMode('navigation');
       return;
@@ -390,14 +398,14 @@ class MenuOrchestrator {
       return;
     }
 
-    // Mostrar preview se configurado
+    // Mostrar preview se configurado E se comando tiver preview disponível
     const config = this.configManager.get('preferences');
     if (config.showPreviews && selectedOption.preview) {
       this.switchMode('preview');
-      return;
+      return; // Aguarda próximo Enter para executar (linha 363-368)
     }
 
-    // Executar comando
+    // Se não tem preview OU preview desabilitado, executa direto
     await this.executeCommand(selectedOption);
   }
 
@@ -533,11 +541,14 @@ class MenuOrchestrator {
     this.logger?.startTimer(`command-execution-${option.command}`);
 
     try {
-      // Marca como executando
+      // Marca como executando E muda para modo "executing"
       this.stateManager.setExecuting(option.command);
+      this.switchMode('executing');
 
-      // Mostra spinner
-      await this.animationEngine.showSpinner(`Executando ${option.label}...`);
+      // Store command info in state for UI rendering
+      this.stateManager.state.executingOption = option;
+      this.stateManager.state.executionLog = [];
+      this.updateDisplay();
 
       // Executa comando real através do CommandExecutor
       await this.executeRealCommand(option);

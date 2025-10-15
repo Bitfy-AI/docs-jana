@@ -98,6 +98,134 @@ Settings are persisted to `~/.docs-jana/config.json`:
 
 ---
 
+## 🎨 Visual Experience
+
+The CLI features a modern, responsive visual system that automatically adapts to your terminal's capabilities, providing an exceptional experience across all platforms.
+
+### Modern Visual Components
+
+Built with 4 core visual components working together:
+
+- **TerminalDetector**: Smart terminal capability detection
+- **BorderRenderer**: Beautiful Unicode borders with ASCII fallback
+- **LayoutManager**: Responsive layout (expanded/standard/compact modes)
+- **IconMapper**: Icons with intelligent fallback (emoji → unicode → ascii → plain)
+
+### Terminal Compatibility
+
+| Terminal | Unicode | Colors | Emojis | Experience |
+|----------|---------|--------|--------|------------|
+| **Windows Terminal** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
+| **iTerm2 (macOS)** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
+| **gnome-terminal** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
+| **PowerShell Core** | ✅ Full | ✅ 256 colors | ⚠️ Limited | ⭐⭐⭐⭐ Great |
+| **PowerShell 5.1** | ⚠️ Partial | ✅ Basic | ❌ No | ⭐⭐⭐ Good |
+| **CMD** | ❌ No | ✅ Basic | ❌ No | ⭐⭐ Basic |
+| **CI/CD** | ❌ No | ❌ No | ❌ No | ⭐ Fallback |
+
+### Graceful Degradation
+
+The CLI automatically detects your terminal's capabilities and gracefully falls back:
+
+```
+Best Experience (Unicode + TrueColor + Emojis)
+├─ Windows Terminal, iTerm2, modern terminals
+│  ╔══════════════════════════════╗
+│  ║  ⬇️  Download N8N workflows  ║
+│  ╚══════════════════════════════╝
+│
+Standard Experience (Unicode + Colors)
+├─ Most terminals
+│  ┌──────────────────────────────┐
+│  │  ↓ Download N8N workflows    │
+│  └──────────────────────────────┘
+│
+Basic Experience (ASCII + Colors)
+├─ Older terminals, CI
+│  +==============================+
+│  |  v Download N8N workflows    |
+│  +==============================+
+│
+Plain Experience (Text only)
+└─ Fallback for all environments
+   Download N8N workflows
+```
+
+### Visual Features
+
+**Modern Borders**
+- 4 border styles: single, double, bold, rounded
+- Unicode box-drawing characters with ASCII fallback
+- Colored borders following theme palette
+
+**Responsive Layout**
+- **Expanded** (≥100 columns): Full descriptions, extra padding
+- **Standard** (80-99 columns): Balanced layout
+- **Compact** (<80 columns): Truncated text, minimal padding
+
+**Icon System**
+- 4-level fallback cascade
+- Emoji → Unicode → ASCII → Plain text
+- Consistent visual language
+
+**Theme Integration**
+- 4 themes: Default, Dark, Light, High-Contrast
+- WCAG 2.1 AA compliant (4.5:1 contrast minimum)
+- Automatic color degradation
+
+### Customization
+
+Customize visual behavior via configuration:
+
+```json
+{
+  "preferences": {
+    "iconsEnabled": true,
+    "showDescriptions": true,
+    "theme": "default",
+    "animationsEnabled": true
+  }
+}
+```
+
+### Troubleshooting Visual Issues
+
+**Unicode characters showing as `?` or boxes:**
+```bash
+# Set UTF-8 encoding
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# Use modern terminal (Windows Terminal, iTerm2, gnome-terminal)
+# Install Unicode font (DejaVu, Fira Code, JetBrains Mono)
+```
+
+**Colors not working:**
+```bash
+# Check TERM variable
+echo $TERM  # Should be xterm-256color or better
+
+# Force color support
+export FORCE_COLOR=1
+
+# Remove NO_COLOR if set
+unset NO_COLOR
+```
+
+**Emojis not rendering:**
+```bash
+# Use modern terminal (Windows Terminal recommended for Windows)
+# Install emoji font (Noto Color Emoji on Linux)
+```
+
+### Learn More
+
+- **[Visual Components Guide](docs/VISUAL-COMPONENTS.md)** - Complete visual system documentation
+- **[Architecture Overview](docs/ARCHITECTURE.md)** - System architecture
+- **[Migration Guide](docs/MIGRATION.md)** - Upgrading guide
+
+---
+
 ## 🚀 Quick Start
 
 ### Installation
