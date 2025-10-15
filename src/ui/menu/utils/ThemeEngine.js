@@ -161,6 +161,7 @@ class ThemeEngine {
   _validateThemeContrast(theme) {
     const issues = [];
     const minRatio = theme.contrastRatios?.minRatio || 4.5;
+    const largeTextRatio = theme.contrastRatios?.largeTextRatio || 3.0;
 
     // Validate selectedText against selected background (most critical for accessibility)
     if (theme.colors.selectedText && theme.backgrounds.selected !== 'transparent') {
@@ -171,6 +172,10 @@ class ThemeEngine {
         );
       }
     }
+
+    // Note: dimText, accent1, accent2, and border colors are typically used against
+    // the terminal background (not the selected background), so we don't validate
+    // them here. They should be validated at runtime against the actual terminal background.
 
     // Note: Other color combinations are validated at runtime when they're actually used
     // against the terminal's background, which we cannot know in advance
@@ -243,6 +248,58 @@ class ThemeEngine {
   }
 
   /**
+   * Applies color to border string using chalk
+   * @param {string} borderString - Border string to colorize
+   * @param {string} type - Border type ('primary', 'secondary', 'accent', 'muted')
+   * @returns {string} Colorized border string
+   */
+  colorizeBorder(borderString, type = 'primary') {
+    if (!this.chalk || this.colorSupport === 0) {
+      return borderString; // No color support, return plain text
+    }
+
+    if (!this.currentTheme) {
+      return borderString;
+    }
+
+    // Get border color from theme (with fallback to main colors if borders not defined)
+    const borders = this.currentTheme.borders || {};
+    const borderColor = borders[type] || this.currentTheme.colors[type] || this.currentTheme.colors.primary;
+
+    try {
+      // Use chalk hex for full color support
+      if (this.colorSupport >= 2) {
+        return this.chalk.hex(borderColor)(borderString);
+      } else {
+        // Fallback to basic colors for limited terminals
+        return this._applyBasicBorderColor(borderString, type);
+      }
+    } catch (error) {
+      console.warn('Failed to colorize border:', error.message);
+      return borderString;
+    }
+  }
+
+  /**
+   * Applies basic ANSI colors to borders for limited terminals
+   * @param {string} borderString - Border string to colorize
+   * @param {string} type - Border type
+   * @returns {string} Colorized border string
+   * @private
+   */
+  _applyBasicBorderColor(borderString, type) {
+    const colorMap = {
+      primary: this.chalk.blue,
+      secondary: this.chalk.cyan,
+      accent: this.chalk.magenta,
+      muted: this.chalk.gray
+    };
+
+    const colorFunc = colorMap[type] || this.chalk.white;
+    return colorFunc(borderString);
+  }
+
+  /**
    * Applies basic ANSI colors for limited terminals
    * @param {string} text - Text to colorize
    * @param {string} type - Semantic color type
@@ -312,11 +369,20 @@ class ThemeEngine {
         info: '#ffffff',
         highlight: '#ffffff',
         muted: '#ffffff',
-        destructive: '#ffffff'
+        destructive: '#ffffff',
+        dimText: '#ffffff',
+        accent1: '#ffffff',
+        accent2: '#ffffff'
       },
       backgrounds: {
         selected: 'transparent',
         normal: 'transparent'
+      },
+      borders: {
+        primary: '#ffffff',
+        secondary: '#ffffff',
+        accent: '#ffffff',
+        muted: '#ffffff'
       },
       contrastRatios: {
         minRatio: 4.5,

@@ -23,14 +23,26 @@ module.exports = {
     destructive: '#dc2626',  // red-600
 
     // Text color for selected items (white for high contrast on colored backgrounds)
-    selectedText: '#ffffff'  // white
+    selectedText: '#ffffff', // white
+
+    // New color fields for enhanced visual hierarchy (optimized for terminal backgrounds)
+    dimText: '#6b7280',      // gray-500 - for secondary/subtle text
+    accent1: '#ec4899',      // pink-500 - additional accent color
+    accent2: '#06b6d4'       // cyan-500 - additional accent color
   },
   backgrounds: {
-    // Background for selected menu item
-    selected: '#3b82f6',     // blue-500
+    // Background for selected menu item (darker for better contrast with white text)
+    selected: '#2563eb',     // blue-600 - ensures 4.5:1 contrast with white text
 
     // Background for normal menu items (transparent = terminal background)
     normal: 'transparent'
+  },
+  borders: {
+    // Border colors for decorative elements (used against terminal backgrounds)
+    primary: '#3b82f6',      // blue-500 - vibrant primary borders
+    secondary: '#06b6d4',    // cyan-500 - secondary borders
+    accent: '#8b5cf6',       // violet-500 - accent borders
+    muted: '#6b7280'         // gray-500 - subtle borders
   },
   contrastRatios: {
     // WCAG 2.1 Level AA minimum for normal text

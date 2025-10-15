@@ -23,14 +23,26 @@ module.exports = {
     destructive: '#b91c1c',  // red-700
 
     // Text color for selected items (white for high contrast)
-    selectedText: '#ffffff'  // white
+    selectedText: '#ffffff', // white
+
+    // New color fields optimized for light backgrounds
+    dimText: '#6b7280',      // gray-500 - darker dim text for light mode
+    accent1: '#db2777',      // pink-600 - darker accent for light mode
+    accent2: '#0d9488'       // teal-600 - darker teal for light mode
   },
   backgrounds: {
     // Darker background for selected items on light terminals
-    selected: '#3b82f6',     // blue-500
+    selected: '#2563eb',     // blue-600 - ensures 4.5:1 contrast with white text
 
     // Transparent to use terminal's light background
     normal: 'transparent'
+  },
+  borders: {
+    // Border colors optimized for light backgrounds
+    primary: '#2563eb',      // blue-600 - darker primary borders
+    secondary: '#0891b2',    // cyan-600 - darker secondary borders
+    accent: '#7c3aed',       // violet-600 - darker accent borders
+    muted: '#9ca3af'         // gray-400 - subtle borders for light mode
   },
   contrastRatios: {
     minRatio: 4.5,

@@ -23,7 +23,12 @@ module.exports = {
     destructive: '#cc0000',  // Dark red
 
     // Text color for selected items (white for maximum contrast)
-    selectedText: '#ffffff'  // Pure white
+    selectedText: '#ffffff', // Pure white
+
+    // New color fields with maximum contrast
+    dimText: '#cccccc',      // Light gray - high contrast dim text
+    accent1: '#ff00ff',      // Pure magenta - high contrast accent
+    accent2: '#00ffff'       // Pure cyan - high contrast accent
   },
   backgrounds: {
     // High contrast background for selection
@@ -31,6 +36,13 @@ module.exports = {
 
     // Transparent to use terminal background
     normal: 'transparent'
+  },
+  borders: {
+    // Border colors with maximum contrast and visibility
+    primary: '#00ffff',      // Pure cyan - maximum visibility
+    secondary: '#00ff00',    // Pure green - maximum visibility
+    accent: '#ff00ff',       // Pure magenta - maximum visibility
+    muted: '#808080'         // Medium gray - still visible in high contrast
   },
   contrastRatios: {
     // WCAG 2.1 Level AAA minimum for normal text

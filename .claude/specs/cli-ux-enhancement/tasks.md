@@ -207,8 +207,8 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 9. Implementar IconMapper para ícones e símbolos
-  - [ ] 9.1 Criar classe IconMapper
+- [x] 9. Implementar IconMapper para ícones e símbolos
+  - [x] 9.1 Criar classe IconMapper
     - Injetar TerminalDetector via constructor
     - Definir DEFAULT_ICONS object com IconSet para cada action type (download, upload, settings, docs, stats, refresh, help, exit)
     - Implementar método `getIcon(actionType)` com fallback em cascata: emoji → unicode → ascii → plain
@@ -216,19 +216,19 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
     - Implementar método `getSelectionIndicator()` para marcador de seleção (▶ → > → *)
     - _Requirements: Requirement 7_
 
-  - [ ] 9.2 Implementar sistema de registro customizado
+  - [x] 9.2 Implementar sistema de registro customizado
     - Implementar método `registerIcon(actionType, iconSet)` para ícones personalizados
     - Implementar método `getCategoryIcon(category)` para ícones de categorias
     - Validar que IconSet possui todos os níveis (emoji, unicode, ascii, plain)
     - _Requirements: 7.7_
 
-  - [ ] 9.3 Implementar cache e otimização
+  - [x] 9.3 Implementar cache e otimização
     - Implementar cache de ícones resolvidos por action type
     - Invalidar cache quando terminal capabilities mudam
     - Logar fallbacks quando detecção força uso de nível inferior
     - _Requirements: 11.1_
 
-  - [ ] 9.4 Adicionar JSDoc completo
+  - [x] 9.4 Adicionar JSDoc completo
     - Documentar typedef IconSet (emoji, unicode, ascii, plain)
     - Documentar typedef StatusType ('success' | 'error' | 'warning' | 'info' | 'neutral')
     - Documentar DEFAULT_ICONS structure
@@ -236,10 +236,11 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
   - _Risk Level_: 🟢 Low (mapping simples)
   - _Estimated Effort_: 4-5 horas
+  - _Status_: ✅ COMPLETED
 
 ---
 
-- [ ] 10. Escrever testes unitários para IconMapper
+- [x] 10. Escrever testes unitários para IconMapper
   - Testar getIcon() para todos os action types padrão
   - Testar fallback emoji → unicode → ascii → plain
   - Testar getStatusIcon() para todos os status types
@@ -248,34 +249,35 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - Testar cache de ícones resolvidos
   - Testar invalidação de cache quando capabilities mudam
   - _Requirements: 13.4_
-  - _Target Coverage_: ≥ 80%
+  - _Target Coverage_: ≥ 80% (Achieved: 96.51% statements, 94.44% branches, 100% functions)
   - _Risk Level_: 🟢 Low (unit tests)
   - _Estimated Effort_: 2-3 horas
+  - _Status_: ✅ COMPLETED (117 tests passing)
 
 ---
 
-- [ ] 11. Estender ThemeEngine com novas cores
-  - [ ] 11.1 Adicionar novos campos à interface ThemeDefinition
+- [x] 11. Estender ThemeEngine com novas cores
+  - [x] 11.1 Adicionar novos campos à interface ThemeDefinition
     - Adicionar campo `colors.dimText` para texto secundário/esmaecido
     - Adicionar campos `colors.accent1` e `colors.accent2` para cores de destaque adicionais
     - Adicionar objeto `borders` com cores (primary, secondary, accent, muted)
     - Manter compatibilidade com campos existentes (primary, success, error, warning, info, highlight, muted, destructive)
     - _Requirements: Requirement 4_
 
-  - [ ] 11.2 Atualizar temas existentes com novos campos
+  - [x] 11.2 Atualizar temas existentes com novos campos
     - Atualizar `src/ui/menu/themes/default.js` com cores vibrantes e borders
     - Atualizar `src/ui/menu/themes/dark.js` com palette otimizada para fundo escuro
     - Atualizar `src/ui/menu/themes/light.js` com palette otimizada para fundo claro
     - Atualizar `src/ui/menu/themes/high-contrast.js` garantindo ratios WCAG AA (4.5:1 mínimo)
     - _Requirements: 4.1, 4.2, 4.3, 4.7, 12.3_
 
-  - [ ] 11.3 Adicionar métodos para aplicação de cores de borda
+  - [x] 11.3 Adicionar métodos para aplicação de cores de borda
     - Adicionar método `colorizeBorder(borderString, type)` no ThemeEngine
     - Suportar tipos: primary, secondary, accent, muted
     - Integrar com detecção de color level (degradar gracefully se sem suporte)
     - _Requirements: 3.6_
 
-  - [ ] 11.4 Atualizar validação de contraste
+  - [x] 11.4 Atualizar validação de contraste
     - Validar contraste de novas cores (dimText, accent1, accent2)
     - Validar contraste de border colors contra backgrounds
     - Garantir ratio mínimo 4.5:1 para texto normal, 3:1 para texto grande
@@ -284,10 +286,11 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
   - _Risk Level_: 🟡 Medium (modifica componente existente)
   - _Estimated Effort_: 4-6 horas
+  - _Status_: ✅ COMPLETED
 
 ---
 
-- [ ] 12. Escrever testes para extensões do ThemeEngine
+- [x] 12. Escrever testes para extensões do ThemeEngine
   - Testar que novos campos estão presentes em todos os temas (default, dark, light, high-contrast)
   - Testar colorizeBorder() aplica cores corretamente
   - Testar degradação de cores quando terminal não suporta
@@ -295,9 +298,10 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - Testar que tema high-contrast atende WCAG AA (ratio ≥ 4.5:1)
   - Validar que temas antigos sem novos campos ainda funcionam (backwards compatibility)
   - _Requirements: 13.4, 9.2_
-  - _Target Coverage_: ≥ 80% (extensões)
+  - _Target Coverage_: ≥ 80% (extensões) - Achieved: 129 tests passing
   - _Risk Level_: 🟢 Low (unit tests)
   - _Estimated Effort_: 3-4 horas
+  - _Status_: ✅ COMPLETED
 
 ---
 
