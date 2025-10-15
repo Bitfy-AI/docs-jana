@@ -99,8 +99,8 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 5. Implementar BorderRenderer para bordas decorativas
-  - [ ] 5.1 Criar classe BorderRenderer
+- [x] 5. Implementar BorderRenderer para bordas decorativas
+  - [x] 5.1 Criar classe BorderRenderer
     - Injetar TerminalDetector e VisualConstants via constructor
     - Implementar método `getCharSet(style)` que retorna BorderCharSet correto (Unicode ou ASCII)
     - Implementar método `renderTopBorder(width, style)` usando caracteres topLeft, horizontal, topRight
@@ -108,21 +108,21 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
     - Implementar método `renderSeparator(width, style)` para linhas divisórias
     - _Requirements: Requirement 3, 6.1, 6.3_
 
-  - [ ] 5.2 Implementar renderização de boxes
+  - [x] 5.2 Implementar renderização de boxes
     - Implementar método `renderBox(text, options)` que envolve texto em borda completa
     - Suportar opções de padding, align (left, center, right), style, color
     - Calcular largura automaticamente baseada em texto e padding
     - Aplicar cores via ThemeEngine quando disponível
     - _Requirements: Requirement 1, Requirement 3_
 
-  - [ ] 5.3 Implementar fallback em cascata
+  - [x] 5.3 Implementar fallback em cascata
     - Se Unicode não suportado → usar ASCII charset
     - Se ASCII falha → usar caracteres textuais simples (-, =, |, +)
     - Garantir que bordas sempre têm comprimento uniforme
     - Logar warnings quando fallback é ativado
     - _Requirements: Requirement 6, 6.2, 6.5_
 
-  - [ ] 5.4 Adicionar JSDoc completo
+  - [x] 5.4 Adicionar JSDoc completo
     - Documentar typedef BorderStyle ('single' | 'double' | 'bold' | 'rounded' | 'ascii')
     - Documentar typedef BorderBoxOptions (style, padding, align, color)
     - Adicionar exemplos de uso para cada método
@@ -130,6 +130,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
   - _Risk Level_: 🟡 Medium (lógica de fallback complexa)
   - _Estimated Effort_: 6-8 horas
+  - _Status_: ✅ COMPLETED
 
 ---
 
@@ -148,8 +149,8 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 7. Implementar LayoutManager para layout responsivo
-  - [ ] 7.1 Criar classe LayoutManager
+- [x] 7. Implementar LayoutManager para layout responsivo
+  - [x] 7.1 Criar classe LayoutManager
     - Injetar TerminalDetector e VisualConstants via constructor
     - Implementar método `getLayoutMode()` baseado em terminal width (expanded ≥100, standard ≥80, compact <80)
     - Implementar método `getContentWidth()` calculando terminalWidth - 2*margins
@@ -157,20 +158,20 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
     - Implementar método `getVerticalSpacing(sectionType)` para header, options, footer
     - _Requirements: Requirement 2, Requirement 8_
 
-  - [ ] 7.2 Implementar manipulação de texto
+  - [x] 7.2 Implementar manipulação de texto
     - Implementar método `truncateText(text, maxWidth, ellipsis)` para textos longos
     - Implementar método `wrapText(text, maxWidth)` com word-wrap inteligente
     - Implementar método `centerText(text, width)` para alinhamento central
     - Garantir que caracteres Unicode são contados corretamente (usando string-width se necessário)
     - _Requirements: 8.5, 8.6_
 
-  - [ ] 7.3 Implementar detecção de mudanças
+  - [x] 7.3 Implementar detecção de mudanças
     - Integrar com TerminalDetector.onResize() para recalcular layout
     - Implementar cache de layout calculations para performance
     - Invalidar cache quando terminal width muda
     - _Requirements: 8.4, 11.1_
 
-  - [ ] 7.4 Adicionar JSDoc completo
+  - [x] 7.4 Adicionar JSDoc completo
     - Documentar typedef LayoutMode ('expanded' | 'standard' | 'compact')
     - Documentar typedef LayoutConfig (mode, contentWidth, terminalWidth, padding, spacing)
     - Adicionar exemplos de cálculos de layout
@@ -178,10 +179,11 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
   - _Risk Level_: 🟡 Medium (cálculos complexos)
   - _Estimated Effort_: 6-7 horas
+  - _Status_: ✅ COMPLETED
 
 ---
 
-- [ ] 8. Escrever testes unitários para LayoutManager
+- [x] 8. Escrever testes unitários para LayoutManager
   - Testar determinação de layout mode para diferentes larguras (60, 80, 100, 120 columns)
   - Testar cálculo de contentWidth considerando margins
   - Testar truncateText() com diferentes tamanhos e ellipsis
@@ -190,9 +192,10 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - Testar recalculo de layout quando terminal é redimensionado
   - Testar cache invalidation
   - _Requirements: 13.4_
-  - _Target Coverage_: ≥ 80%
+  - _Target Coverage_: ≥ 80% (Achieved: 100% statements, 94.73% branches, 100% functions)
   - _Risk Level_: 🟢 Low (unit tests)
   - _Estimated Effort_: 3-4 horas
+  - _Status_: ✅ COMPLETED (70 tests passing)
 
 ---
 

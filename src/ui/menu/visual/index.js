@@ -4,11 +4,13 @@
  */
 
 const TerminalDetector = require('./TerminalDetector');
+const BorderRenderer = require('./BorderRenderer');
+const LayoutManager = require('./LayoutManager');
 
 // Components will be exported here as they are implemented
 module.exports = {
-  TerminalDetector
-  // BorderRenderer: require('./BorderRenderer'),
-  // LayoutManager: require('./LayoutManager'),
+  TerminalDetector,
+  BorderRenderer,
+  LayoutManager
   // IconMapper: require('./IconMapper'),
 };
