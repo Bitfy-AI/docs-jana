@@ -112,6 +112,37 @@ class SimpleLogger {
   }
 
   /**
+   * Mask sensitive data in messages
+   *
+   * @private
+   * @param {string} message - Message to mask
+   * @returns {string} Masked message
+   */
+  _maskSensitive(message) {
+    if (typeof message !== 'string') return message;
+
+    let masked = message;
+    const patterns = [
+      /\b(n8n_api_[a-zA-Z0-9_-]+)/gi,
+      /\b(Bearer\s+[a-zA-Z0-9_\-.]+)/gi,
+      /(password[:\s=]+)([^\s&,}]+)/gi,
+      /(apikey[:\s=]+)([^\s&,}]+)/gi,
+      /(token[:\s=]+)([^\s&,}]+)/gi
+    ];
+
+    patterns.forEach(pattern => {
+      masked = masked.replace(pattern, (match) => {
+        if (match.length > 3) {
+          return '*'.repeat(match.length - 3) + match.slice(-3);
+        }
+        return '***';
+      });
+    });
+
+    return masked;
+  }
+
+  /**
    * Log debug message
    *
    * @param {string} message - Message to log
@@ -119,7 +150,8 @@ class SimpleLogger {
    */
   debug(message, data) {
     if (!this._shouldLog('debug')) return;
-    const formatted = this._format('debug', message, data);
+    const masked = this._maskSensitive(message);
+    const formatted = this._format('debug', masked, data);
     console.log(formatted);
   }
 
@@ -131,7 +163,8 @@ class SimpleLogger {
    */
   info(message, data) {
     if (!this._shouldLog('info')) return;
-    const formatted = this._format('info', message, data);
+    const masked = this._maskSensitive(message);
+    const formatted = this._format('info', masked, data);
     console.log(formatted);
   }
 
@@ -143,7 +176,8 @@ class SimpleLogger {
    */
   warn(message, data) {
     if (!this._shouldLog('warn')) return;
-    const formatted = this._format('warn', message, data);
+    const masked = this._maskSensitive(message);
+    const formatted = this._format('warn', masked, data);
     console.warn(formatted);
   }
 
@@ -155,7 +189,8 @@ class SimpleLogger {
    */
   error(message, error) {
     if (!this._shouldLog('error')) return;
-    const formatted = this._format('error', message);
+    const masked = this._maskSensitive(message);
+    const formatted = this._format('error', masked);
     console.error(formatted);
 
     if (error instanceof Error) {
