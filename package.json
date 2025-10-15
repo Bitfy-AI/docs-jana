@@ -9,11 +9,8 @@
   "scripts": {
     "start": "node cli.js",
     "n8n:download": "node cli.js n8n:download",
-    "download:n8n": "node cli.js n8n:download",
     "n8n:upload": "node cli.js n8n:upload",
-    "upload:n8n": "node cli.js n8n:upload",
     "outline:download": "node cli.js outline:download",
-    "download:outline": "node cli.js outline:download",
     "n8n:configure": "node scripts/admin/n8n-transfer/cli/interactive-cli.js configure",
     "n8n:transfer": "node scripts/admin/n8n-transfer/cli/interactive-cli.js transfer",
     "n8n:validate": "node scripts/admin/n8n-transfer/cli/interactive-cli.js validate",
