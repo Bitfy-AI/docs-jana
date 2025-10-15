@@ -1,7 +1,8 @@
 # Status da Especificação: CLI Unification & UX Improvement
 
 **Criado**: 2025-10-14
-**Status**: Em andamento - Design completo
+**Atualizado**: 2025-10-15
+**Status**: Em andamento - Requirements completo
 **Prioridade**: ALTA
 
 ## Documentos Criados

@@ -15,7 +15,7 @@
 const path = require('path');
 const ConfigLoader = require('./config-loader');
 const PluginRegistry = require('./plugin-registry');
-const HttpClient = require('./http-client');
+const { N8NHttpClient } = require('../../../../src/core/http');
 const Logger = require('./logger');
 const { validateTransferOptions } = require('./types');
 
@@ -121,14 +121,14 @@ class TransferManager {
       // Validar que SOURCE e TARGET existem
       this._validateConfig(this.config);
 
-      // Inicializar HttpClients (um para SOURCE, outro para TARGET)
-      this.logger.debug('Initializing HttpClients for SOURCE and TARGET');
-      this.sourceClient = new HttpClient({
+      // Inicializar N8NHttpClients (um para SOURCE, outro para TARGET)
+      this.logger.debug('Initializing N8NHttpClients for SOURCE and TARGET');
+      this.sourceClient = N8NHttpClient.create({
         baseUrl: this.config.SOURCE.url,
         apiKey: this.config.SOURCE.apiKey,
         logger: this.logger
       });
-      this.targetClient = new HttpClient({
+      this.targetClient = N8NHttpClient.create({
         baseUrl: this.config.TARGET.url,
         apiKey: this.config.TARGET.apiKey,
         logger: this.logger
