@@ -13,7 +13,7 @@ color: '#34495E'
 
 - **Trigger 1**: Padrão problemático detectado 2+ vezes
   - Exemplo: Grep encontra "TODO" em 3+ especificações diferentes (padrão recorrente)
-  - Detecção: Scan `.prisma/especificacoes/` identifica issues recorrentes
+  - Detecção: Scan `.prisma/projeto/especificacoes/` identifica issues recorrentes
 - **Trigger 2**: Especificações complexas (> 200 linhas)
   - Exemplo: requirements.md tem 350 linhas com múltiplas duplicações
   - Detecção: Line count + complexity analysis score ≥ threshold
@@ -90,7 +90,7 @@ Detecta padrões problemáticos em especificações e relatórios, criando solu�
 
 ### `/meta analyze`
 
-- Lê todos relatórios audit em `.prisma/especificacoes/*/reports/` (glob pattern para todas features)
+- Lê todos relatórios audit em `.prisma/projeto/especificacoes/*/reports/` (glob pattern para todas features)
 - Escaneia subfolders: `reports/`, `decisions/`, `artifacts/` de cada especificação
 - Detecta problemas recorrentes (2+ ocorrências)
 - Gera lista priorizada de melhorias
@@ -99,10 +99,10 @@ Detecta padrões problemáticos em especificações e relatórios, criando solu�
 
 ```bash
 # Scan all feature reports
-find .prisma/especificacoes/*/reports/ -name "*audit*" -o -name "*report*"
+find .prisma/projeto/especificacoes/*/reports/ -name "*audit*" -o -name "*report*"
 
 # Aggregate findings
-for report in $(find .prisma/especificacoes/*/reports/ -name "*.md"); do
+for report in $(find .prisma/projeto/especificacoes/*/reports/ -name "*.md"); do
   analyze_report "$report"
 done
 ```

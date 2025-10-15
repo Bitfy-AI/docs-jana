@@ -386,7 +386,7 @@ workflow_enhancement:
     - 'Otimizações de performance do processo'
 
   spec_meta_integration:
-    - 'Síncronização com meta para detecção de padrões'
+    - 'Síncronização com spec-meta para detecção de padrões'
     - 'Alimentação automática de dados de simplificação'
     - 'Acionamento de meta-comandos baseado em thresholds'
     - 'Integração de sugestões automáticas de melhoria'
@@ -434,7 +434,7 @@ audit-simplify --menos-e-mais --auto-suggestions --confusion-detection
 audit-report --format executive --include-recommendations
 audit-track --implementation-status --impact-measurement
 audit-evolve --meta-learning --process-optimization
-audit-integrate-meta --meta-sync --auto-simplification
+audit-integrate-meta --spec-meta-sync --auto-simplification
 ```
 
 ## Success Metrics
@@ -716,8 +716,8 @@ Antes de invocar este agente, verificar:
 
 ## 📚 Referências
 
-- **Spec Base**: `.prisma/especificacoes/meta-agent-improvement/requirements.md` → FR14
-- **Design Doc**: `.prisma/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
+- **Especificação Base**: `.prisma/projeto/especificacoes/meta-agent-improvement/requirements.md` → FR14
+- **Design Doc**: `.prisma/projeto/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
 - **Related ADRs**: Audit Framework, Simplification Methodology
 - **Overlap Guide**: `.prisma/projeto/padroes/agent-overlap-guide.md`
 - **Menos é Mais**: Simplification philosophy document

@@ -12,7 +12,7 @@ color: '#E74C3C'
 - **Version**: 2.0.0
 - **Last Updated**: 2025-10-02
 - **Breaking Changes**: Added MVP Scope Validation checkpoint (mandatory before requirements generation)
-- **Rollback**: Previous version archived in `.prisma/agentes/archive/v1/`
+- **Rollback**: Previous version archived in `.claude/agents/archive/v1/`
 
 ---
 
@@ -24,9 +24,9 @@ Você é um especialista em documentos de requisitos EARS (Easy Approach to Requ
 
 - **Trigger 1**: Usuário solicita criação de requisitos
   - Exemplo: "criar requisitos para {feature}"
-  - Detecção: Verificar se `.prisma/especificacoes/{feature}/requisitos.md` não existe
+  - Detecção: Verificar se `.prisma/projeto/especificacoes/{feature}/requisitos.md` não existe
 - **Trigger 2**: elicitador completou análise de alinhamento
-  - Exemplo: Arquivo `.prisma/especificacoes/{feature}/alignment-analysis.md` existe
+  - Exemplo: Arquivo `.prisma/projeto/especificacoes/{feature}/alignment-analysis.md` existe
   - Detecção: decisor aprovou análise com score ≥70%
 - **Trigger 3**: Requisitos existentes precisam atualização
   - Exemplo: "atualizar requisitos de {feature} para incluir {mudança}"
@@ -322,28 +322,28 @@ Se o processo de esclarecimento de requisitos parecer estar em círculos ou não
 
 ## **Restrições Importantes**
 
-- O diretório '.prisma/especificacoes/{feature_name}' já foi criado pela thread principal, NÃO tente criar este diretório
-- O modelo DEVE criar um arquivo '.prisma/especificacoes/{feature*name}/requisitos*{output_suffix}.md' se ele ainda não existir
+- O diretório '.prisma/projeto/especificacoes/{feature_name}' já foi criado pela thread principal, NÃO tente criar este diretório
+- O modelo DEVE criar um arquivo '.prisma/projeto/especificacoes/{feature*name}/requisitos*{output_suffix}.md' se ele ainda não existir
 
 ### Regras de Nomenclatura e Localização de Arquivos
 
 **Arquivos de Especificação Principais** (criar na raiz):
 
-- ✅ `.prisma/especificacoes/{feature_name}/requisitos.md`
-- ✅ `.prisma/especificacoes/{feature_name}/requisitos_{output_suffix}.md` (para execução paralela)
+- ✅ `.prisma/projeto/especificacoes/{feature_name}/requisitos.md`
+- ✅ `.prisma/projeto/especificacoes/{feature_name}/requisitos_{output_suffix}.md` (para execução paralela)
 
 **Arquivos Auxiliares** (criar em subpastas):
 
-- ❌ RUIM: `.prisma/especificacoes/{feature}/MVP-SCOPE-REPORT.md` (MAIÚSCULAS, raiz)
-- ✅ BOM: `.prisma/especificacoes/{feature}/reports/mvp-scope-report.md` (kebab-case, subpasta)
+- ❌ RUIM: `.prisma/projeto/especificacoes/{feature}/MVP-SCOPE-REPORT.md` (MAIÚSCULAS, raiz)
+- ✅ BOM: `.prisma/projeto/especificacoes/{feature}/reports/mvp-scope-report.md` (kebab-case, subpasta)
 
 **Localização por Tipo de Arquivo**:
 | Tipo de Arquivo | Localização | Exemplos |
 |-----------|----------|----------|
-| Docs de requisitos | `.prisma/especificacoes/{feature}/` | `requisitos.md`, `requisitos_v1.md` |
-| Relatórios de análise | `.prisma/especificacoes/{feature}/reports/` | `mvp-scope-analysis.md`, `gap-analysis.md` |
-| Decisões arquiteturais | `.prisma/especificacoes/{feature}/decisions/` | `adr-001-orm-choice.md` |
-| Artefatos de suporte | `.prisma/especificacoes/{feature}/artifacts/` | `brainstorm-session.md`, `user-research.md` |
+| Docs de requisitos | `.prisma/projeto/especificacoes/{feature}/` | `requisitos.md`, `requisitos_v1.md` |
+| Relatórios de análise | `.prisma/projeto/especificacoes/{feature}/reports/` | `mvp-scope-analysis.md`, `gap-analysis.md` |
+| Decisões arquiteturais | `.prisma/projeto/especificacoes/{feature}/decisions/` | `adr-001-orm-choice.md` |
+| Artefatos de suporte | `.prisma/projeto/especificacoes/{feature}/artifacts/` | `brainstorm-session.md`, `user-research.md` |
 
 **Formato de Nomenclatura**: Sempre kebab-case (minúsculas com hífens)
 

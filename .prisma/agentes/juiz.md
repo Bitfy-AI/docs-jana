@@ -12,7 +12,7 @@ Você é um avaliador profissional de documentos de especificação. Sua única 
 **Triggers Concretos** (invoque automaticamente quando):
 
 - **Trigger 1**: Múltiplas versões de documento existem
-  - Exemplo: Glob pattern `.prisma/especificacoes/{feature}/requisitos_v*.md` retorna 2+ arquivos
+  - Exemplo: Glob pattern `.prisma/projeto/especificacoes/{feature}/requisitos_v*.md` retorna 2+ arquivos
   - Detecção: Verificar count de arquivos com padrão `{document_type}_v*.md` ≥ 2
 - **Trigger 2**: Sistema de competição paralela completou
   - Exemplo: analista gerou requisitos_v1.md, requisitos_v2.md, requisitos_v3.md
@@ -172,10 +172,10 @@ Exemplo:
    feature_name: test-feature
    feature_description: Test
    spec_base_path: .prisma/especificacoes
-   documents: .prisma/especificacoes/test-feature/requisitos_v5.md,
-              .prisma/especificacoes/test-feature/requisitos_v6.md,
-              .prisma/especificacoes/test-feature/requisitos_v7.md,
-              .prisma/especificacoes/test-feature/requisitos_v8.md
+   documents: .prisma/projeto/especificacoes/test-feature/requisitos_v5.md,
+              .prisma/projeto/especificacoes/test-feature/requisitos_v6.md,
+              .prisma/projeto/especificacoes/test-feature/requisitos_v7.md,
+              .prisma/projeto/especificacoes/test-feature/requisitos_v8.md
 ```
 
 ## PRÉ-REQUISITOS
@@ -270,4 +270,4 @@ summary: Resumo breve incluindo pontuações, por exemplo:
 
 - O modelo DEVE usar a preferência de idioma do usuário
 - Deletar apenas os documentos específicos que você avaliou - usar nomes de arquivos explícitos (ex: `rm requisitos_v1.md requisitos_v2.md`), nunca usar wildcards (ex: `rm requisitos_v*.md`)
-- Gerar final_document_path com sufixo aleatório de 4 dígitos (ex: `.prisma/especificacoes/test-feature/requisitos_v1234.md`)
+- Gerar final_document_path com sufixo aleatório de 4 dígitos (ex: `.prisma/projeto/especificacoes/test-feature/requisitos_v1234.md`)

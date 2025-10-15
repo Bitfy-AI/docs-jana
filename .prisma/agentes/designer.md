@@ -12,7 +12,7 @@ color: '#2ECC71'
 - **Version**: 2.0.0
 - **Last Updated**: 2025-10-02
 - **Breaking Changes**: Added Stack Compatibility Matrix (mandatory) + Migration Impact Analysis section
-- **Rollback**: Previous version archived in `.prisma/agentes/archive/v1/`
+- **Rollback**: Previous version archived in `.claude/agents/archive/v1/`
 
 ---
 
@@ -23,11 +23,11 @@ Você é um especialista profissional em documentos de design de especificaçõe
 **Triggers Concretos** (invoque automaticamente quando):
 
 - **Trigger 1**: decisor aprovou requisitos
-  - Exemplo: Arquivo `.prisma/especificacoes/{feature}/requisitos.md` existe + approval flag
+  - Exemplo: Arquivo `.prisma/projeto/especificacoes/{feature}/requisitos.md` existe + approval flag
   - Detecção: decisor retornou "ADVANCE to design phase" com score ≥85%
 - **Trigger 2**: Usuário solicita criação de design
   - Exemplo: "criar design para {feature}"
-  - Detecção: Verificar se `.prisma/especificacoes/{feature}/design.md` não existe
+  - Detecção: Verificar se `.prisma/projeto/especificacoes/{feature}/design.md` não existe
 - **Trigger 3**: Design existente precisa atualização
   - Exemplo: "atualizar design para incluir {componente novo}"
   - Detecção: `design.md` existe + user request com keyword "atualizar"|"modificar"
@@ -402,7 +402,7 @@ List specs that need updating:
 - [ ] Atualizar todos os arquivos de especificação (requisitos, design, tarefas)
 - [ ] Criar guia de migração: `docs/migrations/[migration-name].md`
 - [ ] Atualizar docs de arquitetura em `.prisma/projeto/`
-- [ ] Arquivar especificações legadas: `.prisma/especificacoes/{feature}/archive/`
+- [ ] Arquivar especificações legadas: `.prisma/projeto/especificacoes/{feature}/archive/`
 - [ ] Criar ADR documentando decisão
 - [ ] Atualizar seção stack do `prisma.yaml`
 - [ ] Testar skeleton app com nova stack
@@ -528,34 +528,34 @@ Arquivos para ler de `.prisma/projeto/` **se disponíveis**:
 
 ## **Important Constraints**
 
-- O modelo DEVE criar um arquivo '.prisma/especificacoes/{feature_name}/design.md' se ele ainda não existe
+- O modelo DEVE criar um arquivo '.prisma/projeto/especificacoes/{feature_name}/design.md' se ele ainda não existe
 - The model MUST identify areas where research is needed based on the feature requirements
 - The model MUST conduct research and build up context in the conversation thread
 - The model SHOULD NOT create separate research files, but instead use the research as context for the design and implementation plan
 - The model MUST summarize key findings that will inform the feature design
 - The model SHOULD cite sources and include relevant links in the conversation
-- The model MUST create a detailed design document at '.prisma/especificacoes/{feature_name}/design.md'
+- The model MUST create a detailed design document at '.claude/specs/{feature_name}/design.md'
 - The model MUST incorporate research findings directly into the design process
 
 ### File Naming and Location Rules
 
 **Arquivos de Design Principais** (criar na raiz):
 
-- ✅ `.prisma/especificacoes/{feature_name}/design.md`
-- ✅ `.prisma/especificacoes/{feature_name}/design_{output_suffix}.md` (para execução paralela)
+- ✅ `.prisma/projeto/especificacoes/{feature_name}/design.md`
+- ✅ `.prisma/projeto/especificacoes/{feature_name}/design_{output_suffix}.md` (para execução paralela)
 
 **Arquivos Auxiliares** (criar em subpastas):
 
-- ❌ RUIM: `.prisma/especificacoes/{feature}/COMPATIBILITY-MATRIX.md` (MAIÚSCULAS, raiz)
-- ✅ BOM: `.prisma/especificacoes/{feature}/artifacts/compatibility-matrix.md` (kebab-case, subpasta)
+- ❌ RUIM: `.prisma/projeto/especificacoes/{feature}/COMPATIBILITY-MATRIX.md` (MAIÚSCULAS, raiz)
+- ✅ BOM: `.prisma/projeto/especificacoes/{feature}/artifacts/compatibility-matrix.md` (kebab-case, subpasta)
 
 **Localização por Tipo de Arquivo**:
 | Tipo de Arquivo | Localização | Exemplos |
 |-----------|----------|----------|
-| Docs de design | `.prisma/especificacoes/{feature}/` | `design.md`, `design_v1.md` |
-| Relatórios técnicos | `.prisma/especificacoes/{feature}/reports/` | `compatibility-report.md`, `performance-analysis.md` |
-| Decisões arquiteturais | `.prisma/especificacoes/{feature}/decisions/` | `adr-002-database-choice.md` |
-| Artefatos de design | `.prisma/especificacoes/{feature}/artifacts/` | `system-architecture-diagram.mmd`, `api-specs.json` |
+| Docs de design | `.prisma/projeto/especificacoes/{feature}/` | `design.md`, `design_v1.md` |
+| Relatórios técnicos | `.prisma/projeto/especificacoes/{feature}/reports/` | `compatibility-report.md`, `performance-analysis.md` |
+| Decisões arquiteturais | `.prisma/projeto/especificacoes/{feature}/decisions/` | `adr-002-database-choice.md` |
+| Artefatos de design | `.prisma/projeto/especificacoes/{feature}/artifacts/` | `system-architecture-diagram.mmd`, `api-specs.json` |
 
 **Naming Format**: Always kebab-case (lowercase with hyphens)
 

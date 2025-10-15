@@ -11,8 +11,8 @@ color: '#27AE60'
 
 - **Version**: 2.0.0
 - **Last Updated**: 2025-10-03
-- **Breaking Changes**: Renamed from documentador-specs to documentador + Migration to Prisma workflow
-- **Rollback**: Previous version archived in `.prisma/agentes/archive/documentador-specs.md`
+- **Breaking Changes**: Renamed from spec-docs to documentador + Migration to Prisma workflow
+- **Rollback**: Previous version archived in `.prisma/agents/archive/spec-docs.md`
 
 ---
 
@@ -409,7 +409,7 @@ Create documents P0 → P1 → P2 → P3
 For EACH document:
 
 1. Use appropriate template (ADR, pattern doc, API reference)
-2. Follow structure from `.prisma/templates/`
+2. Follow structure from `.claude/templates/`
 3. Cross-reference related docs
 4. Update index/README if needed
 
@@ -477,7 +477,7 @@ Examples:
 
 ### IF tied to specific feature/epic
 
-→ **Location**: `.prisma/especificacoes/{feature-name}/`
+→ **Location**: `.prisma/projeto/especificacoes/{feature-name}/`
 
 Examples:
 
@@ -504,7 +504,7 @@ Examples:
 | ADRs                  | Future team      | `docs/decisions/`         | `001-remove-nextauth.md`   |
 | API Reference         | End users        | `docs/api/`               | `analysis-api.md`          |
 | Setup Guide           | End users        | `docs/`                   | `setup.md`                 |
-| Feature Specs         | Agents           | `.prisma/especificacoes/` | `epic-1/requirements.md`   |
+| Feature Specs         | Agents           | `.prisma/projeto/especificacoes/` | `epic-1/requirements.md`   |
 
 ## 🗄️ LEGACY DOCUMENTATION ARCHIVAL
 
@@ -524,7 +524,7 @@ Archive docs automatically when:
 
 3. **Especificação Supersedida**
    - Keyword: "updated spec", "new version"
-   - Action: Move old spec to `.prisma/especificacoes/{feature}/archive/`
+   - Action: Move old spec to `.prisma/projeto/especificacoes/{feature}/archive/`
 
 ### Archive Process
 
@@ -650,7 +650,7 @@ docs/                                      # APPLICATION user documentation (sim
 | ------------------------- | -------------------------- | ---------------------- | -------------------------------------------- | ------------------ |
 | `.prisma/projeto/`        | **Technical project docs** | Developers, architects | Architecture, decisions, technical processes | **arquiteto**      |
 | `docs/`                   | **Application user docs**  | End users, integrators | User guides, API usage, deployment           | **documentador**   |
-| `.prisma/especificacoes/` | **Feature specifications** | Feature developers     | Requirements, design, tasks                  | **Agentes Prisma** |
+| `.prisma/projeto/especificacoes/` | **Feature specifications** | Feature developers     | Requirements, design, tasks                  | **Agentes Prisma** |
 | `.prisma/relatorios/`     | **Framework diagnostics**  | Framework maintainers  | Compliance, improvement analysis             | **conformista**    |
 
 **CRITICAL**: `.prisma/projeto/` contains **technical documentation for DEVELOPMENT**, while `docs/` contains **user documentation for APPLICATION USAGE**.

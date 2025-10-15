@@ -389,7 +389,7 @@ flowchart TD
 | Cenário                                                       | Arquivos | Cross-Refs | Validação | Coordenação | Pontos | Executor                         | Justificativa                            |
 | ------------------------------------------------------------- | -------- | ---------- | --------- | ----------- | ------ | -------------------------------- | ---------------------------------------- |
 | **Tarefas Simples (0-15 pts - Orquestrador Executa)**         |
-| Ler prisma.yaml                                               | 1        | 0          | Simples   | 0           | 5      | Orquestrador                     | Leitura única, sem validação             |
+| Ler kfc-settings.json                                         | 1        | 0          | Simples   | 0           | 5      | Orquestrador                     | Leitura única, sem validação             |
 | Grep para "MVP" em especificação                              | 1        | 0          | Simples   | 0           | 5      | Orquestrador                     | Busca única                              |
 | Renomear 1 arquivo com git mv                                 | 1        | 1-2        | Simples   | 0           | 8      | Orquestrador                     | Operação simples, poucas refs            |
 | Atualizar número de versão em 1 arquivo                       | 1        | 0          | Simples   | 0           | 5      | Orquestrador                     | Mudança de valor único                   |
@@ -405,7 +405,7 @@ flowchart TD
 | Adicionar checkpoint MVP ao analista                          | 1        | 1-2        | Lógica    | 0           | 16     | Contextual                       | Arquivo único, mudança lógica            |
 | Criar agent-decision-matrix.md                                | 1        | 0          | Lógica    | 5           | 18     | Contextual                       | Novo doc, saídas de agentes              |
 | Renomear 5 arquivos de MAIÚSCULAS para kebab-case             | 5        | 6+         | Simples   | 0           | 23     | Contextual                       | Muitos arquivos, muitas refs             |
-| Atualizar prisma.yaml com 3 seções                            | 1        | 0          | Lógica    | 0           | 16     | Contextual                       | Arquivo único, estrutura lógica          |
+| Atualizar kfc-settings.json com 3 seções                      | 1        | 0          | Lógica    | 0           | 16     | Contextual                       | Arquivo único, estrutura lógica          |
 | Validar referências cruzadas em especificação                 | 3        | 6+         | Lógica    | 0           | 25     | Contextual                       | Múltiplos arquivos, validação            |
 | Comparar 2 versões de requisitos.md                           | 2        | 0          | Lógica    | 0           | 18     | Contextual                       | Múltiplos arquivos, análise              |
 | Extrair lições de 3 ADRs                                      | 3        | 0          | Domínio   | 0           | 20     | Contextual                       | Múltiplos arquivos, expertise            |

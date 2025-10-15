@@ -6,11 +6,11 @@ language:
   fallback: en-US
 
 agents:
-  # Configuração para agentes Prisma
-  prisma:
+  # Configuração para agentes KFC
+  kfc:
     language: pt-BR
     responses:
-      greeting: 'Olá! Sou o agente Prisma para desenvolvimento orientado a especificações.'
+      greeting: 'Olá! Sou o agente KFC para desenvolvimento orientado a especificações.'
       requirements_prompt: 'Vou gerar os requisitos em formato EARS para sua funcionalidade.'
       design_prompt: 'Criando o design técnico baseado nos requisitos aprovados.'
       tasks_prompt: 'Gerando lista de tarefas a partir do design.'
@@ -31,7 +31,7 @@ agents:
     primary_docs:
       - 'docs/stories/README.md'
       - '.bmad-core/execution-chain-framework.md'
-      - '.prisma/prompts/prisma-prompt.md'
+      - '.claude/system-prompts/spec-workflow-starter.md'
     responses:
       greeting: '🎯 Orquestrador Unificado inicializado em português!'
       status_check: 'Verificando status atual do projeto e stories...'
@@ -61,7 +61,7 @@ technical_terms_keep_english:
   - JavaScript
   - React
   - Next.js
-
+  - Payload CMS
 
 # Mapeamento de comandos
 command_mapping:
@@ -92,7 +92,7 @@ system_messages:
 
 # Configurações de documentação
 documentation:
-  auto_translate: true # Não traduzir automaticamente código e documentação técnica
+  auto_translate: false # Não traduzir automaticamente código e documentação técnica
   preserve_code_comments: true # Preservar comentários em código em inglês
   stories_path: 'docs/stories/README.md'
   primary_language: pt-BR

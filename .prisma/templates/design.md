@@ -7,8 +7,7 @@
 - **Última Atualização**: {DATA}
 - **Status**: Rascunho
 - **Versão**: 0.1.0
-- **Baseado em Requisitos**: `requisitos.md` v{VERSAO}
-- **Localização**: `.prisma/especificacoes/{nome-da-feature}/design.md`
+- **Baseado em Requisitos**: requisitos.md v{VERSAO}
 
 ## Resumo Executivo
 
@@ -441,11 +440,3 @@ graph LR
 - Clean Architecture
 - DRY (Don't Repeat Yourself)
 - KISS (Keep It Simple, Stupid)
-
-**Notas**:
-
-- Este arquivo é criado pelo agente **arquiteto** e está localizado em `.prisma/especificacoes/{nome-da-feature}/design.md`
-- Documentos relacionados: `requisitos.md`, `tarefas.md`
-- Relatórios são salvos em `.prisma/especificacoes/{nome-da-feature}/relatorios/`
-- Decisões são registradas em `.prisma/especificacoes/{nome-da-feature}/decisoes/`
-- Artefatos são armazenados em `.prisma/especificacoes/{nome-da-feature}/artefatos/`

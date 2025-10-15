@@ -420,7 +420,7 @@ context_inputs:
 
 ```yaml
 exploration_document:
-  location: .prisma/especificacoes/{feature-name}/exploration-session.md
+  location: .prisma/projeto/especificacoes/{feature-name}/exploration-session.md
   format: structured_comprehensive_markdown
   quality: documentation_rich
 

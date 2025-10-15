@@ -1,19 +1,55 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: P3 Quality Refinements - Test Polish & TypeScript Support\n\nImplemented Priority 3 (optional) quality improvements to achieve 94/100 score.\n\n## P3 Improvements (Nice to Have)\n\n### P3.1: Test Output Polish\n- Suppressed deprecation warnings in backwards compatibility tests\n- Added dedicated test to validate deprecation warning in development mode\n- Clean test output without noise\n\n### P3.2: Performance Test Enhancements\n- Added warmup helper function (3 iterations) to eliminate JIT cold-start\n- Enhanced performance tests with warmup before benchmarking\n- Added consecutive render efficiency test (10 renders, <50ms avg)\n- Result: More accurate, stable performance measurements\n\n### P3.3: TypeScript Support\n- Created UIRenderer.d.ts with complete type definitions (211 lines)\n- Full interface definitions for all public APIs\n- Deprecation warnings in TypeScript for legacy methods\n- IDE autocomplete and inline documentation support\n\n### P3.4: Documentation Update\n- Updated PROJECT_COMPLETION_REPORT.md with Phase 4 section (~170 lines)\n- Documented P1+P2+P3 improvement cycle (88 → 92 → 94 score)\n- Performance benchmarks, quality metrics, production readiness\n\n## Test Results\n\nTotal Tests: 56 (was 54, +2 new tests)\nPass Rate: 100% (56/56)\nNew Tests:\n- Deprecation warning validation test\n- Consecutive render efficiency test\n\n## Final Metrics\n\nOverall Score: 94/100 (+2 from P1+P2)\nTest Coverage: 90%+\nPerformance: All benchmarks 80-96% faster than targets\nTypeScript Support: Full .d.ts definitions\nDocumentation: Complete\n\n## Files Modified\n\n1. __tests__/unit/ui/menu/components/UIRenderer.test.js (+~100 lines)\n   - Warmup helper function\n   - Deprecation warning test\n   - Consecutive render test\n   - Console.warn suppression\n\n2. src/ui/menu/components/UIRenderer.d.ts (211 lines, NEW)\n   - Complete TypeScript definitions\n   - Interface definitions\n   - Deprecation annotations\n\n3. PROJECT_COMPLETION_REPORT.md (+~170 lines)\n   - Phase 4 comprehensive section\n   - P1+P2+P3 improvement cycle documented\n\n4. .claude/settings.local.json (minor)\n   - Local settings update\n\n## Code Review Progression\n\n- Initial Score: 88/100\n- After P1+P2: 92/100 (+4)\n- After P3: 94/100 (+2)\n\n## Quality Gates Status\n\n✅ Code Quality: 94/100 (Excellent)\n✅ Security: 92/100 (No issues)\n✅ Performance: 95/100 (Exceeds targets by 80-96%)\n✅ Testing: 98/100 (90%+ coverage, 56 tests)\n✅ Standards: 92/100 (Full compliance)\n\nSpec: .claude/specs/cli-ux-enhancement/\nPhase: 4/7 (UIRenderer Integration) - P3 POLISH COMPLETE\nQuality Score: 94/100 (Excellent)\nStatus: READY FOR PRODUCTION MERGE\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git log:*)",
-      "Bash(git reset:*)",
-      "Bash(git commit:*)",
-      "Bash(mkdir:*)",
-      "Bash(cat:*)",
-      "SlashCommand(/prisma:implementacao:paralela temos que criar um sistema de menu MUITO mais simples e claro\n\nRequisitos CORRETOS:\n\nMenu quando roda `pnpm start`:\n\n```\nJANA WORKFLOWS\n\n[1] Configurar N8N Destino (atual: https://flows.example.com)\n[2] Baixar Workflows do N8N Source (salva em: n8n/workflows/)\n[3] Comparar Workflows (Local vs N8N Target)\n[4] Simular Envio (Dry Run - não modifica nada)\n[5] Enviar Workflows para N8N (ATENÇÃO: modifica workflows!)\n[6] Baixar Documentação do Outline (apenas DEV)\n[7] Ver Histórico\n[0] Sair\n```\n\nDetalhes:\n\n1. **Configurar N8N**: Mostrar URL configurada SEMPRE entre parênteses\n2. **Baixar Workflows**: SEMPRE salva em `n8n/workflows/` (sem timestamp), SEMPRE substitui pasta anterior\n3. **Comparar**: Nova opção que mostra diffs de versões (AAA-AAA-001 vs AAA-AAA-002)\n4. **Dry Run**: Nova opção separada, roda `n8n:upload --dry-run` internamente\n5. **Enviar**: Roda `n8n:upload` (sem dry-run)\n6. **Outline**: Só aparece se NODE_ENV !== 'production'\n7. **Histórico**: Melhorado com stack traces de erros\n\nImplementar comandos:\n- `n8n:compare` - compara local vs target\n- `n8n:dry-run` - wrapper para n8n:upload --dry-run\n\nE corrigir:\n- Nomes de arquivos COM ESPAÇOS (não underscores)\n- Sempre mesma pasta n8n/workflows/)",
-      "SlashCommand(/prisma:implementacao:paralela:*)",
-      "Bash(git add:*)",
-      "Bash(mv:*)"
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Task",
+      "Bash(npm run build:*)",
+      "Bash(docker-compose:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(test:*)",
+      "Bash(npx tsx:*)",
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "SlashCommand(/prisma:implementacao-paralela ultrathink)",
+      "SlashCommand(/prisma:implementacao-paralela:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "bypassPermissions"
   },
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/invoke-documentador.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"✅ Arquivo salvo: $CLAUDE_FILE_PATHS\" >&2"
+          }
+        ]
+      }
+    ]
+  }
 }

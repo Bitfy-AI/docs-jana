@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Workflow de Especificações
 
-Este repositório utiliza o **Prisma Spec Workflow** para desenvolvimento de features complexas.
+Este repositório utiliza o **KFC Spec Workflow** para desenvolvimento de features complexas.
 
 **IMPORTANTE:** Quando você iniciar uma conversa ou o usuário solicitar trabalho com specs, você DEVE:
 

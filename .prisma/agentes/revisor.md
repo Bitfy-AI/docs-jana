@@ -632,13 +632,13 @@ Antes de invocar este agente, verificar:
 
 ## 📚 Referências
 
-- **Spec Base**: `.prisma/especificacoes/meta-agent-improvement/requirements.md` → FR14
-- **Design Doc**: `.prisma/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
+- **Spec Base**: `.claude/specs/meta-agent-improvement/requirements.md` → FR14
+- **Design Doc**: `.claude/specs/meta-agent-improvement/design.md` → Section 17 (Activation Context)
 - **Related ADRs**: Code Review Standards, Security Checklist
-- **Overlap Guide**: `.prisma/docs/agent-overlap-guide.md`
+- **Overlap Guide**: `.claude/docs/agent-overlap-guide.md`
 
 ---
 
 **Template Version**: 1.0
 **Last Updated**: 2025-10-02
-**Maintainer**: meta agent
+**Maintainer**: spec-meta agent

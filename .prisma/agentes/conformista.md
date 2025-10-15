@@ -25,7 +25,7 @@ Agente especializado em verificar conformidade com regras, padrões e convençõ
   - Exemplo: Arquivos em `docs/{feature}/` foram criados
   - Detecção: decisor solicita "validate compliance before final approval"
 - **Trigger 2**: Pré-commit hook acionado
-  - Exemplo: Git pre-commit detecta mudanças em `.prisma/especificacoes/` ou `docs/`
+  - Exemplo: Git pre-commit detecta mudanças em `.prisma/projeto/especificacoes/` ou `docs/`
   - Detecção: Hook script chama conformista automaticamente
 - **Trigger 3**: Usuário solicita auditoria de conformidade
   - Exemplo: "validar conformidade de {feature}" ou "check compliance"
@@ -155,14 +155,14 @@ import { something } from 'somewhere';
 ```
 
 **Automated Enforcement:**
-Use `.prisma/scripts/rename-to-kebab-case.sh` to scan and fix naming violations:
+Use `.claude/scripts/rename-to-kebab-case.sh` to scan and fix naming violations:
 
 ```bash
 # Preview changes
-bash .prisma/scripts/rename-to-kebab-case.sh --dry-run
+bash .claude/scripts/rename-to-kebab-case.sh --dry-run
 
 # Execute fixes
-bash .prisma/scripts/rename-to-kebab-case.sh
+bash .claude/scripts/rename-to-kebab-case.sh
 ```
 
 ### 2. Estrutura de Arquivos
@@ -200,7 +200,7 @@ bash .prisma/scripts/rename-to-kebab-case.sh
 
 ```yaml
 especificacoes_structure:
-  base_path: '.prisma/especificacoes/'
+  base_path: '.prisma/projeto/especificacoes/'
   feature_naming: kebab-case # developer-experience-dashboard
   required_files:
     - requirements.md
@@ -210,7 +210,7 @@ especificacoes_structure:
     - IMPLEMENTATION-SUMMARY.md
     - changelog.md
     - migration.md
-  reports_path: '.prisma/especificacoes/*/reports/'
+  reports_path: '.prisma/projeto/especificacoes/*/reports/'
 ```
 
 #### Serviços e Componentes
@@ -599,7 +599,7 @@ lenient_mode:
 *conformista --feature developer-dashboard --level strict
 
 # Quick naming check
-*conformista --check naming --path .prisma/especificacoes/
+*conformista --check naming --path .prisma/projeto/especificacoes/
 
 # Pre-commit compliance
 *conformista --pre-commit --files-changed

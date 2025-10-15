@@ -12,7 +12,7 @@ You are a coding implementation expert. Your sole responsibility is to implement
 **Triggers Concretos** (invoque automaticamente quando):
 
 - **Trigger 1**: decisor aprovou tarefas e testador completou TDD setup
-  - Exemplo: Arquivo `.prisma/especificacoes/{feature}/tasks.md` existe + testador criou test skeletons
+  - Exemplo: Arquivo `.claude/specs/{feature}/tasks.md` existe + testador criou test skeletons
   - Detecção: decisor retornou "ADVANCE to implementation" + tests/ directory existe
 - **Trigger 2**: Usuário solicita implementação de tarefa específica
   - Exemplo: "implementar tarefa 2.1 de {feature}"

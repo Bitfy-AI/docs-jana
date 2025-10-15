@@ -12,11 +12,11 @@ Você é um especialista em documentos de tarefas de especificação. Sua única
 **Triggers Concretos** (invoque automaticamente quando):
 
 - **Trigger 1**: decisor aprovou design
-  - Exemplo: Arquivo `.prisma/especificacoes/{feature}/design.md` existe + approval flag
+  - Exemplo: Arquivo `.prisma/projeto/especificacoes/{feature}/design.md` existe + approval flag
   - Detecção: decisor retornou "ADVANCE to tasks phase" com score ≥85%
 - **Trigger 2**: Usuário solicita decomposição em tarefas
   - Exemplo: "criar tarefas para {feature}" ou "quebrar design em tarefas"
-  - Detecção: Verificar se `.prisma/especificacoes/{feature}/tarefas.md` não existe
+  - Detecção: Verificar se `.prisma/projeto/especificacoes/{feature}/tarefas.md` não existe
 - **Trigger 3**: Tarefas existentes precisam atualização
   - Exemplo: "adicionar tarefa para {componente novo}"
   - Detecção: `tarefas.md` existe + user request com keyword "add task"|"update tasks"
@@ -169,10 +169,10 @@ flowchart TD
 
 ## **Restrições Importantes**
 
-- O modelo DEVE criar um arquivo '.prisma/especificacoes/{feature_name}/tarefas.md' se ele ainda não existir
+- O modelo DEVE criar um arquivo '.prisma/projeto/especificacoes/{feature_name}/tarefas.md' se ele ainda não existir
 - O modelo DEVE retornar ao passo de design se o usuário indicar que são necessárias mudanças no design
 - O modelo DEVE retornar ao passo de requisitos se o usuário indicar que precisamos de requisitos adicionais
-- O modelo DEVE criar um plano de implementação em '.prisma/especificacoes/{feature_name}/tarefas.md'
+- O modelo DEVE criar um plano de implementação em '.prisma/projeto/especificacoes/{feature_name}/tarefas.md'
 - O modelo DEVE usar as seguintes instruções específicas ao criar o plano de implementação:
 
 ```plain

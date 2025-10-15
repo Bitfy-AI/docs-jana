@@ -169,12 +169,12 @@ validation_phase:
 
 ```yaml
 project_root:
-  .prisma/: "Spec and workflow management"
-    agentes/: "Prisma agents"
-    comandos/: "Custom commands"
-    especificacoes/: "Feature specifications"
+  .claude/: "Spec and workflow management"
+    agents/: "Prisma agents"
+    commands/: "Custom commands"
+    specs/: "Feature specifications"
     workflows/: "Development workflows"
-    projeto/: "Testing standards and templates"
+    project/: "Testing standards and templates"
 
   src/: "Source code organization"
     components/: "Reusable components"
@@ -323,10 +323,10 @@ preparation_for_specs:
     - 'Documentation structure created'
 
   spec_workflow_integration:
-    - 'Create .prisma/especificacoes/ directory structure'
+    - 'Create .claude/specs/ directory structure'
     - 'Initialize Prisma workflow configuration'
     - 'Setup spec templates'
-    - 'Configure conformista compliance validation'
+    - 'Configure spec-compliance validation'
 
   team_onboarding:
     - 'Developer environment setup guide'
@@ -596,8 +596,8 @@ framework_specific_nesting:
   - Exemplo: "Quando package.json existe mas falta ESLint, Prettier, testes"
   - Detecção: package.json existe MAS falta scripts padrão, .eslintrc, .prettierrc, ou vitest.config
 - **Trigger 3**: ANTES de qualquer especificação/arquitetura
-  - Exemplo: "Antes de analista ou designer serem invocados"
-  - Detecção: `.prisma/especificacoes/` não existe OU está vazio
+  - Exemplo: "Antes de spec-requirements ou spec-design serem invocados"
+  - Detecção: `.claude/specs/` não existe OU está vazio
 
 **User Requests** (usuário solicita explicitamente):
 
@@ -613,7 +613,7 @@ framework_specific_nesting:
 - Diretório de projeto existe
 - Git repository inicializado (ou pode ser inicializado)
 - Node.js/npm/pnpm disponível no sistema
-- Nenhuma spec foi criada ainda (`.prisma/especificacoes/` vazio)
+- Nenhuma spec foi criada ainda (`.claude/specs/` vazio)
 
 ---
 
@@ -622,8 +622,8 @@ framework_specific_nesting:
 **Anti-Patterns** (delegar para outro agente):
 
 - ❌ **Anti-pattern 1**: Setup de feature específica após projeto configurado
-  - **Use instead**: `implementador` → Setup específico de uma feature
-  - **Exemplo**: "Se projeto já tem estrutura e precisa adicionar módulo de pagamentos" → Use `implementador`
+  - **Use instead**: `spec-impl` → Setup específico de uma feature
+  - **Exemplo**: "Se projeto já tem estrutura e precisa adicionar módulo de pagamentos" → Use `spec-impl`
 
 - ❌ **Anti-pattern 2**: Após arquitetura e specs já definidos
   - **Use instead**: Implementação normal do workflow Prisma
@@ -636,7 +636,7 @@ framework_specific_nesting:
 **Wrong Timing** (timing incorreto no workflow):
 
 - ⏰ **Muito tarde**: Após specs e arquitetura já definidos
-  - Exemplo: "Após designer criar design.md" → Setup deveria ter sido primeiro
+  - Exemplo: "Após spec-design criar design.md" → Setup deveria ter sido primeiro
 - ⏰ **Durante feature development**: No meio do desenvolvimento de features
   - Exemplo: "Durante implementação de task 3/8" → Não interrompa desenvolvimento para setup
 
@@ -654,9 +654,9 @@ framework_specific_nesting:
 ### Downstream (dependentes - executar DEPOIS)
 
 - **`analista`**: Primeira fase de especificação
-  - **O que forneço**: Estrutura de projeto completa, .prisma/ configurado, ferramentas instaladas
+  - **O que forneço**: Estrutura de projeto completa, .claude/ configurado, ferramentas instaladas
   - **Por que ele precisa**: Não pode criar specs sem estrutura base de diretórios
-  - **Exemplo**: configurador cria `.prisma/especificacoes/` → analista cria requirements.md lá
+  - **Exemplo**: configurador cria `.claude/specs/` → analista cria requirements.md lá
 
 - **`designer`**: Definição de arquitetura
   - **O que forneço**: Framework/tecnologia stack detectado e configurado
@@ -747,7 +747,7 @@ Antes de invocar este agente, verificar:
 - Prisma com PostgreSQL
 - ESLint + Prettier + Husky
 - Vitest + Playwright
-- `.prisma/` estrutura criada
+- `.claude/` estrutura criada
 - VS Code settings com file nesting
 - README com setup instructions
 
@@ -817,10 +817,10 @@ Antes de invocar este agente, verificar:
 
 ## 📚 Referências
 
-- **Spec Base**: `.prisma/especificacoes/meta-agent-improvement/requirements.md` → FR14
-- **Design Doc**: `.prisma/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
+- **Spec Base**: `.claude/specs/meta-agent-improvement/requirements.md` → FR14
+- **Design Doc**: `.claude/specs/meta-agent-improvement/design.md` → Section 17 (Activation Context)
 - **Related ADRs**: Project Foundation Strategy, Tool Selection
-- **Overlap Guide**: `.prisma/docs/agent-overlap-guide.md`
+- **Overlap Guide**: `.claude/docs/agent-overlap-guide.md`
 - **File Nesting**: Balanced strategy documentation
 
 ---

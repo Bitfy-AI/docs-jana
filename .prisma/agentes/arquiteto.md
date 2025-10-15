@@ -34,7 +34,7 @@ color: '#16A085'
 
 - design.md aprovado com score ≥85%
 - ADR trigger keyword detected em design
-- `.prisma/projeto/arquitetura/` directory existe
+- `.claude/project/architecture/` directory existe
 
 ## 🚫 NÃO Usar Este Agente Quando
 
@@ -76,7 +76,7 @@ color: '#16A085'
 ### Downstream (dependentes - executar DEPOIS)
 
 - **`conformista`**: [Validação de conformidade]
-  - **O que forneço**: ADRs em `.prisma/projeto/decisoes-tecnicas/`, architecture docs
+  - **O que forneço**: ADRs em `.claude/project/technical-decisions/`, architecture docs
   - **Por que ele precisa**: Validar que implementações futuras seguem decisões documentadas
   - **Exemplo**: arquiteto criou ADR 003 (Drizzle ORM) → conformista valida que código usa Drizzle
 
@@ -88,7 +88,7 @@ color: '#16A085'
 ### Overlapping (conflitos - escolher 1)
 
 - **`arquiteto` vs `documentador`**: [Baseline global vs Documentação de feature]
-  - **Use `arquiteto` quando**: BASELINE arquitetural (ADRs, padrões globais, `.prisma/projeto/`)
+  - **Use `arquiteto` quando**: BASELINE arquitetural (ADRs, padrões globais, `.claude/project/`)
   - **Use `documentador` quando**: Documentação de FEATURE específica (user guides, API refs, `docs/`)
   - **Exemplo**:
     - Use `arquiteto` quando: "Criar ADR sobre Service Layer pattern para todo projeto" (baseline)
@@ -100,7 +100,7 @@ color: '#16A085'
 
 **Impacto:**
 
-- documentador atualmente assume responsabilidade temporária por `.prisma/projeto/`
+- documentador atualmente assume responsabilidade temporária por `.claude/project/`
 - conformista pode referenciar documentação que não existe
 - Workflow funcional mas não otimizado (overhead em documentador)
 
@@ -122,7 +122,7 @@ current_state:
 
 ## Propósito (Quando Implementado)
 
-**Documentação técnica automática** pós-aprovação do designer. Cria documentation baseline em `.prisma/projeto/arquitetura/` para uso futuro do conformista usando context engineering minimalista.
+**Documentação técnica automática** pós-aprovação do designer. Cria documentation baseline em `.claude/project/architecture/` para uso futuro do conformista usando context engineering minimalista.
 
 ## Context Engineering
 
@@ -136,11 +136,11 @@ current_state:
 
 ```
 REQUIRED:
-- .prisma/especificacoes/{feature-name}/design.md (aprovado)
+- .prisma/projeto/especificacoes/{feature-name}/design.md (aprovado)
 
 OPTIONAL:
-- .prisma/projeto/arquitetura/ (documentação existente)
-- .prisma/projeto/decisoes-tecnicas/ (ADRs existentes)
+- .claude/project/architecture/ (documentação existente)
+- .claude/project/technical-decisions/ (ADRs existentes)
 ```
 
 ### Core Prompt (Enxuto)
@@ -170,7 +170,7 @@ KEEP MINIMAL: Foco em decisions, não em explanations.
 #### 1. Documentação Principal
 
 ```
-.prisma/projeto/arquitetura/{feature-name}-architecture.md
+.claude/project/architecture/{feature-name}-architecture.md
 
 SECTIONS:
 ## Architectural Overview
@@ -191,7 +191,7 @@ SECTIONS:
 #### 2. ADR (se aplicável)
 
 ```
-.prisma/projeto/decisoes-tecnicas/adr-{number}-{decision-name}.md
+.claude/project/technical-decisions/adr-{number}-{decision-name}.md
 
 TEMPLATE:
 # ADR-{number}: {Decision Title}
@@ -234,12 +234,12 @@ planejador (com technical awareness)
 #### File System Pattern
 
 ```
-.prisma/projeto/arquitetura/
+.claude/project/architecture/
 ├── {feature-name}-architecture.md    # Main doc
 ├── components.md                      # Updated component list
 └── system-overview.md                 # Updated system overview
 
-.prisma/projeto/decisoes-tecnicas/
+.claude/project/technical-decisions/
 └── adr-{number}-{decision}.md         # New ADR if needed
 ```
 
@@ -325,7 +325,7 @@ arquiteto --validate --feature-name {feature}
 
 ### Completion Checklist
 
-- [ ] Architecture document created in `.prisma/projeto/arquitetura/`
+- [ ] Architecture document created in `.claude/project/architecture/`
 - [ ] Technical handoff prepared for planejador
 - [ ] ADR generated (if architectural decision detected)
 - [ ] Component documentation updated

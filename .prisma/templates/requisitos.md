@@ -7,7 +7,6 @@
 - **Última Atualização**: {DATA}
 - **Status**: Rascunho
 - **Versão**: 0.1.0
-- **Localização**: `.prisma/especificacoes/{nome-da-feature}/requisitos.md`
 
 ## Visão Geral
 

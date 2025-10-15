@@ -20,7 +20,7 @@ Especialista em **padronização automática de testes**, implementando Test Tro
 **QUANDO USAR testador (EU - 4º agente):**
 
 - ✅ **ANTES da implementação**: TDD approach - testes primeiro, código depois
-- ✅ **Após aprovação de tasks**: decisor aprovou decomposição técnica
+- ✅ **Após aprovação de tasks**: spec-decision aprovou decomposição técnica
 - ✅ **Estratégia de teste**: Definir estrutura, patterns, Test Trophy distribution
 - ✅ **Setup completo**: Configurar vitest/jest, mocks, fixtures, test data builders
 - ✅ **Test standards**: Criar test-standards.yaml, environment detection
@@ -119,8 +119,8 @@ interface E2ETestTemplate {
 ```yaml
 outputs:
   primary:
-    - .prisma/especificacoes/{feature}/tests.md
-    - .prisma/especificacoes/{feature}/tests/ (código)
+    - .prisma/projeto/especificacoes/{feature}/tests.md
+    - .prisma/projeto/especificacoes/{feature}/tests/ (código)
     - .prisma/projeto/test-standards.yaml
     - .prisma/projeto/environment.json
 
@@ -147,7 +147,7 @@ thresholds:
 3. **Competitive Generation**: 3-5 estratégias paralelas
 4. **Judge Evaluation**: Auto-avaliação + seleção ótima
 5. **Test Generation**: Spec-específicos + templates projeto
-6. **Integration Prep**: CI/CD + handoff implementador
+6. **Integration Prep**: CI/CD + handoff spec-impl
 
 ## Advanced Features
 
@@ -180,13 +180,13 @@ thresholds:
 
 - **Trigger 1**: decisor aprova tasks técnicas
   - Exemplo: "Quando decisor valida tasks.md e aprova para setup de testes"
-  - Detecção: Arquivo `.prisma/especificacoes/{feature}/tasks.md` existe E não existe `.prisma/especificacoes/{feature}/tests.md`
+  - Detecção: Arquivo `.prisma/projeto/especificacoes/{feature}/tasks.md` existe E não existe `.prisma/projeto/especificacoes/{feature}/tests.md`
 - **Trigger 2**: Usuário solicita TDD setup explicitamente
   - Exemplo: "Quando usuário diz 'setup TDD para {feature}' ou 'create test structure'"
   - Detecção: Comando contém palavras-chave "TDD", "test setup", "test structure"
 - **Trigger 3**: ANTES da implementação começar (timing crítico)
   - Exemplo: "Quando implementador ainda não foi invocado"
-  - Detecção: Arquivos de implementação em `.prisma/especificacoes/{feature}/` não existem OU são vazios
+  - Detecção: Arquivos de implementação em `.prisma/projeto/especificacoes/{feature}/` não existem OU são vazios
 
 **User Requests** (usuário solicita explicitamente):
 
@@ -200,7 +200,7 @@ thresholds:
 
 - `tasks.md` existe E foi aprovado por decisor
 - `tests.md` NÃO existe
-- Nenhum arquivo `*.test.ts` existe em `.prisma/especificacoes/{feature}/tests/`
+- Nenhum arquivo `*.test.ts` existe em `.prisma/projeto/especificacoes/{feature}/tests/`
 - implementador ainda NÃO foi invocado
 
 ---
@@ -326,8 +326,8 @@ Antes de invocar este agente, verificar:
 
 **Resultado esperado**:
 
-- `.prisma/especificacoes/authentication/tests.md` criado
-- `.prisma/especificacoes/authentication/tests/` com estrutura Test Trophy
+- `.prisma/projeto/especificacoes/authentication/tests.md` criado
+- `.prisma/projeto/especificacoes/authentication/tests/` com estrutura Test Trophy
 - Mocks, fixtures, test data builders configurados
 - test-standards.yaml atualizado
 
@@ -393,8 +393,8 @@ Antes de invocar este agente, verificar:
 
 ## 📚 Referências
 
-- **Spec Base**: `.prisma/especificacoes/meta-agent-improvement/requirements.md` → FR14
-- **Design Doc**: `.prisma/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
+- **Spec Base**: `.prisma/projeto/especificacoes/meta-agent-improvement/requirements.md` → FR14
+- **Design Doc**: `.prisma/projeto/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
 - **Related ADRs**: Test Trophy Architecture, TDD Workflow
 - **Overlap Guide**: `.prisma/docs/agent-overlap-guide.md`
 

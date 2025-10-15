@@ -23,7 +23,7 @@ color: '#3498DB'
   - Detecção: Keyword "authentication"|"permission"|"migration"|"integration"
 - **Trigger 3**: idealizador completou ideation
   - Exemplo: brainstorm_results.md existe com 3+ solution candidates
-  - Detecção: Arquivo `.prisma/especificacoes/{feature}/brainstorm-results.md` existe
+  - Detecção: Arquivo `.prisma/projeto/especificacoes/{feature}/brainstorm-results.md` existe
 
 **User Requests** (usuário solicita explicitamente):
 
@@ -282,7 +282,7 @@ configuration:
 
 ```yaml
 alignment_report:
-  location: .prisma/especificacoes/{feature-name}/alignment-analysis.md
+  location: .prisma/projeto/especificacoes/{feature-name}/alignment-analysis.md
   format: structured_markdown
   quality: comprehensive_documentation
 

@@ -393,10 +393,10 @@ review_handoff:
 
 ```yaml
 outputs:
-  analysis_report: '.prisma/especificacoes/{{feature}}/standards-report.md'
-  pattern_checklist: '.prisma/especificacoes/{{feature}}/patterns-checklist.md'
-  refactoring_guide: '.prisma/especificacoes/{{feature}}/refactoring-recommendations.md'
-  architecture_diagram: '.prisma/especificacoes/{{feature}}/architecture-overview.md'
+  analysis_report: '.prisma/projeto/especificacoes/{{feature}}/standards-report.md'
+  pattern_checklist: '.prisma/projeto/especificacoes/{{feature}}/patterns-checklist.md'
+  refactoring_guide: '.prisma/projeto/especificacoes/{{feature}}/refactoring-recommendations.md'
+  architecture_diagram: '.prisma/projeto/especificacoes/{{feature}}/architecture-overview.md'
 ```
 
 ## Advanced Pattern Detection
@@ -760,8 +760,8 @@ Antes de invocar este agente, verificar:
 
 ## 📚 Referências
 
-- **Especificação Base**: `.prisma/especificacoes/meta-agent-improvement/requirements.md` → FR14
-- **Design Doc**: `.prisma/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
+- **Especificação Base**: `.prisma/projeto/especificacoes/meta-agent-improvement/requirements.md` → FR14
+- **Design Doc**: `.prisma/projeto/especificacoes/meta-agent-improvement/design.md` → Section 17 (Activation Context)
 - **Related ADRs**: Clean Architecture, Design Patterns Strategy
 - **Overlap Guide**: `.prisma/docs/agent-overlap-guide.md`
 - **SOLID Principles**: Detailed explanation in project docs
