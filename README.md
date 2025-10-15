@@ -1,958 +1,347 @@
-# 📚 Docs-Jana - Unified Documentation & Workflow Management CLI
+# JANA WORKFLOWS
 
-> Modern, unified command-line interface for managing N8N workflows and Outline documentation
+Sistema simples para gerenciar workflows do N8N.
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/jana-team/docs-jana)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org)
+## 📋 O que este sistema faz?
+
+- **Baixa workflows** do seu N8N
+- **Compara workflows** antes de enviar
+- **Envia workflows** para outro N8N
+- **Testa antes de enviar** (Dry Run)
+
+## 🚀 Como Instalar (Primeira vez)
+
+### Passo 1: Instalar Node.js
+
+Node.js é um programa que permite rodar este sistema.
+
+1. Acesse: https://nodejs.org/
+2. Clique no botão verde **"Download Node.js (LTS)"**
+3. Execute o instalador que foi baixado
+4. Clique em "Next" até finalizar
+5. **Reinicie o computador** após instalar
+
+**Como saber se instalou certo?**
+- Abra o **Prompt de Comando** (CMD) ou **Terminal**
+- Digite: `node --version`
+- Se aparecer algo como `v20.x.x`, está instalado!
+
+### Passo 2: Instalar o Sistema
+
+1. Abra o **Prompt de Comando** (CMD) ou **Terminal**
+2. Navegue até a pasta do projeto:
+   ```bash
+   cd caminho/para/docs-jana
+   ```
+3. Digite o comando de instalação:
+   ```bash
+   npm install
+   ```
+4. Aguarde (vai aparecer várias coisas na tela - é normal!)
+5. Quando terminar, está pronto!
+
+**O que acabou de acontecer?**
+- O comando `npm install` baixou tudo que o sistema precisa para funcionar
+- São chamadas de "dependências" (mas você não precisa saber disso)
+- É como baixar os arquivos necessários para um jogo funcionar
+
+## 🎯 Como Usar
+
+### Abrir o Menu Principal
+
+No **Prompt de Comando** (CMD) ou **Terminal**, dentro da pasta do projeto:
+
+```bash
+npm start
+```
+
+ou
+
+```bash
+pnpm start
+```
+
+Vai aparecer um menu assim:
+
+```
+JANA WORKFLOWS v2.2.0
+
+[1] Configurar N8N Destino (atual: Nenhum configurado)
+[2] Baixar Workflows do N8N Source (salva em: n8n/workflows/)
+[3] Comparar Workflows (Local vs N8N Target)
+[4] Simular Envio (Dry Run - não modifica nada)
+[5] Enviar Workflows para N8N (ATENÇÃO: modifica workflows!)
+[6] Baixar Documentação do Outline
+[7] Ver Histórico
+[0] Sair
+
+Digite o número da opção e pressione Enter:
+```
+
+## 📖 Guia de Uso - Passo a Passo
+
+### Primeira vez? Siga esta ordem:
+
+#### 1️⃣ Configurar N8N de Destino
+
+**O que é isso?**
+- É o N8N para onde você quer ENVIAR os workflows
+- Pode ser seu N8N de produção, de teste, etc.
+
+**Como fazer:**
+1. No menu, digite `1` e pressione Enter
+2. O sistema vai pedir:
+   - **URL do N8N**: Ex: `https://n8n.suaempresa.com`
+   - **Chave API**: Obtenha no N8N em Settings → API → Create API Key
+3. O sistema testa a conexão automaticamente
+4. Se der certo, está configurado!
+
+**Dica:** Guarde a chave API em um lugar seguro!
 
 ---
 
-## 🌟 Features
+#### 2️⃣ Baixar Workflows do N8N Source
 
-- **🔄 N8N Workflow Management**: Download, upload, and migrate workflows between instances
-- **📄 Outline Integration**: Download and manage documentation from Outline
-- **📝 Auto Documentation**: Generate markdown docs from workflow sticky notes
-- **🧪 Testing Tools**: Built-in migration and integration testing
-- **⚡ Modern CLI**: Unified interface with intuitive commands
-- **🎨 Clean Architecture**: Factory patterns, DI, and service layers
-- **🔒 Secure**: Environment-based configuration, no hardcoded secrets
-- **✨ Interactive Menu**: Beautiful keyboard-driven interface with themes, animations, and history
+**O que é isso?**
+- Baixa os workflows do seu N8N original
+- Salva na pasta `n8n/workflows/` do seu computador
+- Sempre substitui os anteriores (não acumula)
 
----
+**Como fazer:**
+1. No menu, digite `2` e pressione Enter
+2. Aguarde o download
+3. Os workflows ficam salvos em `n8n/workflows/`
 
-## ✨ Interactive Menu (NEW!)
-
-Experience a modern, keyboard-driven interactive menu with rich visual feedback and productivity features.
-
-### Quick Start
-
-```bash
-# Launch interactive menu (no arguments)
-docs-jana
-
-# Or explicitly
-docs-jana --interactive
-```
-
-![Interactive Menu Preview](docs/interactive-menu/preview.png)
-
-### Key Features
-
-- **🎯 Keyboard Navigation**: Arrow keys, Enter, Esc - no mouse needed
-- **🎨 4 Beautiful Themes**: Default, Dark, Light, High-Contrast (WCAG AA compliant)
-- **⚡ Keyboard Shortcuts**: Single-key shortcuts for instant access
-- **📜 Command History**: Track and re-run previous executions
-- **🔍 Command Preview**: See exactly what will execute before running
-- **⚙️ Customizable**: Configure themes, animations, icons, and more
-- **♿ Accessible**: Full keyboard support, contrast validation, fallback modes
-
-### Navigation Shortcuts
-
-| Key | Action | Description |
-|-----|--------|-------------|
-| `↑↓` | Navigate | Move through options |
-| `Enter` | Select | Execute highlighted command |
-| `1-6` or `d/u/o` | Quick Select | Jump to specific commands |
-| `h` | History | View execution history |
-| `s` | Settings | Configure preferences |
-| `?` | Help | Show all shortcuts |
-| `q` | Quit | Exit application |
-
-### Menu Modes
-
-- **Navigation Mode**: Browse and select commands
-- **Preview Mode**: Detailed command information with warnings
-- **History Mode**: View last 10 executions with stats
-- **Config Mode**: Customize theme, animations, and behavior
-- **Help Mode**: Complete keyboard reference
-
-### Configuration
-
-Settings are persisted to `~/.docs-jana/config.json`:
-
-```json
-{
-  "theme": "default",
-  "animationsEnabled": true,
-  "animationSpeed": "normal",
-  "iconsEnabled": true,
-  "showDescriptions": true,
-  "showPreviews": true,
-  "historySize": 50
-}
-```
-
-### Documentation
-
-- **[User Guide](docs/interactive-menu/USER_GUIDE.md)** - Complete usage guide
-- **[Developer Guide](docs/interactive-menu/DEVELOPER_GUIDE.md)** - Architecture and extension guide
-- **[API Reference](docs/interactive-menu/API_REFERENCE.md)** - Full API documentation
-- **[Migration Guide](docs/interactive-menu/MIGRATION_GUIDE.md)** - Upgrade guide
-
-### Requirements
-
-- **Terminal**: Modern terminal with color support (Windows Terminal, iTerm2, etc.)
-- **Node.js**: 16+ (same as main CLI)
-- **Environment**: Interactive terminal (auto-detects CI/CD and falls back)
+**Importante:** Esta opção só aparece em ambiente de desenvolvimento.
 
 ---
 
-## 🎨 Visual Experience
-
-The CLI features a modern, responsive visual system that automatically adapts to your terminal's capabilities, providing an exceptional experience across all platforms.
-
-### Modern Visual Components
-
-Built with 4 core visual components working together:
-
-- **TerminalDetector**: Smart terminal capability detection
-- **BorderRenderer**: Beautiful Unicode borders with ASCII fallback
-- **LayoutManager**: Responsive layout (expanded/standard/compact modes)
-- **IconMapper**: Icons with intelligent fallback (emoji → unicode → ascii → plain)
-
-### Terminal Compatibility
-
-| Terminal | Unicode | Colors | Emojis | Experience |
-|----------|---------|--------|--------|------------|
-| **Windows Terminal** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
-| **iTerm2 (macOS)** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
-| **gnome-terminal** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
-| **PowerShell Core** | ✅ Full | ✅ 256 colors | ⚠️ Limited | ⭐⭐⭐⭐ Great |
-| **PowerShell 5.1** | ⚠️ Partial | ✅ Basic | ❌ No | ⭐⭐⭐ Good |
-| **CMD** | ❌ No | ✅ Basic | ❌ No | ⭐⭐ Basic |
-| **CI/CD** | ❌ No | ❌ No | ❌ No | ⭐ Fallback |
-
-### Graceful Degradation
-
-The CLI automatically detects your terminal's capabilities and gracefully falls back:
-
-```
-Best Experience (Unicode + TrueColor + Emojis)
-├─ Windows Terminal, iTerm2, modern terminals
-│  ╔══════════════════════════════╗
-│  ║  ⬇️  Download N8N workflows  ║
-│  ╚══════════════════════════════╝
-│
-Standard Experience (Unicode + Colors)
-├─ Most terminals
-│  ┌──────────────────────────────┐
-│  │  ↓ Download N8N workflows    │
-│  └──────────────────────────────┘
-│
-Basic Experience (ASCII + Colors)
-├─ Older terminals, CI
-│  +==============================+
-│  |  v Download N8N workflows    |
-│  +==============================+
-│
-Plain Experience (Text only)
-└─ Fallback for all environments
-   Download N8N workflows
-```
-
-### Visual Features
-
-**Modern Borders**
-- 4 border styles: single, double, bold, rounded
-- Unicode box-drawing characters with ASCII fallback
-- Colored borders following theme palette
-
-**Responsive Layout**
-- **Expanded** (≥100 columns): Full descriptions, extra padding
-- **Standard** (80-99 columns): Balanced layout
-- **Compact** (<80 columns): Truncated text, minimal padding
-
-**Icon System**
-- 4-level fallback cascade
-- Emoji → Unicode → ASCII → Plain text
-- Consistent visual language
-
-**Theme Integration**
-- 4 themes: Default, Dark, Light, High-Contrast
-- WCAG 2.1 AA compliant (4.5:1 contrast minimum)
-- Automatic color degradation
-
-### Customization
-
-Customize visual behavior via configuration:
-
-```json
-{
-  "preferences": {
-    "iconsEnabled": true,
-    "showDescriptions": true,
-    "theme": "default",
-    "animationsEnabled": true
-  }
-}
-```
-
-### Troubleshooting Visual Issues
-
-**Unicode characters showing as `?` or boxes:**
-```bash
-# Set UTF-8 encoding
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
-# Use modern terminal (Windows Terminal, iTerm2, gnome-terminal)
-# Install Unicode font (DejaVu, Fira Code, JetBrains Mono)
-```
-
-**Colors not working:**
-```bash
-# Check TERM variable
-echo $TERM  # Should be xterm-256color or better
-
-# Force color support
-export FORCE_COLOR=1
-
-# Remove NO_COLOR if set
-unset NO_COLOR
-```
-
-**Emojis not rendering:**
-```bash
-# Use modern terminal (Windows Terminal recommended for Windows)
-# Install emoji font (Noto Color Emoji on Linux)
-```
-
-### Learn More
-
-- **[Visual Components Guide](docs/VISUAL-COMPONENTS.md)** - Complete visual system documentation
-- **[Architecture Overview](docs/ARCHITECTURE.md)** - System architecture
-- **[Migration Guide](docs/MIGRATION.md)** - Upgrading guide
-
----
-
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/jana-team/docs-jana.git
-cd docs-jana
-
-# Install dependencies with pnpm
-pnpm install
-
-# Make CLI globally available (optional)
-pnpm link --global
-```
-
-> **Note:** This project uses pnpm for package management. Install pnpm globally with: `npm install -g pnpm`
-
-### Configuration
-
-Create a `.env` file in the project root:
-
-```bash
-# N8N Configuration
-N8N_BASE_URL=https://n8n.example.com
-N8N_API_KEY=your-api-key-here
-
-# Outline Configuration
-OUTLINE_API_URL=https://outline.example.com/api
-OUTLINE_API_TOKEN=your-token-here
-
-# Optional
-LOG_LEVEL=info
-```
-
-### Basic Usage
-
-```bash
-# Show help
-docs-jana help
-
-# Show version
-docs-jana version
-
-# List all available commands
-docs-jana
-```
-
----
-
-## 📖 Commands
-
-### N8N Workflows
-
-#### Download Workflows
-
-```bash
-# Download all workflows organized by tags
-docs-jana n8n:download --source --no-tag-filter --output ./workflows
-
-# Download with tag filter
-docs-jana n8n:download --source --tag jana --output ./workflows
-
-# Download to specific directory
-docs-jana n8n:download --output ./my-workflows
-
-# Alternative: use npm script
-npm run n8n:download
-```
-
-**Features:**
-- ✅ **Automatic pagination**: Downloads all workflows (no limit)
-- ✅ **Tag organization**: Creates folders by tag (workflows/{tag}/)
-- ✅ **Source flag**: Use `--source` to download from source instance
-
-#### Upload Workflows with Advanced Features
-
-```bash
-# 1. Validate before uploading (dry-run)
-docs-jana n8n:upload --input ./workflows --folder jana --dry-run
-
-# 2. Upload specific folder with tag sync
-docs-jana n8n:upload --input ./workflows --folder jana --sync-tags
-
-# 3. Force overwrite existing workflows
-docs-jana n8n:upload --input ./workflows --folder jana --sync-tags --force
-
-# 4. Upload all workflows without folder filter
-docs-jana n8n:upload --input ./workflows --sync-tags
-
-# 5. Skip ID remapping (if no executeWorkflow nodes)
-docs-jana n8n:upload --input ./workflows --folder jana --skip-remap
-```
-
-**Features:**
-- ✅ **Folder filtering**: Upload only workflows from specific tag folder
-- ✅ **Automatic ID remapping**: Updates executeWorkflow node references (3-phase process)
-- ✅ **Tag management**: Auto-detects tags from folder name, creates/links them
-- ✅ **Upload history**: Tracks last 3 upload operations (saved in `.upload-history.json`)
-- ✅ **Dry-run mode**: Validate workflows before uploading
-- ✅ **Reference analysis**: Detects missing workflow dependencies
-- ✅ **Progress reporting**: Real-time progress with detailed error reports
-
-**3-Phase Upload Process:**
-1. **Phase 1**: Initial upload (N8N assigns new IDs)
-2. **Phase 2**: ID remapping (updates workflow references)
-3. **Phase 3**: Re-upload with corrected references
-
-**Upload History Display:**
-```
-📋 Últimas ações:
-✅ [01/10 14:30] jana: 28/30 workflows uploaded
-⚠️  [01/10 12:15] no-tag: 100/150 workflows uploaded (50 failed)
-✅ [30/09 18:00] v1.0.1: 6/6 workflows uploaded
-```
-
-### Outline Documentation
-
-#### Download Documentation
-
-```bash
-# Download all docs
-docs-jana outline:download
-
-# Download to specific directory
-docs-jana outline:download --output ./docs
-
-# Download specific collections
-docs-jana outline:download --collections "Engineering,Product"
-
-# With custom delay between requests
-docs-jana outline:download --delay 500
-
-# Verbose logging
-docs-jana outline:download --verbose
-```
-
-### Documentation Generation
-
-#### Generate Markdown Docs
-
-```bash
-# Generate docs from workflows
-docs-jana docs:generate
-
-# Generate from specific directory
-docs-jana docs:generate --input ./workflows --output ./documentation
-
-# With quality verification
-docs-jana docs:generate --verify
-```
-
-### Testing
-
-#### Migration Tests
-
-```bash
-# Run migration tests
-docs-jana test:migration
-
-# Test with specific workflows
-docs-jana test:migration --input ./workflows
-```
-
-#### Outline Integration Tests
-
-```bash
-# Run Outline integration tests
-docs-jana test:outline
-```
-
----
-
-## 🏗️ Architecture
-
-### Project Structure
-
-```
-docs-jana/
-├── cli.js                      # Main CLI entry point
-├── index.js                    # Orchestration layer (NEW)
-├── src/
-│   ├── commands/               # CLI command implementations
-│   │   ├── n8n-download.js
-│   │   ├── n8n-upload.js
-│   │   └── outline-download.js
-│   ├── services/               # Business logic services
-│   │   ├── workflow-service.js
-│   │   ├── outline-service.js
-│   │   ├── migration-verifier.js
-│   │   └── ...
-│   ├── auth/                   # Authentication strategies
-│   │   ├── auth-strategy.js
-│   │   ├── api-key-strategy.js
-│   │   ├── basic-auth-strategy.js
-│   │   └── auth-factory.js
-│   ├── utils/                  # Utility modules
-│   │   ├── logger.js
-│   │   ├── http-client.js
-│   │   ├── file-manager.js
-│   │   ├── config-manager.js
-│   │   └── ...
-│   ├── models/                 # Data models
-│   └── tests/                  # (moved to /scripts)
-├── __tests__/                  # Jest test suites
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-├── scripts/                    # Utility scripts (NEW)
-│   ├── test/                   # Test scripts
-│   ├── admin/                  # Admin scripts
-│   └── README.md               # Scripts documentation
-├── examples/                   # CLI examples (NEW)
-│   ├── n8n-import/             # N8N import example
-│   └── simple-cli/             # Simple CLI example
-├── docs/                       # Documentation (NEW)
-│   ├── technical/              # Technical documentation
-│   ├── architecture/           # Architecture docs (future)
-│   └── README.md               # Documentation index
-├── .claude/                    # Claude Code specs
-│   └── specs/
-│       └── cli-architecture-refactor/
-└── test-orchestration.js       # Orchestration tests
-```
-
-### Design Patterns
-
-- **Service Locator**: Centralized service management with lazy loading (index.js)
-- **Command Pattern**: Each CLI command is a separate module
-- **Factory Pattern**: Auth strategies created via factory
-- **Strategy Pattern**: Multiple authentication methods
-- **Dependency Injection**: Services receive dependencies via constructor
-- **Service Layer**: Business logic separated from CLI logic
-- **Orchestration**: Lifecycle management for command execution
-
-### Dependency Injection Architecture
-
-The UIRenderer component implements a modern **Dependency Injection (DI)** pattern that provides high testability, flexibility, and backwards compatibility.
-
-#### Pattern Overview
-
-```javascript
-// UIRenderer with full DI
-const renderer = new UIRenderer({
-  themeEngine,           // Required
-  animationEngine,       // Required
-  keyboardMapper,        // Required
-  borderRenderer,        // Optional (auto-created)
-  layoutManager,         // Optional (auto-created)
-  iconMapper,            // Optional (auto-created)
-  terminalDetector       // Optional (auto-created)
-});
-```
-
-#### Key Benefits
-
-1. **Testability** 🧪
-   - All dependencies can be mocked for unit testing
-   - Isolated component testing without external dependencies
-   - 54+ tests with 100% pass rate
-
-2. **Flexibility** 🔧
-   - Swap implementations without changing UIRenderer code
-   - Custom visual components for different environments
-   - Progressive enhancement based on terminal capabilities
-
-3. **Backwards Compatibility** 🔄
-   - Auto-creation of components when not provided
-   - Legacy properties maintained (`this.icons`, `wrapText()`)
-   - Zero breaking changes for existing code
-
-#### Auto-Creation Pattern
-
-For backwards compatibility, UIRenderer automatically creates visual components if not provided:
-
-```javascript
-// Old code still works - no dependencies needed
-const renderer = new UIRenderer({
-  themeEngine,
-  animationEngine,
-  keyboardMapper
-});
-// Visual components (BorderRenderer, LayoutManager, etc.) auto-created ✅
-
-// New code with explicit control
-const renderer = new UIRenderer({
-  themeEngine,
-  animationEngine,
-  keyboardMapper,
-  borderRenderer: customBorderRenderer,  // Custom implementation
-  layoutManager: customLayoutManager,    // Custom implementation
-  // ...
-});
-```
-
-#### Visual Components
-
-Phase 4 introduced 4 new visual components integrated via DI:
-
-| Component | Responsibility | Auto-Created |
-|-----------|---------------|--------------|
-| **BorderRenderer** | Modern Unicode/ASCII borders with fallback | ✅ Yes |
-| **LayoutManager** | Responsive layout (expanded/standard/compact) | ✅ Yes |
-| **IconMapper** | Icon system with emoji→unicode→ascii→plain fallback | ✅ Yes |
-| **TerminalDetector** | Terminal capability detection (Unicode, colors, width) | ✅ Yes |
-
-#### Performance Optimizations
-
-1. **Smart Cache Invalidation**
-   ```javascript
-   // Auto-invalidates cache when state changes
-   _autoInvalidateCache(newState) {
-     if (this._shouldInvalidateCache(newState)) {
-       this.cachedOutput = null;
-     }
-   }
+#### 3️⃣ Comparar Workflows
+
+**O que é isso?**
+- Compara os workflows da sua pasta com os do N8N de destino
+- Mostra quais são NOVOS, quais foram MODIFICADOS e quais são IDÊNTICOS
+- **NÃO modifica nada** - apenas mostra as diferenças
+
+**Como fazer:**
+1. No menu, digite `3` e pressione Enter
+2. O sistema vai mostrar algo assim:
+   ```
+   [NOVOS] 2 workflows que NÃO existem no N8N:
+      + Customer Onboarding (AAA-AAA-001)
+      + Email Automation (AAA-AAA-002)
+
+   [MODIFICADOS] 1 workflow com DIFERENÇAS:
+      ~ Lead Scoring
+        - No N8N Target: v1
+        - Local (será enviado): v2
+
+   [IDÊNTICOS] 5 workflows SEM MUDANÇAS
    ```
 
-2. **Lazy Instantiation**
-   - Components only created when first needed
-   - Minimal memory footprint in default configuration
-   - ~1ms overhead for DI resolution
-
-3. **Resize Debouncing**
-   - Terminal resize events debounced to 200ms
-   - Prevents excessive re-renders
-   - Automatic state preservation
-
-#### Example: Custom Border Implementation
-
-```javascript
-// Create custom border renderer for ASCII-only terminals
-class AsciiBorderRenderer {
-  renderTopBorder(width, style) {
-    return '+' + '='.repeat(width - 2) + '+';
-  }
-  renderBottomBorder(width, style) {
-    return '+' + '='.repeat(width - 2) + '+';
-  }
-  renderSeparator(width, style) {
-    return '+' + '-'.repeat(width - 2) + '+';
-  }
-}
-
-// Inject custom implementation
-const renderer = new UIRenderer({
-  themeEngine,
-  animationEngine,
-  keyboardMapper,
-  borderRenderer: new AsciiBorderRenderer()
-});
-```
-
-#### Testing with DI
-
-```javascript
-// Easy mocking for unit tests
-const mockBorderRenderer = {
-  renderTopBorder: jest.fn(() => '╔═══╗'),
-  renderBottomBorder: jest.fn(() => '╚═══╝'),
-  renderSeparator: jest.fn(() => '├───┤')
-};
-
-const renderer = new UIRenderer({
-  themeEngine: mockThemeEngine,
-  animationEngine: mockAnimationEngine,
-  keyboardMapper: mockKeyboardMapper,
-  borderRenderer: mockBorderRenderer  // Mocked dependency
-});
-
-// Test isolated behavior
-renderer.renderHeader();
-expect(mockBorderRenderer.renderTopBorder).toHaveBeenCalled();
-```
-
-#### Migration Guide
-
-**No migration needed!** The DI pattern is fully backwards compatible:
-
-```javascript
-// OLD CODE - Still works ✅
-const renderer = new UIRenderer({ themeEngine, animationEngine, keyboardMapper });
-
-// NEW CODE - More control ✅
-const renderer = new UIRenderer({
-  themeEngine,
-  animationEngine,
-  keyboardMapper,
-  borderRenderer: customBorderRenderer
-});
-```
-
-#### Learn More
-
-- **[Developer Guide](docs/interactive-menu/DEVELOPER_GUIDE.md)** - Extending visual components
-- **[API Reference](docs/interactive-menu/API_REFERENCE.md)** - Complete API documentation
-- **[UIRenderer Tests](__tests__/unit/ui/menu/components/UIRenderer.test.js)** - 54 tests demonstrating DI patterns
-
-### Architecture
-
-The project follows a **three-layer architecture** that separates concerns and improves testability:
-
-```
-┌─────────────────────────────────────────┐
-│  Layer 1: CLI Interface (cli.js)        │
-│  - Parse arguments                      │
-│  - Display help/version                 │
-│  - Interactive menu                     │
-│  - Invoke orchestration layer           │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│  Layer 2: Orchestration (index.js)      │
-│  - ServiceContainer (Service Locator)   │
-│  - CommandOrchestrator                  │
-│  - Service lifecycle management         │
-│  - Configuration loading                │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│  Layer 3: Business Logic (src/)         │
-│  - Command handlers (src/commands/)     │
-│  - Business services (src/services/)    │
-│  - Utilities (src/utils/)               │
-│  - Factories (src/factories/)           │
-└─────────────────────────────────────────┘
-```
-
-**Key Components:**
-
-- **[cli.js](cli.js)**: Command-line interface entry point
-  - Minimal business logic
-  - User-facing interactions
-  - Calls `executeCommand()` from index.js
-
-- **[index.js](index.js)**: Orchestration layer (468 lines)
-  - `ServiceContainer`: Service Locator with lazy instantiation
-  - `CommandOrchestrator`: Lifecycle management (initialize → run → cleanup)
-  - `executeCommand()`: Public API for command execution
-
-**Performance:**
-- Orchestration overhead: **~1ms average** (measured across 100 iterations)
-- Lazy instantiation: Services only created when needed
-- Resource cleanup: Automatic cleanup after each execution
-
-**Learn More:**
-- **[CLI Architecture](docs/architecture/CLI-ARCHITECTURE.md)** - Comprehensive architecture documentation
-- **[Service Factory](docs/architecture/SERVICE-FACTORY.md)** - Service management patterns
+**Para que serve?**
+- Para você saber EXATAMENTE o que vai ser enviado
+- Ver se tem workflows novos ou modificados
+- **SEMPRE faça isso ANTES de enviar!**
 
 ---
 
-## 📚 Documentation
+#### 4️⃣ Simular Envio (Dry Run)
 
-Comprehensive documentation for all aspects of the project, organized for easy navigation.
+**O que é isso?**
+- "Dry Run" = "Teste" ou "Simulação"
+- SIMULA o envio SEM modificar NADA no N8N
+- É 100% seguro - pode usar à vontade!
 
-### 📖 Documentation Hub
-- **[📚 Complete Documentation Index](docs/README.md)** - Central hub with links to all documentation
+**Como fazer:**
+1. No menu, digite `4` e pressione Enter
+2. O sistema vai simular o envio
+3. Vai mostrar se daria certo ou se teria algum erro
+4. **NADA é modificado no N8N**
 
-### 🎯 Quick Access by Role
+**Para que serve?**
+- Testar se vai dar certo antes de enviar de verdade
+- Ver se tem algum erro
+- Ter certeza de que tudo está OK
 
-#### For Users
-- **[🚀 How to Use the CLI](docs/guides/como-usar-cli.md)** - Complete usage guide
-- **[📖 Getting Started](docs/guides/MIGRATION.md)** - Migration and setup guide
+**Dica:** SEMPRE faça o Dry Run ANTES de enviar!
 
-#### For Developers
-- **[🏗️ System Architecture](docs/architecture/ARCHITECTURE.md)** - Complete system design
-- **[🎨 Visual Components](docs/components/VISUAL-COMPONENTS.md)** - UI component system
-- **[⚖️ Architecture Decisions (ADRs)](docs/decisions/README.md)** - Key architectural decisions
+---
 
-#### For Project Management
-- **[📊 Project Summary](docs/project/PROJECT_SUMMARY.md)** - Executive overview
-- **[✅ Completion Report](docs/reports/completion/PROJECT_COMPLETION_REPORT.md)** - Final delivery
-- **[🧪 QA Reports](docs/reports/qa/)** - Quality assurance reports
-- **[📝 Implementation Reports](docs/reports/implementation/)** - Technical implementation details
+#### 5️⃣ Enviar Workflows para N8N
 
-### 📂 Documentation Structure
+**⚠️ ATENÇÃO: Esta opção MODIFICA workflows no N8N de verdade!**
+
+**O que é isso?**
+- Envia os workflows da pasta `n8n/workflows/` para o N8N de destino
+- **SUBSTITUI** os workflows no N8N pelos da pasta local
+- As mudanças são **PERMANENTES**
+
+**Como fazer:**
+1. **ANTES de fazer isso:**
+   - ✅ Faça a Comparação (opção 3)
+   - ✅ Faça o Dry Run (opção 4)
+   - ✅ Tenha certeza do que vai enviar
+2. No menu, digite `5` e pressione Enter
+3. Aguarde o envio
+4. Pronto! Os workflows foram enviados
+
+**Importante:**
+- Só use esta opção quando tiver CERTEZA
+- Os workflows no N8N serão substituídos
+- Não tem "desfazer" - faça backup antes!
+
+---
+
+#### 6️⃣ Baixar Documentação do Outline
+
+**O que é isso?**
+- Baixa documentação do Outline (se você usar)
+
+**Importante:** Esta opção só aparece em ambiente de desenvolvimento.
+
+---
+
+#### 7️⃣ Ver Histórico
+
+**O que é isso?**
+- Mostra o histórico de comandos que você executou
+- Se deu certo ou erro
+- Quando foi executado
+
+**Como fazer:**
+1. No menu, digite `7` e pressione Enter
+2. Vai ver algo assim:
+   ```
+   [SUCESSO] n8n:upload - 15:30:45
+   [ERRO] n8n:download - 14:20:30
+     Erro: Falha na conexão
+   ```
+
+---
+
+#### 0️⃣ Sair
+
+Sai do sistema.
+
+## 🎓 Fluxo Recomendado (Ordem ideal)
 
 ```
-docs/
-├── README.md                    # Documentation index
-├── architecture/                # System architecture
-│   └── ARCHITECTURE.md
-├── components/                  # Component documentation
-│   └── VISUAL-COMPONENTS.md
-├── guides/                      # User and developer guides
-│   ├── como-usar-cli.md
-│   ├── MIGRATION.md
-│   └── MIGRATION-GUIDE.md
-├── decisions/                   # Architecture Decision Records (ADRs)
-│   ├── README.md
-│   └── TEMPLATE.md
-├── project/                     # Project management docs
-│   └── PROJECT_SUMMARY.md
-├── reports/                     # Technical reports
-│   ├── qa/
-│   ├── testing/
-│   ├── implementation/
-│   └── completion/
-└── archive/                     # Deprecated documentation
+1. Configurar N8N Destino (primeira vez apenas)
+   ↓
+2. Baixar Workflows do N8N Source
+   ↓
+3. Comparar Workflows (ver o que vai ser enviado)
+   ↓
+4. Simular Envio (testar se vai dar certo)
+   ↓
+5. Enviar Workflows (só se tudo estiver OK!)
 ```
 
-### 🔍 Additional Resources
+## ❓ Perguntas Frequentes
 
-- **[Scripts Documentation](scripts/README.md)** - Utility scripts guide
-- **[Test Documentation](__tests__/README.md)** - Testing strategy and results
-- **[KFC Specs](.claude/specs/)** - Feature specifications (internal)
-- **[CHANGELOG](CHANGELOG.md)** - Version history
+### "O que é uma Chave API?"
 
----
+É como uma senha especial que o N8N gera para você. Para obter:
 
-## 🛠️ Scripts & Utilities
+1. Abra seu N8N
+2. Vá em **Settings** (Configurações)
+3. Clique em **API**
+4. Clique em **Create API Key** (Criar Chave API)
+5. Copie a chave (ela só aparece UMA vez!)
+6. Cole no sistema quando pedir
 
-Utility scripts for testing, administration, and maintenance.
+### "O que significa 'AAA-AAA-001' e 'AAA-AAA-002'?"
 
-### Script Categories
-- **[Scripts Documentation](scripts/README.md)** - Complete scripts guide
-- **[Test Scripts](scripts/test/)** - Testing and validation scripts
-- **[Admin Scripts](scripts/admin/)** - Administrative utilities (⚠️ use with caution)
+São versões dos workflows:
+- `AAA-AAA-001` = versão 1
+- `AAA-AAA-002` = versão 2
+- `AAA-AAA-003` = versão 3
 
-### Quick Access
-```bash
-# View all available scripts
-cat scripts/README.md
+Quando você vê que o local tem `002` e o N8N tem `001`, significa que o local está mais atualizado.
 
-# Run a test script
-node scripts/test/test-tag-operations.js
+### "Posso usar em produção?"
 
-# Admin operations (careful!)
-node scripts/admin/cleanup-duplicates.js --dry-run
-```
+Sim! Mas:
+- ✅ Faça SEMPRE o Dry Run antes
+- ✅ Compare os workflows antes
+- ✅ Faça backup do N8N de produção antes
+- ⚠️ Tenha certeza do que está fazendo
 
----
+### "O que acontece se eu fechar no meio?"
 
-## 🔧 Development
+Nada de grave! O sistema salva tudo. Mas:
+- Se estava baixando workflows: pode ficar incompleto
+- Se estava enviando workflows: alguns podem não ter sido enviados
 
-### Running Tests
+É seguro fechar e abrir de novo.
 
-```bash
-# Run all tests
-npm test
+### "Como sei se deu erro?"
 
-# Run with coverage
-npm run test:coverage
+O sistema mostra mensagens claras:
+- `[SUCESSO]` - Deu certo!
+- `[ERRO]` - Deu errado (vai mostrar o motivo)
+- `[AVISO]` - Atenção para algo
 
-# Run specific test suites
-npm run test:unit
-npm run test:integration
-npm run test:e2e
+Se der erro, leia a mensagem - geralmente explica o que aconteceu.
 
-# Watch mode
-npm run test:watch
-```
+## 🆘 Problemas Comuns
 
-### Linting
+### "Comando não encontrado"
 
-```bash
-# Lint code
-npm run lint
+**Problema:** Digitou `npm start` e apareceu "comando não encontrado"
 
-# Fix linting issues
-npm run lint:fix
-```
-
-### Pre-commit Hooks
-
-The project uses Husky + lint-staged to automatically:
-- Run ESLint on changed files
-- Run Jest tests on related files
-- Ensure code quality before commits
+**Solução:**
+1. Verifique se o Node.js está instalado: `node --version`
+2. Se não aparecer a versão, instale o Node.js de novo
+3. Reinicie o terminal/CMD após instalar
 
 ---
 
-## 📊 Code Quality
+### "Não conecta no N8N"
 
-### Current Metrics (Baseline)
+**Problema:** Erro ao configurar ou usar o N8N
 
-- **Files**: 25 JavaScript files
-- **Lines of Code**: 5,993 lines
-- **Code Duplication**: 0.4% (20 lines)
-- **Vulnerabilities**: 0
-- **Test Coverage**: 80%+ target
-
-### Quality Improvements in Progress
-
-We're implementing systematic quality improvements including:
-- Security fixes (path traversal, injection prevention)
-- Memory leak prevention
-- Race condition resolution
-- Comprehensive test coverage
-- Code refactoring and documentation
-
-See [Code Quality Improvements Spec](.claude/specs/code-quality-improvements/) for details.
+**Soluções:**
+1. Verifique se a URL está correta (com https://)
+2. Verifique se a Chave API está correta
+3. Verifique se o N8N está online e acessível
+4. Tente acessar a URL no navegador para ter certeza
 
 ---
 
-## 🤝 Contributing
+### "Nenhum workflow encontrado"
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run tests: `npm test`
-5. Commit: `git commit -m "feat: add my feature"`
-6. Push: `git push origin feature/my-feature`
-7. Create a Pull Request
+**Problema:** Diz que não encontrou workflows
 
-### Commit Convention
+**Soluções:**
+1. Execute "Baixar Workflows" primeiro (opção 2)
+2. Verifique se a pasta `n8n/workflows/` existe e tem arquivos
+3. Verifique se tem workflows no N8N mesmo
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+## 📞 Suporte
 
-- `feat:` New features
-- `fix:` Bug fixes
-- `docs:` Documentation changes
-- `refactor:` Code refactoring
-- `test:` Adding tests
-- `chore:` Maintenance tasks
+Se precisar de ajuda:
 
----
+1. Veja o **Histórico** (opção 7) para ver os erros
+2. Leia a mensagem de erro com calma
+3. Consulte este README
+4. Entre em contato com o suporte técnico
 
-## 📝 Environment Variables
+## 🔧 Para Desenvolvedores
 
-### N8N Configuration
+Se você é desenvolvedor e quer contribuir:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `N8N_BASE_URL` | Yes | N8N instance URL |
-| `N8N_API_KEY` | No* | API key for authentication |
-| `N8N_USERNAME` | No* | Username for basic auth |
-| `N8N_PASSWORD` | No* | Password for basic auth |
+- **Documentação técnica:** [docs/](./docs/)
+- **Arquitetura:** [docs/architecture/ARCHITECTURE.md](./docs/architecture/ARCHITECTURE.md)
+- **Testes:** `npm test`
+- **Comandos adicionais:** [.claude/commands/](./.claude/commands/)
 
-*Either API key or username/password required
+## 📄 Licença
 
-### Outline Configuration
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OUTLINE_API_URL` | Yes | Outline API URL |
-| `OUTLINE_API_TOKEN` | Yes | Outline API token |
-
-### Optional Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOG_LEVEL` | `info` | Logging level (debug, info, warn, error) |
-| `MAX_RETRIES` | `3` | Max HTTP retry attempts |
-| `TIMEOUT` | `30000` | HTTP request timeout (ms) |
-
-### Multi-Instance Support
-
-For migrating workflows between instances, use environment variable prefixes:
-
-```bash
-# Source instance (for download)
-N8N_URL_SOURCE=https://source.n8n.com
-N8N_API_KEY_SOURCE=source-api-key
-
-# Target instance (for upload)
-N8N_URL=https://target.n8n.com
-N8N_API_KEY=target-api-key
-```
+MIT
 
 ---
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### "Command not found: docs-jana"
-
-Run `npm link` to make the CLI globally available, or use `node cli.js` directly.
-
-#### "Configuration Error: N8N_BASE_URL is required"
-
-Ensure you have a `.env` file with all required variables. See Configuration section.
-
-#### "ECONNREFUSED" or connection errors
-
-- Check that N8N/Outline instances are running and accessible
-- Verify URLs in `.env` are correct
-- Check firewall/network settings
-
-### Debug Mode
-
-Enable verbose logging for detailed output:
-
-```bash
-# Using --verbose flag
-docs-jana n8n:download --verbose
-
-# Using environment variable
-DEBUG=* docs-jana n8n:download
-```
-
----
-
-## 📜 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- N8N team for the amazing workflow automation platform
-- Outline team for the collaborative documentation tool
-- Contributors and users of this project
-
----
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/jana-team/docs-jana/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jana-team/docs-jana/discussions)
-- **Email**: support@jana-team.com
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Web UI for workflow management
-- [ ] Webhook integration for auto-sync
-- [ ] Cloud backup integration (S3, GCS)
-- [ ] CI/CD pipeline templates
-- [ ] Workflow version control
-- [ ] Multi-instance sync
-- [ ] GraphQL API
-- [ ] Docker image
-
----
-
-**Made with ❤️ by Jana Team**
+**Versão:** 2.2.0
+**Última atualização:** Outubro 2025
