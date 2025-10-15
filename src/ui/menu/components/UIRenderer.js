@@ -1,15 +1,43 @@
 /**
- * UIRenderer - Renderiza interface visual do menu interativo
+ * @class UIRenderer
+ * @description Renderizador visual do menu com suporte a múltiplos modos e temas.
+ * Usa ThemeEngine para cores acessíveis (WCAG 2.1 AA) e AnimationEngine para feedback visual.
+ * Integrado com BorderRenderer, LayoutManager, IconMapper e TerminalDetector para experiência visual moderna.
  *
- * Responsável por:
- * - Renderizar menu completo com opções e descrições
- * - Aplicar temas e cores via ThemeEngine
- * - Exibir ícones, status, e indicadores visuais
- * - Renderizar modos especiais (preview, history, config, help)
- * - Gerenciar animações via AnimationEngine
- * - Adaptar a diferentes tamanhos de terminal
+ * Funcionalidades:
+ * - Renderização de 5 modos (navigation, preview, history, config, help)
+ * - Aplicação automática de temas com validação de contraste
+ * - Bordas decorativas modernas com fallback automático (Unicode → ASCII)
+ * - Ícones aprimorados com fallback em cascata (emoji → unicode → ascii → plain)
+ * - Layout responsivo baseado em largura do terminal
+ * - Histórico visual com timestamps relativos
+ * - Tabelas formatadas com cli-table3
+ * - Detecção e resposta a redimensionamento de terminal
  *
- * Requirements: REQ-2, REQ-3, REQ-4, REQ-5, REQ-6
+ * @example
+ * // Criar renderer com novas dependências visuais
+ * const renderer = new UIRenderer({
+ *   themeEngine,
+ *   animationEngine,
+ *   keyboardMapper,
+ *   borderRenderer,
+ *   layoutManager,
+ *   iconMapper,
+ *   terminalDetector
+ * });
+ *
+ * // Renderizar menu
+ * const state = {
+ *   options: menuOptions,
+ *   selectedIndex: 0,
+ *   mode: 'navigation',
+ *   isExecuting: false
+ * };
+ * renderer.render(state);
+ *
+ * @example
+ * // Limpar tela
+ * renderer.clear();
  */
 
 const cliTable = require('cli-table3');
@@ -20,8 +48,20 @@ class UIRenderer {
    * @param {ThemeEngine} dependencies.themeEngine - Engine de temas
    * @param {AnimationEngine} dependencies.animationEngine - Engine de animações
    * @param {KeyboardMapper} dependencies.keyboardMapper - Mapeador de atalhos
+   * @param {BorderRenderer} [dependencies.borderRenderer] - Renderizador de bordas (opcional, criado automaticamente)
+   * @param {LayoutManager} [dependencies.layoutManager] - Gerenciador de layout (opcional, criado automaticamente)
+   * @param {IconMapper} [dependencies.iconMapper] - Mapeador de ícones (opcional, criado automaticamente)
+   * @param {TerminalDetector} [dependencies.terminalDetector] - Detector de capabilities (opcional, criado automaticamente)
    */
-  constructor({ themeEngine, animationEngine, keyboardMapper }) {
+  constructor({
+    themeEngine,
+    animationEngine,
+    keyboardMapper,
+    borderRenderer = null,
+    layoutManager = null,
+    iconMapper = null,
+    terminalDetector = null
+  }) {
     if (!themeEngine) {
       throw new Error('ThemeEngine is required');
     }
@@ -36,33 +76,63 @@ class UIRenderer {
     this.animationEngine = animationEngine;
     this.keyboardMapper = keyboardMapper;
 
-    // Ícones Unicode padrão
+    // Initialize visual components (auto-create if not provided for backwards compatibility)
+    if (!terminalDetector) {
+      const TerminalDetector = require('../visual/TerminalDetector');
+      terminalDetector = new TerminalDetector();
+    }
+    this.terminalDetector = terminalDetector;
+
+    if (!borderRenderer) {
+      const BorderRenderer = require('../visual/BorderRenderer');
+      const visualConstants = require('../config/visual-constants');
+      borderRenderer = new BorderRenderer(this.terminalDetector, visualConstants, this.themeEngine);
+    }
+    this.borderRenderer = borderRenderer;
+
+    if (!layoutManager) {
+      const LayoutManager = require('../visual/LayoutManager');
+      const visualConstants = require('../config/visual-constants');
+      layoutManager = new LayoutManager(this.terminalDetector, visualConstants);
+    }
+    this.layoutManager = layoutManager;
+
+    if (!iconMapper) {
+      const IconMapper = require('../visual/IconMapper');
+      iconMapper = new IconMapper(this.terminalDetector);
+    }
+    this.iconMapper = iconMapper;
+
+    // Legacy icon fallback (kept for backwards compatibility)
     this.icons = {
-      settings: '⚙️',
-      download: '📥',
-      upload: '📤',
-      docs: '📋',
-      stats: '📊',
-      refresh: '🔄',
-      help: '❓',
-      exit: '🚪',
-      success: '✓',
-      error: '✗',
-      warning: '⚠',
-      info: '•'
+      settings: this.iconMapper.getIcon('settings'),
+      download: this.iconMapper.getIcon('download'),
+      upload: this.iconMapper.getIcon('upload'),
+      docs: this.iconMapper.getIcon('docs'),
+      stats: this.iconMapper.getIcon('stats'),
+      refresh: this.iconMapper.getIcon('refresh'),
+      help: this.iconMapper.getIcon('help'),
+      exit: this.iconMapper.getIcon('exit'),
+      success: this.iconMapper.getStatusIcon('success'),
+      error: this.iconMapper.getStatusIcon('error'),
+      warning: this.iconMapper.getStatusIcon('warning'),
+      info: this.iconMapper.getStatusIcon('info')
     };
 
-    // Status indicators
+    // Status indicators (using iconMapper)
     this.statusSymbols = {
-      success: '✓',
-      error: '✗',
-      warning: '⚠',
-      neutral: '•'
+      success: this.iconMapper.getStatusIcon('success'),
+      error: this.iconMapper.getStatusIcon('error'),
+      warning: this.iconMapper.getStatusIcon('warning'),
+      neutral: this.iconMapper.getStatusIcon('neutral')
     };
 
     // Cache para otimização
     this.cachedOutput = null;
     this.lastState = null;
+
+    // Setup resize listener
+    this._setupResizeListener();
   }
 
   /**
@@ -79,6 +149,12 @@ class UIRenderer {
     if (!state || !Array.isArray(state.options)) {
       throw new Error('Invalid state: options array is required');
     }
+
+    // Auto-invalidate cache if state changed significantly
+    this._autoInvalidateCache(state);
+
+    // Save state for resize re-rendering
+    this._updateLastState(state);
 
     // Renderizar baseado no modo
     switch (state.mode) {
@@ -116,24 +192,54 @@ class UIRenderer {
   }
 
   /**
-   * Renderiza header do menu
+   * Renderiza header do menu com bordas decorativas modernas
    * Requirements: 2.4
+   *
+   * Usa BorderRenderer para criar cabeçalho com bordas Unicode/ASCII
+   * com fallback automático baseado em capacidades do terminal.
    */
   renderHeader() {
     const title = 'DOCS-JANA CLI';
     const subtitle = 'Documentation & Workflow Management';
+    const contentWidth = this.layoutManager.getContentWidth();
 
-    if (!this.themeEngine.chalk) {
-      return `\n${title}\n${subtitle}\n`;
-    }
+    const lines = [];
 
+    // Top border (double style for header emphasis)
+    const topBorder = this.borderRenderer.renderTopBorder(contentWidth, 'double');
+    const coloredTopBorder = this.themeEngine.colorizeBorder
+      ? this.themeEngine.colorizeBorder(topBorder, 'primary')
+      : topBorder;
+    lines.push(coloredTopBorder);
+
+    // Title (centered and bold)
+    const centeredTitle = this.layoutManager.centerText(title, contentWidth);
     const formattedTitle = this.themeEngine.format(
-      this.themeEngine.colorize(title, 'selected'),
+      this.themeEngine.colorize(centeredTitle, 'selected'),
       'bold'
     );
-    const formattedSubtitle = this.themeEngine.colorize(subtitle, 'dim');
+    lines.push(formattedTitle);
 
-    return `\n${formattedTitle}\n${formattedSubtitle}\n`;
+    // Separator line
+    const separator = this.borderRenderer.renderSeparator(contentWidth, 'single');
+    const coloredSeparator = this.themeEngine.colorizeBorder
+      ? this.themeEngine.colorizeBorder(separator, 'secondary')
+      : separator;
+    lines.push(coloredSeparator);
+
+    // Subtitle (centered and dimmed)
+    const centeredSubtitle = this.layoutManager.centerText(subtitle, contentWidth);
+    const formattedSubtitle = this.themeEngine.colorize(centeredSubtitle, 'dimText');
+    lines.push(formattedSubtitle);
+
+    // Bottom border
+    const bottomBorder = this.borderRenderer.renderBottomBorder(contentWidth, 'double');
+    const coloredBottomBorder = this.themeEngine.colorizeBorder
+      ? this.themeEngine.colorizeBorder(bottomBorder, 'primary')
+      : bottomBorder;
+    lines.push(coloredBottomBorder);
+
+    return '\n' + lines.join('\n') + '\n';
   }
 
   /**
@@ -166,38 +272,60 @@ class UIRenderer {
   }
 
   /**
-   * Renderiza uma única opção
+   * Renderiza uma única opção com ícones aprimorados e cores dinâmicas
+   * Requirements: 2.2, 2.3, 3.1, 4.3, 4.4
    * @private
    */
   renderOption(option, isSelected, index) {
-    const icon = option.icon || this.icons.info;
+    // Get icon using IconMapper with automatic fallback
+    const actionType = option.actionType || option.category || 'info';
+    const icon = this.iconMapper.getIcon(actionType);
+
     const label = option.label || option.command || 'Unknown';
     const shortcut = option.shortcut ? `[${option.shortcut}]` : `[${index + 1}]`;
 
     // Renderizar status da última execução
     const statusIndicator = this.renderStatusIndicator(option.lastExecution);
 
-    // Montar linha
-    let line = `  ${icon}  ${shortcut} ${label} ${statusIndicator}`;
+    // Get selection indicator using IconMapper
+    const selectionIndicator = isSelected
+      ? this.iconMapper.getSelectionIndicator()
+      : '  ';
+
+    // Build line with proper spacing
+    const parts = [
+      icon,
+      ' ',
+      shortcut,
+      ' ',
+      label
+    ];
+
+    if (statusIndicator) {
+      parts.push(' ');
+      parts.push(statusIndicator);
+    }
+
+    let line = parts.join('');
 
     // Aplicar cores e formatação
     if (!this.themeEngine.chalk || this.themeEngine.colorSupport === 0) {
-      // Fallback: usar ▶ para selecionado, > também funciona
-      return isSelected ? `▶ ${line}` : `  ${line}`;
+      // Fallback: sem cores, apenas indicador de seleção
+      return `${selectionIndicator} ${line}`;
     }
 
     if (isSelected) {
-      // Opção selecionada: fundo destacado + negrito
+      // Opção selecionada: fundo destacado + negrito + cor de texto específica
       line = this.themeEngine.format(
-        this.themeEngine.colorize(line, 'selected'),
+        this.themeEngine.colorize(line, 'selectedText', 'selected'),
         'bold'
       );
-      return `▶ ${line}`;
+      return `${selectionIndicator} ${line}`;
     } else {
-      // Opção normal: cor baseada em categoria
+      // Opção normal: cor baseada em categoria com palette expandida
       const color = this.getCategoryColor(option.category);
       line = this.themeEngine.colorize(line, color);
-      return `  ${line}`;
+      return `${selectionIndicator} ${line}`;
     }
   }
 
@@ -264,7 +392,7 @@ class UIRenderer {
   }
 
   /**
-   * Renderiza descrição detalhada da opção selecionada
+   * Renderiza descrição detalhada da opção selecionada com bordas modernas
    * Requirements: 5.1, 5.2, 5.4, 5.5
    *
    * @param {Object} option - Opção selecionada
@@ -274,31 +402,75 @@ class UIRenderer {
       return '';
     }
 
+    const contentWidth = this.layoutManager.getContentWidth();
+    const layoutMode = this.layoutManager.getLayoutMode();
     const lines = [];
+
     lines.push(''); // Linha vazia
-    lines.push('─'.repeat(60)); // Separador
+
+    // Separator with border renderer
+    const separator = this.borderRenderer.renderSeparator(contentWidth, 'single');
+    const coloredSeparator = this.themeEngine.colorizeBorder
+      ? this.themeEngine.colorizeBorder(separator, 'accent')
+      : separator;
+    lines.push(coloredSeparator);
 
     // Título da descrição
     const title = 'Descrição:';
-    lines.push(this.themeEngine.chalk
-      ? this.themeEngine.format(title, 'bold')
-      : title
-    );
+    const formattedTitle = this.themeEngine.chalk
+      ? this.themeEngine.format(this.themeEngine.colorize(title, 'highlight'), 'bold')
+      : title;
+    lines.push('  ' + formattedTitle);
 
-    // Descrição (quebrada em múltiplas linhas se necessário)
-    const wrappedDescription = this.wrapText(option.description, 58);
-    lines.push(wrappedDescription);
+    lines.push(''); // Linha vazia após título
 
-    lines.push('─'.repeat(60)); // Separador
+    // Descrição usando LayoutManager para wrapping inteligente
+    const descWidth = contentWidth - 4; // Account for padding
+    const wrappedLines = this.layoutManager.wrapText(option.description, descWidth);
+
+    wrappedLines.forEach(line => {
+      lines.push('  ' + line);
+    });
+
+    lines.push(''); // Linha vazia antes do separador
+
+    lines.push(coloredSeparator);
     return lines.join('\n');
   }
 
   /**
-   * Quebra texto em múltiplas linhas
+   * Quebra texto em múltiplas linhas (legacy method, now using LayoutManager)
    * Requirements: 5.5
+   *
+   * @deprecated Since Phase 4 - Use this.layoutManager.wrapText() instead for better Unicode support and performance
    * @private
+   * @param {string} text - Text to wrap
+   * @param {number} [maxWidth=58] - Maximum width per line
+   * @returns {string} Wrapped text with indentation
+   *
+   * @example
+   * // DEPRECATED - Don't use
+   * renderer.wrapText('Long text here', 50);
+   *
+   * // RECOMMENDED - Use LayoutManager instead
+   * const lines = renderer.layoutManager.wrapText('Long text here', 50);
+   * const formatted = lines.map(line => `  ${line}`).join('\n');
    */
   wrapText(text, maxWidth = 58) {
+    // Log deprecation warning in debug/verbose mode
+    if (process.env.DEBUG || process.env.VERBOSE || process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[UIRenderer.wrapText] DEPRECATED: This method is deprecated since Phase 4. ' +
+        'Use layoutManager.wrapText() instead for better Unicode support and performance.'
+      );
+    }
+
+    // Fallback to LayoutManager implementation
+    if (this.layoutManager) {
+      return this.layoutManager.wrapText(text, maxWidth).map(line => `  ${line}`).join('\n');
+    }
+
+    // Legacy implementation as fallback
     const words = text.split(' ');
     const lines = [];
     let currentLine = '';
@@ -317,27 +489,70 @@ class UIRenderer {
   }
 
   /**
-   * Renderiza footer com atalhos de teclado
+   * Renderiza footer com atalhos de teclado e informações auxiliares
    * Requirements: 7.1
+   *
+   * Usa BorderRenderer para criar footer com bordas modernas e
+   * LayoutManager para ajustar conteúdo à largura do terminal.
    */
   renderFooter() {
-    const shortcuts = [
-      { key: '↑↓', desc: 'Navegar' },
-      { key: 'Enter', desc: 'Selecionar' },
-      { key: 'h', desc: 'Ajuda' },
-      { key: 'q', desc: 'Sair' }
-    ];
+    const contentWidth = this.layoutManager.getContentWidth();
+    const layoutMode = this.layoutManager.getLayoutMode();
+    const lines = [];
+
+    // Top border for footer
+    const topBorder = this.borderRenderer.renderTopBorder(contentWidth, 'single');
+    const coloredTopBorder = this.themeEngine.colorizeBorder
+      ? this.themeEngine.colorizeBorder(topBorder, 'muted')
+      : topBorder;
+    lines.push(coloredTopBorder);
+
+    // Shortcuts based on layout mode
+    const shortcuts = layoutMode === 'compact'
+      ? [
+        { key: '↑↓', desc: 'Nav' },
+        { key: '↵', desc: 'Sel' },
+        { key: 'h', desc: 'Help' },
+        { key: 'q', desc: 'Exit' }
+      ]
+      : [
+        { key: '↑↓', desc: 'Navegar' },
+        { key: 'Enter', desc: 'Selecionar' },
+        { key: 'h', desc: 'Ajuda' },
+        { key: 'q', desc: 'Sair' }
+      ];
 
     const shortcutText = shortcuts
       .map(s => `${s.key}: ${s.desc}`)
-      .join('  |  ');
+      .join('  │  ');
+
+    // Center shortcuts in footer
+    const centeredShortcuts = this.layoutManager.centerText(shortcutText, contentWidth);
 
     if (!this.themeEngine.chalk) {
-      return `\n${shortcutText}\n`;
+      lines.push(centeredShortcuts);
+    } else {
+      const formatted = this.themeEngine.colorize(centeredShortcuts, 'dimText');
+      lines.push(formatted);
     }
 
-    const formatted = this.themeEngine.colorize(shortcutText, 'dim');
-    return `\n${formatted}\n`;
+    // Bottom border for footer
+    const bottomBorder = this.borderRenderer.renderBottomBorder(contentWidth, 'single');
+    const coloredBottomBorder = this.themeEngine.colorizeBorder
+      ? this.themeEngine.colorizeBorder(bottomBorder, 'muted')
+      : bottomBorder;
+    lines.push(coloredBottomBorder);
+
+    // Add terminal info in expanded mode
+    if (layoutMode === 'expanded') {
+      const capabilities = this.terminalDetector.detect();
+      const infoText = `Terminal: ${capabilities.width}x${capabilities.height} │ Unicode: ${capabilities.supportsUnicode ? '✓' : '✗'} │ Colors: ${capabilities.colorLevel}`;
+      const centeredInfo = this.layoutManager.centerText(infoText, contentWidth);
+      const formattedInfo = this.themeEngine.colorize(centeredInfo, 'dimText');
+      lines.push(formattedInfo);
+    }
+
+    return '\n' + lines.join('\n') + '\n';
   }
 
   /**
@@ -643,6 +858,97 @@ class UIRenderer {
    */
   supportsColor() {
     return this.themeEngine.colorSupport > 0;
+  }
+
+  /**
+   * Configura listener para redimensionamento de terminal
+   * Requirements: Phase 4, Task 17
+   * @private
+   */
+  _setupResizeListener() {
+    if (!this.terminalDetector) {
+      return;
+    }
+
+    // Setup debounced resize handler
+    this.terminalDetector.onResize(() => {
+      // Invalidate cache on resize
+      this.cachedOutput = null;
+      this.lastState = null;
+
+      // Re-render if we have a last state
+      if (this.lastState) {
+        this.render(this.lastState);
+      }
+    });
+  }
+
+  /**
+   * Atualiza o lastState para permitir re-renderização em resize
+   * @private
+   */
+  _updateLastState(state) {
+    this.lastState = {
+      ...state,
+      options: [...state.options],
+      timestamp: Date.now()
+    };
+  }
+
+  /**
+   * Verifica se o cache deve ser invalidado baseado em mudanças no state
+   * Usa hash simples para detectar mudanças significativas
+   * @private
+   * @param {Object} newState - Novo state para comparar
+   * @returns {boolean} - true se cache deve ser invalidado
+   */
+  _shouldInvalidateCache(newState) {
+    if (!this.lastState) {
+      return true;
+    }
+
+    // Compare critical properties
+    if (newState.selectedIndex !== this.lastState.selectedIndex) {
+      return true;
+    }
+
+    if (newState.mode !== this.lastState.mode) {
+      return true;
+    }
+
+    if (newState.options.length !== this.lastState.options.length) {
+      return true;
+    }
+
+    // Check if any option label or actionType changed
+    for (let i = 0; i < newState.options.length; i++) {
+      const newOpt = newState.options[i];
+      const oldOpt = this.lastState.options[i];
+
+      if (newOpt.label !== oldOpt.label || newOpt.actionType !== oldOpt.actionType) {
+        return true;
+      }
+    }
+
+    // Check for layout changes (terminal width)
+    const currentWidth = this.layoutManager ? this.layoutManager.getContentWidth() : 80;
+    if (this._lastRenderWidth && currentWidth !== this._lastRenderWidth) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Invalida cache automaticamente se state mudou significativamente
+   * @private
+   * @param {Object} newState - Novo state para renderizar
+   */
+  _autoInvalidateCache(newState) {
+    if (this._shouldInvalidateCache(newState)) {
+      this.cachedOutput = null;
+      this._lastRenderWidth = this.layoutManager ? this.layoutManager.getContentWidth() : 80;
+    }
   }
 }
 

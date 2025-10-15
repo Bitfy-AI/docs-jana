@@ -1,15 +1,36 @@
 /**
- * InputHandler - Captura e processamento de entrada do usuário
+ * @class InputHandler
+ * @description Captura e processa entrada do teclado em modo raw para resposta imediata.
+ * Integra com KeyboardMapper e StateManager para navegação fluida.
  *
- * Responsável por:
- * - Capturar entrada do teclado via stdin
- * - Integrar com KeyboardMapper para mapeamento de ações
- * - Integrar com StateManager para atualização de estado
- * - Suportar modo raw para captura imediata de teclas
- * - Lidar com terminais não-interativos
- * - Cleanup gracioso ao sair
+ * Funcionalidades:
+ * - Captura imediata de teclas (modo raw)
+ * - Mapeamento automático de ações
+ * - Navegação integrada com StateManager
+ * - Suporte a atalhos customizados
+ * - Detecção de terminal não-interativo
+ * - Cleanup gracioso
  *
- * Requirements: REQ-1 (Navegação com Setas), REQ-6 (Atalhos de Teclado)
+ * @example
+ * // Uso básico
+ * const handler = new InputHandler(stateManager, keyboardMapper);
+ *
+ * handler.on('enter', () => {
+ *   console.log('Enter pressionado');
+ * });
+ *
+ * handler.on('arrow-up', () => {
+ *   console.log('Navegando para cima');
+ * });
+ *
+ * handler.start(); // Inicia captura
+ * // ... usuário interage ...
+ * handler.stop(); // Para captura
+ *
+ * @example
+ * // Aguardar entrada específica
+ * const input = await handler.waitForInput();
+ * console.log(`Tecla: ${input.key}, Ação: ${input.action}`);
  */
 
 const readline = require('readline');

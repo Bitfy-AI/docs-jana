@@ -23,7 +23,12 @@ module.exports = {
     destructive: '#f87171',  // red-400
 
     // Text color for selected items (white for high contrast)
-    selectedText: '#ffffff'  // white
+    selectedText: '#ffffff', // white
+
+    // New color fields optimized for dark backgrounds
+    dimText: '#d1d5db',      // gray-300 - brighter dim text for dark mode
+    accent1: '#f472b6',      // pink-400 - vibrant accent for dark mode
+    accent2: '#2dd4bf'       // teal-400 - vibrant teal for dark mode
   },
   backgrounds: {
     // Brighter background for selected items on dark terminals
@@ -31,6 +36,13 @@ module.exports = {
 
     // Transparent to use terminal's dark background
     normal: 'transparent'
+  },
+  borders: {
+    // Border colors optimized for dark backgrounds
+    primary: '#60a5fa',      // blue-400 - bright primary borders
+    secondary: '#22d3ee',    // cyan-400 - bright secondary borders
+    accent: '#c084fc',       // violet-400 - bright accent borders
+    muted: '#6b7280'         // gray-500 - subtle but visible borders
   },
   contrastRatios: {
     minRatio: 4.5,

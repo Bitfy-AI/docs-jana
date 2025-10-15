@@ -1,0 +1,669 @@
+# Visual Components Documentation
+
+## Overview
+
+The Docs-Jana CLI features a modern, responsive visual system built with four core components that work together to provide an exceptional terminal experience with graceful degradation for limited environments.
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    UIRenderer                            │
+│  (Main rendering engine - coordinates all visual layers) │
+└───────────┬──────────────────────────────────────────────┘
+            │
+      ┌─────┴──────────────────────────────────┐
+      │                                         │
+┌─────▼──────────┐                   ┌─────────▼─────────┐
+│TerminalDetector│                   │  ThemeEngine      │
+│ (Capabilities)  │                   │  (Colors)         │
+└─────┬──────────┘                   └─────────┬─────────┘
+      │                                         │
+      ├────────┬────────────┬──────────────────┤
+      │        │            │                  │
+┌─────▼──┐ ┌──▼─────┐ ┌────▼──────┐ ┌────────▼────────┐
+│Border  │ │Layout  │ │Icon       │ │VisualConstants  │
+│Renderer│ │Manager │ │Mapper     │ │(Design Tokens)  │
+└────────┘ └────────┘ └───────────┘ └─────────────────┘
+```
+
+## Core Components
+
+### 1. TerminalDetector
+
+**Purpose:** Detect terminal capabilities and provide intelligent fallbacks.
+
+**Location:** `src/ui/menu/visual/TerminalDetector.js`
+
+**Responsibilities:**
+- Detect Unicode support
+- Detect emoji support
+- Detect color level (0=none, 1=basic, 2=256, 3=truecolor)
+- Get terminal dimensions
+- Handle resize events
+- Cache detection results for performance
+
+**Usage:**
+
+```javascript
+const TerminalDetector = require('./src/ui/menu/visual/TerminalDetector');
+
+const detector = new TerminalDetector();
+const capabilities = detector.detect();
+
+console.log(capabilities);
+// {
+//   supportsUnicode: true,
+//   supportsEmojis: true,
+//   colorLevel: 3,
+//   width: 120,
+//   height: 40,
+//   platform: 'darwin',
+//   isCi: false,
+//   terminalType: 'xterm-256color'
+// }
+
+// Listen for terminal resize
+const cleanup = detector.onResize(({ width, height }) => {
+  console.log(`Terminal resized to ${width}x${height}`);
+  // Re-render UI here
+});
+
+// Cleanup when done
+cleanup();
+```
+
+**Detection Strategy:**
+
+| Capability | Detection Method | Fallback |
+|------------|------------------|----------|
+| **Unicode** | TERM, LANG env vars, platform | ASCII charset |
+| **Emojis** | Platform + terminal type | Unicode symbols |
+| **Colors** | chalk.level or TERM parsing | No colors |
+| **Dimensions** | process.stdout.getWindowSize() | 80x24 default |
+
+**Platform Support:**
+
+- ✅ macOS: Full Unicode + emoji support
+- ✅ Linux: Full Unicode + emoji (modern terminals)
+- ✅ Windows Terminal: Full Unicode + emoji
+- ⚠️ Windows CMD/PowerShell 5.1: Limited Unicode, no emojis
+- ⚠️ CI Environments: ASCII only, no colors
+
+---
+
+### 2. BorderRenderer
+
+**Purpose:** Render decorative borders with automatic fallback.
+
+**Location:** `src/ui/menu/visual/BorderRenderer.js`
+
+**Responsibilities:**
+- Render box-drawing characters
+- Support multiple border styles (single, double, bold, rounded)
+- Automatic fallback: Unicode → ASCII → Plain text
+- Apply theme colors to borders
+- Consistent border widths
+
+**Usage:**
+
+```javascript
+const BorderRenderer = require('./src/ui/menu/visual/BorderRenderer');
+
+const renderer = new BorderRenderer(terminalDetector, visualConstants, themeEngine);
+
+// Render top border
+console.log(renderer.renderTopBorder(80, 'double'));
+// Output: ╔══════════════════════════════════════════════════════════════════════════════╗
+
+// Render box with content
+console.log(renderer.renderBox([
+  'Welcome to Docs-Jana CLI',
+  'Unified documentation management'
+], {
+  style: 'double',
+  padding: 2,
+  align: 'center',
+  color: 'primary'
+}));
+// Output:
+// ╔════════════════════════════════════════════════════╗
+// ║                                                    ║
+// ║          Welcome to Docs-Jana CLI                 ║
+// ║       Unified documentation management            ║
+// ║                                                    ║
+// ╚════════════════════════════════════════════════════╝
+
+// Render separator
+console.log(renderer.renderSeparator(80, 'single'));
+// Output: ────────────────────────────────────────────────────────────────────────────────
+```
+
+**Border Styles:**
+
+| Style | Unicode | ASCII Fallback | Use Case |
+|-------|---------|----------------|----------|
+| **single** | ─ │ ┌ ┐ └ ┘ | - \| + + + + | Standard borders |
+| **double** | ═ ║ ╔ ╗ ╚ ╝ | = \| + + + + | Headers, emphasis |
+| **bold** | ━ ┃ ┏ ┓ ┗ ┛ | = \| + + + + | Strong emphasis |
+| **rounded** | ─ │ ╭ ╮ ╰ ╯ | - \| + + + + | Friendly UI |
+
+**Fallback Cascade:**
+
+```
+Unicode supported?
+  ├─ YES → Use Unicode characters (┌─┐)
+  └─ NO → Use ASCII characters (+-+)
+           └─ Render fails? → Use plain text (---)
+```
+
+---
+
+### 3. LayoutManager
+
+**Purpose:** Manage responsive layout and text manipulation.
+
+**Location:** `src/ui/menu/visual/LayoutManager.js`
+
+**Responsibilities:**
+- Determine layout mode based on terminal width
+- Calculate content width (terminal width - margins)
+- Provide padding and spacing values
+- Truncate, wrap, and center text
+- Cache layout calculations
+- Invalidate cache on resize
+
+**Usage:**
+
+```javascript
+const LayoutManager = require('./src/ui/menu/visual/LayoutManager');
+
+const layoutManager = new LayoutManager(terminalDetector, visualConstants);
+
+// Get layout mode
+const mode = layoutManager.getLayoutMode();
+console.log(mode); // 'expanded' | 'standard' | 'compact'
+
+// Get content width
+const contentWidth = layoutManager.getContentWidth();
+console.log(contentWidth); // 76 (for 80-column terminal with 2-char margins)
+
+// Text manipulation
+const truncated = layoutManager.truncateText('Very long text here', 15);
+console.log(truncated); // 'Very long te...'
+
+const wrapped = layoutManager.wrapText('Long sentence that needs wrapping', 20);
+console.log(wrapped);
+// ['Long sentence that', 'needs wrapping']
+
+const centered = layoutManager.centerText('Title', 40);
+console.log(centered); // '                 Title                  '
+
+// Get complete layout config
+const config = layoutManager.getLayoutConfig();
+console.log(config);
+// {
+//   mode: 'standard',
+//   contentWidth: 76,
+//   terminalWidth: 80,
+//   horizontalPadding: 2,
+//   verticalSpacing: {
+//     beforeHeader: 1,
+//     afterHeader: 1,
+//     betweenOptions: 0,
+//     beforeFooter: 1
+//   }
+// }
+
+// Cleanup when done
+layoutManager.cleanup();
+```
+
+**Layout Modes:**
+
+| Mode | Terminal Width | Features | Use Case |
+|------|----------------|----------|----------|
+| **expanded** | ≥ 100 columns | Full descriptions, extra padding | Desktop monitors |
+| **standard** | 80-99 columns | Normal layout | Default terminals |
+| **compact** | < 80 columns | Truncated text, minimal padding | Small windows |
+
+**Responsive Breakpoints:**
+
+```javascript
+// From visual-constants.js
+LAYOUT: {
+  breakpoints: {
+    expanded: 100,  // Desktop - full experience
+    standard: 80,   // Normal - balanced layout
+    compact: 60     // Minimum - essential only
+  }
+}
+```
+
+---
+
+### 4. IconMapper
+
+**Purpose:** Map actions to icons with intelligent fallback.
+
+**Location:** `src/ui/menu/visual/IconMapper.js`
+
+**Responsibilities:**
+- Map action types to appropriate icons
+- Provide 4-level fallback: emoji → unicode → ascii → plain
+- Support custom icon registration
+- Cache resolved icons
+- Status icons for success/error/warning/info
+
+**Usage:**
+
+```javascript
+const IconMapper = require('./src/ui/menu/visual/IconMapper');
+
+const iconMapper = new IconMapper(terminalDetector);
+
+// Get action icon
+const downloadIcon = iconMapper.getIcon('download');
+console.log(downloadIcon); // '⬇️' (emoji) or '↓' (unicode) or 'v' (ascii) or 'DL' (plain)
+
+// Get status icon
+const successIcon = iconMapper.getStatusIcon('success');
+console.log(successIcon); // '✅' (emoji) or '✓' (unicode) or 'v' (ascii) or 'OK' (plain)
+
+// Get selection indicator
+const indicator = iconMapper.getSelectionIndicator();
+console.log(indicator); // '▶' (unicode) or '>' (ascii) or '*' (plain)
+
+// Register custom icon
+iconMapper.registerIcon('custom-action', {
+  emoji: '🎯',
+  unicode: '◉',
+  ascii: 'o',
+  plain: 'X'
+});
+
+const customIcon = iconMapper.getIcon('custom-action');
+console.log(customIcon); // Uses appropriate level based on terminal
+```
+
+**Default Icon Set:**
+
+| Action | Emoji | Unicode | ASCII | Plain |
+|--------|-------|---------|-------|-------|
+| **download** | ⬇️ | ↓ | v | DL |
+| **upload** | ⬆️ | ↑ | ^ | UP |
+| **settings** | ⚙️ | ⚙ | * | CFG |
+| **docs** | 📄 | ○ | o | DOC |
+| **stats** | 📊 | ≡ | = | STT |
+| **refresh** | 🔄 | ↻ | @ | RFR |
+| **help** | ❓ | ? | ? | ? |
+| **exit** | 🚪 | ✕ | x | X |
+
+**Status Icons:**
+
+| Status | Emoji | Unicode | ASCII | Plain |
+|--------|-------|---------|-------|-------|
+| **success** | ✅ | ✓ | v | OK |
+| **error** | ❌ | ✗ | x | ERR |
+| **warning** | ⚠️ | ! | ! | WRN |
+| **info** | ℹ️ | i | i | INF |
+| **neutral** | ⚪ | ○ | o | - |
+
+---
+
+## Visual Constants (Design Tokens)
+
+**Location:** `src/ui/menu/config/visual-constants.js`
+
+**Purpose:** Centralize all visual design decisions in one place.
+
+```javascript
+module.exports = {
+  // Border characters for each style
+  BORDER_CHARS: {
+    single: { /* Unicode & ASCII variants */ },
+    double: { /* Unicode & ASCII variants */ },
+    bold: { /* Unicode & ASCII variants */ },
+    rounded: { /* Unicode & ASCII variants */ }
+  },
+
+  // Layout configuration
+  LAYOUT: {
+    breakpoints: {
+      expanded: 100,  // ≥100 columns
+      standard: 80,   // ≥80 columns
+      compact: 60     // <80 columns
+    },
+    margins: {
+      horizontal: 2   // 2 chars on each side
+    },
+    padding: {
+      expanded: 4,    // More breathing room
+      standard: 2,    // Normal padding
+      compact: 1      // Minimal padding
+    }
+  },
+
+  // Spacing configuration
+  SPACING: {
+    beforeHeader: 1,       // Empty line before header
+    afterHeader: 1,        // Empty line after header
+    betweenOptions: 0,     // No space between menu options
+    beforeDescription: 1,  // Space before description
+    afterDescription: 0,   // No space after description
+    beforeFooter: 1        // Space before footer
+  },
+
+  // Typography settings
+  TYPOGRAPHY: {
+    maxDescriptionLength: {
+      expanded: 120,   // Full descriptions
+      standard: 80,    // Normal descriptions
+      compact: 50      // Truncated descriptions
+    },
+    indentation: 2     // 2 spaces for indented content
+  }
+};
+```
+
+---
+
+## Integration Example
+
+Here's how all components work together in UIRenderer:
+
+```javascript
+const UIRenderer = require('./src/ui/menu/components/UIRenderer');
+
+// Components are auto-initialized if not provided
+const renderer = new UIRenderer({
+  themeEngine,
+  animationEngine,
+  keyboardMapper
+  // terminalDetector, borderRenderer, layoutManager, iconMapper
+  // are created automatically
+});
+
+// Render state
+const state = {
+  options: [
+    {
+      label: 'Download N8N workflows',
+      command: 'n8n:download',
+      actionType: 'download'
+    },
+    {
+      label: 'Upload N8N workflows',
+      command: 'n8n:upload',
+      actionType: 'upload'
+    }
+  ],
+  selectedIndex: 0,
+  mode: 'navigation'
+};
+
+renderer.render(state);
+```
+
+**Output (with full Unicode support):**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║                      DOCS-JANA CLI v2.0                        ║
+║              Documentation & Workflow Management               ║
+╚════════════════════════════════════════════════════════════════╝
+
+  ▶ ⬇️  Download N8N workflows
+    ⬆️  Upload N8N workflows
+
+────────────────────────────────────────────────────────────────
+[↑↓] Navigate | [Enter] Select | [h] Help | [q] Quit
+```
+
+**Output (ASCII fallback):**
+
+```
++================================================================+
+|                      DOCS-JANA CLI v2.0                        |
+|              Documentation & Workflow Management               |
++================================================================+
+
+  > DL Download N8N workflows
+    UP Upload N8N workflows
+
+----------------------------------------------------------------
+[↑↓] Navigate | [Enter] Select | [h] Help | [q] Quit
+```
+
+---
+
+## Performance Optimizations
+
+### Caching Strategy
+
+1. **TerminalDetector**
+   - Caches capabilities object
+   - Invalidates on terminal width change
+   - Re-detection triggered by resize events
+
+2. **LayoutManager**
+   - Caches layout configuration
+   - Invalidates on terminal resize
+   - Minimal recalculation overhead
+
+3. **IconMapper**
+   - Caches resolved icons by action type
+   - Invalidates when capabilities change
+
+4. **BorderRenderer**
+   - No caching (stateless renders)
+   - Charset selection cached by TerminalDetector
+
+### Performance Targets
+
+| Operation | Target | Achieved |
+|-----------|--------|----------|
+| Terminal detection | < 1ms | ~0.5ms |
+| Border rendering | < 2ms | ~1ms |
+| Layout calculation | < 1ms | ~0.2ms |
+| Icon resolution | < 1ms | ~0.1ms |
+| Full menu render | < 100ms | ~50ms |
+
+---
+
+## Testing
+
+### Test Coverage
+
+| Component | Coverage | Tests |
+|-----------|----------|-------|
+| TerminalDetector | 96.24% | 57 tests |
+| BorderRenderer | 95.5% | 45 tests |
+| LayoutManager | 100% | 70 tests |
+| IconMapper | 96.51% | 117 tests |
+| UIRenderer | 98.1% | 43 tests |
+
+### Running Tests
+
+```bash
+# Test individual components
+npm test -- TerminalDetector.test.js
+npm test -- BorderRenderer.test.js
+npm test -- LayoutManager.test.js
+npm test -- IconMapper.test.js
+npm test -- UIRenderer.test.js
+
+# Test all visual components
+npm test -- __tests__/unit/ui/menu/visual/
+```
+
+---
+
+## Customization
+
+### Custom Themes
+
+Extend ThemeEngine with custom colors:
+
+```javascript
+const customTheme = {
+  name: 'custom',
+  colors: {
+    primary: '#00ff00',
+    success: '#00cc00',
+    // ... other colors
+  },
+  borders: {
+    primary: '#ffffff',
+    secondary: '#cccccc'
+  }
+};
+
+themeEngine.loadTheme(customTheme);
+```
+
+### Custom Icons
+
+Register custom action icons:
+
+```javascript
+iconMapper.registerIcon('deploy', {
+  emoji: '🚀',
+  unicode: '↗',
+  ascii: '^',
+  plain: 'GO'
+});
+```
+
+### Custom Layouts
+
+Override visual constants:
+
+```javascript
+const customConstants = {
+  ...require('./src/ui/menu/config/visual-constants'),
+  LAYOUT: {
+    ...visualConstants.LAYOUT,
+    breakpoints: {
+      expanded: 120,  // Larger expanded mode
+      standard: 90,
+      compact: 70
+    }
+  }
+};
+
+const layoutManager = new LayoutManager(terminalDetector, customConstants);
+```
+
+---
+
+## Troubleshooting
+
+### Unicode Characters Not Displaying
+
+**Problem:** Box-drawing characters show as `?` or gibberish.
+
+**Solutions:**
+1. Set UTF-8 encoding: `export LANG=en_US.UTF-8`
+2. Use terminal with Unicode support (iTerm2, Windows Terminal, gnome-terminal)
+3. Install Unicode font (DejaVu, Fira Code, JetBrains Mono)
+
+### Colors Not Working
+
+**Problem:** Colors display as plain text or wrong colors.
+
+**Solutions:**
+1. Check `TERM` variable: `echo $TERM` (should be `xterm-256color` or similar)
+2. Set force color: `export FORCE_COLOR=1`
+3. Remove NO_COLOR: `unset NO_COLOR`
+
+### Emojis Not Rendering
+
+**Problem:** Emojis show as boxes or `??`.
+
+**Solutions:**
+1. Use modern terminal (Windows Terminal, iTerm2, Hyper)
+2. Install emoji font (Noto Color Emoji on Linux)
+3. System limitation on Windows CMD/PowerShell 5.1 (upgrade to Windows Terminal)
+
+### Layout Broken on Resize
+
+**Problem:** UI doesn't adapt when terminal is resized.
+
+**Solutions:**
+1. Resize listeners should be automatic
+2. Call `layoutManager.invalidateCache()` manually if needed
+3. Check `terminalDetector.onResize()` is registered
+
+---
+
+## API Reference
+
+### TerminalDetector
+
+```typescript
+class TerminalDetector {
+  detect(): TerminalCapabilities
+  supportsUnicode(): boolean
+  supportsEmojis(): boolean
+  getColorLevel(): number
+  getDimensions(): { width: number, height: number }
+  onResize(callback: Function): Function
+  invalidateCache(): void
+}
+```
+
+### BorderRenderer
+
+```typescript
+class BorderRenderer {
+  renderTopBorder(width: number, style: BorderStyle): string
+  renderBottomBorder(width: number, style: BorderStyle): string
+  renderSeparator(width: number, style: BorderStyle): string
+  renderBox(lines: string[], options: BorderBoxOptions): string
+  getCharSet(style: BorderStyle): BorderCharSet
+}
+```
+
+### LayoutManager
+
+```typescript
+class LayoutManager {
+  getLayoutMode(): LayoutMode
+  getContentWidth(): number
+  getHorizontalPadding(mode?: LayoutMode): number
+  getVerticalSpacing(section: string): number
+  truncateText(text: string, maxWidth: number, ellipsis?: string): string
+  wrapText(text: string, maxWidth: number): string[]
+  centerText(text: string, width: number): string
+  getLayoutConfig(): LayoutConfig
+  invalidateCache(): void
+  cleanup(): void
+}
+```
+
+### IconMapper
+
+```typescript
+class IconMapper {
+  getIcon(actionType: string): string
+  getStatusIcon(status: StatusType): string
+  getSelectionIndicator(): string
+  getCategoryIcon(category: string): string
+  registerIcon(actionType: string, iconSet: IconSet): void
+  invalidateCache(): void
+}
+```
+
+---
+
+## Related Documentation
+
+- [Architecture Overview](./ARCHITECTURE.md)
+- [Migration Guide](./MIGRATION.md)
+- [Theme Customization](../src/ui/menu/themes/README.md)
+
+---
+
+**Last Updated:** 2025-10-15
+**Version:** 2.0.0

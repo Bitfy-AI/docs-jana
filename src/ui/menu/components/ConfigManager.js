@@ -1,14 +1,27 @@
 /**
- * ConfigManager - Gerenciamento de configurações do usuário
+ * @class ConfigManager
+ * @description Gerenciamento de configurações do usuário com persistência em arquivo JSON.
+ * Carrega de ~/.docs-jana/config.json e salva automaticamente com permissões restritas (0600).
  *
- * Responsável por gerenciar preferências do usuário, incluindo:
- * - Carregamento de configurações do arquivo ~/.docs-jana/config.json
- * - Salvamento de preferências personalizadas
- * - Validação de valores de configuração
- * - Migração de versões de configuração
- * - Valores padrão quando arquivo não existe
+ * Funcionalidades:
+ * - Carregamento e salvamento automático
+ * - Validação de valores
+ * - Migração de versões
+ * - Valores padrão seguros
+ * - Acesso via dot notation (ex: 'preferences.theme')
  *
- * Requirements: REQ-10 (Configuração Personalizável), REQ-11 (Modularização)
+ * @example
+ * // Carregar e usar configurações
+ * const config = new ConfigManager();
+ * await config.load();
+ *
+ * const theme = config.get('preferences.theme'); // 'default'
+ * config.set('preferences.theme', 'dark');
+ * await config.save();
+ *
+ * @example
+ * // Resetar para padrão
+ * await config.reset();
  */
 
 const fs = require('fs').promises;
@@ -26,12 +39,15 @@ const DEFAULT_CONFIG = {
     animationSpeed: 'normal',
     iconsEnabled: true,
     showDescriptions: true,
-    showPreviews: true,
+    showPreviews: false, // DISABLED: Execute commands directly without preview step
     historySize: 50,
     keyboardShortcuts: {
-      help: ['h', '?'],
-      exit: ['q', 'Escape'],
-      rerun: ['r']
+      // Format: key → action (KeyboardMapper expects this format)
+      // Do not override navigation keys (up, down, enter, escape, space)
+      // Examples:
+      // 'h': 'help',
+      // 'r': 'refresh',
+      // 'c': 'config'
     }
   }
 };

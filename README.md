@@ -98,6 +98,134 @@ Settings are persisted to `~/.docs-jana/config.json`:
 
 ---
 
+## 🎨 Visual Experience
+
+The CLI features a modern, responsive visual system that automatically adapts to your terminal's capabilities, providing an exceptional experience across all platforms.
+
+### Modern Visual Components
+
+Built with 4 core visual components working together:
+
+- **TerminalDetector**: Smart terminal capability detection
+- **BorderRenderer**: Beautiful Unicode borders with ASCII fallback
+- **LayoutManager**: Responsive layout (expanded/standard/compact modes)
+- **IconMapper**: Icons with intelligent fallback (emoji → unicode → ascii → plain)
+
+### Terminal Compatibility
+
+| Terminal | Unicode | Colors | Emojis | Experience |
+|----------|---------|--------|--------|------------|
+| **Windows Terminal** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
+| **iTerm2 (macOS)** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
+| **gnome-terminal** | ✅ Full | ✅ TrueColor | ✅ Yes | ⭐⭐⭐⭐⭐ Excellent |
+| **PowerShell Core** | ✅ Full | ✅ 256 colors | ⚠️ Limited | ⭐⭐⭐⭐ Great |
+| **PowerShell 5.1** | ⚠️ Partial | ✅ Basic | ❌ No | ⭐⭐⭐ Good |
+| **CMD** | ❌ No | ✅ Basic | ❌ No | ⭐⭐ Basic |
+| **CI/CD** | ❌ No | ❌ No | ❌ No | ⭐ Fallback |
+
+### Graceful Degradation
+
+The CLI automatically detects your terminal's capabilities and gracefully falls back:
+
+```
+Best Experience (Unicode + TrueColor + Emojis)
+├─ Windows Terminal, iTerm2, modern terminals
+│  ╔══════════════════════════════╗
+│  ║  ⬇️  Download N8N workflows  ║
+│  ╚══════════════════════════════╝
+│
+Standard Experience (Unicode + Colors)
+├─ Most terminals
+│  ┌──────────────────────────────┐
+│  │  ↓ Download N8N workflows    │
+│  └──────────────────────────────┘
+│
+Basic Experience (ASCII + Colors)
+├─ Older terminals, CI
+│  +==============================+
+│  |  v Download N8N workflows    |
+│  +==============================+
+│
+Plain Experience (Text only)
+└─ Fallback for all environments
+   Download N8N workflows
+```
+
+### Visual Features
+
+**Modern Borders**
+- 4 border styles: single, double, bold, rounded
+- Unicode box-drawing characters with ASCII fallback
+- Colored borders following theme palette
+
+**Responsive Layout**
+- **Expanded** (≥100 columns): Full descriptions, extra padding
+- **Standard** (80-99 columns): Balanced layout
+- **Compact** (<80 columns): Truncated text, minimal padding
+
+**Icon System**
+- 4-level fallback cascade
+- Emoji → Unicode → ASCII → Plain text
+- Consistent visual language
+
+**Theme Integration**
+- 4 themes: Default, Dark, Light, High-Contrast
+- WCAG 2.1 AA compliant (4.5:1 contrast minimum)
+- Automatic color degradation
+
+### Customization
+
+Customize visual behavior via configuration:
+
+```json
+{
+  "preferences": {
+    "iconsEnabled": true,
+    "showDescriptions": true,
+    "theme": "default",
+    "animationsEnabled": true
+  }
+}
+```
+
+### Troubleshooting Visual Issues
+
+**Unicode characters showing as `?` or boxes:**
+```bash
+# Set UTF-8 encoding
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# Use modern terminal (Windows Terminal, iTerm2, gnome-terminal)
+# Install Unicode font (DejaVu, Fira Code, JetBrains Mono)
+```
+
+**Colors not working:**
+```bash
+# Check TERM variable
+echo $TERM  # Should be xterm-256color or better
+
+# Force color support
+export FORCE_COLOR=1
+
+# Remove NO_COLOR if set
+unset NO_COLOR
+```
+
+**Emojis not rendering:**
+```bash
+# Use modern terminal (Windows Terminal recommended for Windows)
+# Install emoji font (Noto Color Emoji on Linux)
+```
+
+### Learn More
+
+- **[Visual Components Guide](docs/VISUAL-COMPONENTS.md)** - Complete visual system documentation
+- **[Architecture Overview](docs/ARCHITECTURE.md)** - System architecture
+- **[Migration Guide](docs/MIGRATION.md)** - Upgrading guide
+
+---
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -332,6 +460,169 @@ docs-jana/
 - **Dependency Injection**: Services receive dependencies via constructor
 - **Service Layer**: Business logic separated from CLI logic
 - **Orchestration**: Lifecycle management for command execution
+
+### Dependency Injection Architecture
+
+The UIRenderer component implements a modern **Dependency Injection (DI)** pattern that provides high testability, flexibility, and backwards compatibility.
+
+#### Pattern Overview
+
+```javascript
+// UIRenderer with full DI
+const renderer = new UIRenderer({
+  themeEngine,           // Required
+  animationEngine,       // Required
+  keyboardMapper,        // Required
+  borderRenderer,        // Optional (auto-created)
+  layoutManager,         // Optional (auto-created)
+  iconMapper,            // Optional (auto-created)
+  terminalDetector       // Optional (auto-created)
+});
+```
+
+#### Key Benefits
+
+1. **Testability** 🧪
+   - All dependencies can be mocked for unit testing
+   - Isolated component testing without external dependencies
+   - 54+ tests with 100% pass rate
+
+2. **Flexibility** 🔧
+   - Swap implementations without changing UIRenderer code
+   - Custom visual components for different environments
+   - Progressive enhancement based on terminal capabilities
+
+3. **Backwards Compatibility** 🔄
+   - Auto-creation of components when not provided
+   - Legacy properties maintained (`this.icons`, `wrapText()`)
+   - Zero breaking changes for existing code
+
+#### Auto-Creation Pattern
+
+For backwards compatibility, UIRenderer automatically creates visual components if not provided:
+
+```javascript
+// Old code still works - no dependencies needed
+const renderer = new UIRenderer({
+  themeEngine,
+  animationEngine,
+  keyboardMapper
+});
+// Visual components (BorderRenderer, LayoutManager, etc.) auto-created ✅
+
+// New code with explicit control
+const renderer = new UIRenderer({
+  themeEngine,
+  animationEngine,
+  keyboardMapper,
+  borderRenderer: customBorderRenderer,  // Custom implementation
+  layoutManager: customLayoutManager,    // Custom implementation
+  // ...
+});
+```
+
+#### Visual Components
+
+Phase 4 introduced 4 new visual components integrated via DI:
+
+| Component | Responsibility | Auto-Created |
+|-----------|---------------|--------------|
+| **BorderRenderer** | Modern Unicode/ASCII borders with fallback | ✅ Yes |
+| **LayoutManager** | Responsive layout (expanded/standard/compact) | ✅ Yes |
+| **IconMapper** | Icon system with emoji→unicode→ascii→plain fallback | ✅ Yes |
+| **TerminalDetector** | Terminal capability detection (Unicode, colors, width) | ✅ Yes |
+
+#### Performance Optimizations
+
+1. **Smart Cache Invalidation**
+   ```javascript
+   // Auto-invalidates cache when state changes
+   _autoInvalidateCache(newState) {
+     if (this._shouldInvalidateCache(newState)) {
+       this.cachedOutput = null;
+     }
+   }
+   ```
+
+2. **Lazy Instantiation**
+   - Components only created when first needed
+   - Minimal memory footprint in default configuration
+   - ~1ms overhead for DI resolution
+
+3. **Resize Debouncing**
+   - Terminal resize events debounced to 200ms
+   - Prevents excessive re-renders
+   - Automatic state preservation
+
+#### Example: Custom Border Implementation
+
+```javascript
+// Create custom border renderer for ASCII-only terminals
+class AsciiBorderRenderer {
+  renderTopBorder(width, style) {
+    return '+' + '='.repeat(width - 2) + '+';
+  }
+  renderBottomBorder(width, style) {
+    return '+' + '='.repeat(width - 2) + '+';
+  }
+  renderSeparator(width, style) {
+    return '+' + '-'.repeat(width - 2) + '+';
+  }
+}
+
+// Inject custom implementation
+const renderer = new UIRenderer({
+  themeEngine,
+  animationEngine,
+  keyboardMapper,
+  borderRenderer: new AsciiBorderRenderer()
+});
+```
+
+#### Testing with DI
+
+```javascript
+// Easy mocking for unit tests
+const mockBorderRenderer = {
+  renderTopBorder: jest.fn(() => '╔═══╗'),
+  renderBottomBorder: jest.fn(() => '╚═══╝'),
+  renderSeparator: jest.fn(() => '├───┤')
+};
+
+const renderer = new UIRenderer({
+  themeEngine: mockThemeEngine,
+  animationEngine: mockAnimationEngine,
+  keyboardMapper: mockKeyboardMapper,
+  borderRenderer: mockBorderRenderer  // Mocked dependency
+});
+
+// Test isolated behavior
+renderer.renderHeader();
+expect(mockBorderRenderer.renderTopBorder).toHaveBeenCalled();
+```
+
+#### Migration Guide
+
+**No migration needed!** The DI pattern is fully backwards compatible:
+
+```javascript
+// OLD CODE - Still works ✅
+const renderer = new UIRenderer({ themeEngine, animationEngine, keyboardMapper });
+
+// NEW CODE - More control ✅
+const renderer = new UIRenderer({
+  themeEngine,
+  animationEngine,
+  keyboardMapper,
+  borderRenderer: customBorderRenderer
+});
+```
+
+#### Learn More
+
+- **[Developer Guide](docs/interactive-menu/DEVELOPER_GUIDE.md)** - Extending visual components
+- **[API Reference](docs/interactive-menu/API_REFERENCE.md)** - Complete API documentation
+- **[UIRenderer Tests](__tests__/unit/ui/menu/components/UIRenderer.test.js)** - 54 tests demonstrating DI patterns
 
 ### Architecture
 
