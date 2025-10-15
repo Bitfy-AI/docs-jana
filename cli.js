@@ -531,4 +531,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main, COMMANDS, findCommand };
+module.exports = { main, COMMANDS, findCommand, printHelp, printVersion };

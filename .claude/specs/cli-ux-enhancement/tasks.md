@@ -447,7 +447,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 20. Escrever testes para cli.js printHelp()
+- [x] 20. Escrever testes para cli.js printHelp()
   - Testar renderização de help com bordas decorativas
   - Testar fallback para ASCII em terminal limitado
   - Testar modo não-interativo (sem cores, sem bordas)
@@ -456,6 +456,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - _Target Coverage_: ≥ 80%
   - _Risk Level_: 🟢 Low (unit tests)
   - _Estimated Effort_: 2 horas
+  - _Status_: ✅ COMPLETED (61 tests passing, comprehensive coverage of printHelp() and printVersion())
 
 ---
 
