@@ -7,7 +7,7 @@ const EnvLoader = require('../utils/env-loader');
 EnvLoader.load();
 
 const Logger = require('../utils/logger');
-const HttpClient = require('../utils/http-client');
+const { HttpClientFactory } = require('../core/factories');
 const FileManager = require('../utils/file-manager');
 const ConfigManager = require('../utils/config-manager');
 const AuthFactory = require('../auth/auth-factory');
@@ -180,14 +180,14 @@ EXAMPLES:
 
     // Create dependencies using Factory Pattern
     const authStrategy = AuthFactory.create(this.config);
-    const httpClient = new HttpClient(
-      this.config.baseUrl,
-      authStrategy.getHeaders(),
-      {
-        maxRetries: this.config.maxRetries || 3,
-        timeout: this.config.timeout || 30000
-      }
-    );
+
+    // Use HttpClientFactory to create HttpClient instance
+    const httpClient = HttpClientFactory.create({
+      baseUrl: this.config.baseUrl,
+      headers: authStrategy.getHeaders(),
+      maxRetries: this.config.maxRetries || 3,
+      timeout: this.config.timeout || 30000
+    });
 
     this.fileManager = new FileManager(this.logger);
     this.workflowService = new WorkflowService(httpClient, authStrategy, this.logger);
