@@ -18,7 +18,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 1. Criar estrutura de diretórios para componentes visuais
+- [x] 1. Criar estrutura de diretórios para componentes visuais
   - Criar diretório `src/ui/menu/visual/` para novos componentes visuais
   - Criar diretório `src/ui/menu/config/` para constantes de configuração
   - Criar arquivo de índice `src/ui/menu/visual/index.js` para exports centralizados
@@ -29,8 +29,8 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 2. Implementar VisualConstants com design tokens
-  - [ ] 2.1 Criar arquivo visual-constants.js com constantes de design
+- [x] 2. Implementar VisualConstants com design tokens
+  - [x] 2.1 Criar arquivo visual-constants.js com constantes de design
     - Definir BORDER_CHARS com conjuntos Unicode e ASCII para diferentes estilos (single, double, bold, rounded)
     - Definir LAYOUT com breakpoints (expanded: 100, standard: 80, compact: 60) e margins
     - Definir SPACING com valores para beforeHeader, afterHeader, betweenOptions, beforeFooter
@@ -38,7 +38,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
     - Exportar todos os design tokens como module.exports
     - _Requirements: Requirement 2, Requirement 3, 13.2_
 
-  - [ ] 2.2 Documentar todas as constantes com JSDoc
+  - [x] 2.2 Documentar todas as constantes com JSDoc
     - Adicionar JSDoc typedef para BorderCharSet (topLeft, topRight, bottomLeft, bottomRight, horizontal, vertical, etc)
     - Adicionar JSDoc typedef para LayoutConfig (breakpoints, minWidth, margins, padding)
     - Documentar cada seção de constantes com comentários explicativos
@@ -50,8 +50,8 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 3. Implementar TerminalDetector para detecção de capabilities
-  - [ ] 3.1 Criar classe TerminalDetector
+- [x] 3. Implementar TerminalDetector para detecção de capabilities
+  - [x] 3.1 Criar classe TerminalDetector
     - Implementar método `detect()` que retorna TerminalCapabilities object
     - Implementar método `supportsUnicode()` usando testes de encoding
     - Implementar método `supportsEmojis()` verificando terminal type e platform
@@ -59,13 +59,13 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
     - Implementar método `getDimensions()` usando process.stdout.getWindowSize()
     - _Requirements: Requirement 6, 11.1, 12.1_
 
-  - [ ] 3.2 Implementar detecção de resize
+  - [x] 3.2 Implementar detecção de resize
     - Implementar método `onResize(callback)` que escuta eventos SIGWINCH
     - Implementar debounce de 200ms para evitar múltiplos re-renders
     - Garantir cleanup correto de event listeners
     - _Requirements: Requirement 8, 11.1_
 
-  - [ ] 3.3 Adicionar JSDoc e documentação
+  - [x] 3.3 Adicionar JSDoc e documentação
     - Documentar interface TerminalCapabilities (supportsUnicode, supportsEmojis, colorLevel, width, height, platform, isCi, terminalType)
     - Adicionar exemplos de uso
     - Documentar estratégia de detecção para cada capability
@@ -76,7 +76,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 4. Escrever testes unitários para TerminalDetector
+- [x] 4. Escrever testes unitários para TerminalDetector
   - Testar detecção de Unicode support com diferentes valores de TERM
   - Testar detecção de emoji support em diferentes plataformas (win32, darwin, linux)
   - Testar detecção de color level mockando chalk.level
@@ -85,7 +85,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - Testar debounce de resize (múltiplos eventos → single callback)
   - Validar TerminalCapabilities object structure
   - _Requirements: 13.4_
-  - _Target Coverage_: ≥ 80%
+  - _Target Coverage_: ≥ 80% (Achieved: 96.24% statements, 94.21% branches)
   - _Risk Level_: 🟢 Low (unit tests)
   - _Estimated Effort_: 3-4 horas
 
