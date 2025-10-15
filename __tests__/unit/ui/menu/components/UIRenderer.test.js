@@ -685,6 +685,306 @@ describe('UIRenderer - Phase 4 Refactored', () => {
     });
   });
 
+  describe('renderPreviewMode() - P1.1 Coverage Enhancement', () => {
+    let renderer;
+
+    beforeEach(() => {
+      renderer = new UIRenderer({
+        themeEngine: mockThemeEngine,
+        animationEngine: mockAnimationEngine,
+        keyboardMapper: mockKeyboardMapper,
+        borderRenderer: mockBorderRenderer,
+        layoutManager: mockLayoutManager,
+        iconMapper: mockIconMapper,
+        terminalDetector: mockTerminalDetector
+      });
+
+      // Mock process.stdout.write to capture output
+      jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      process.stdout.write.mockRestore();
+    });
+
+    it('should render preview mode with command details', () => {
+      const state = {
+        mode: 'preview',
+        options: [{
+          label: 'Test Command',
+          command: 'npm test',
+          actionType: 'test',
+          category: 'action',
+          preview: {
+            shellCommand: 'npm test',
+            affectedPaths: ['src/', 'tests/'],
+            estimatedDuration: 5,
+            warning: 'This will run all tests'
+          }
+        }],
+        selectedIndex: 0
+      };
+
+      const output = renderer.render(state);
+
+      expect(output).toContain('PREVIEW DO COMANDO');
+      expect(output).toContain('npm test');
+      expect(output).toContain('src/');
+      expect(output).toContain('tests/');
+      expect(output).toContain('5');
+      expect(output).toContain('This will run all tests');
+    });
+
+    it('should fallback to navigation mode when preview not available', () => {
+      const state = {
+        mode: 'preview',
+        options: [{ label: 'Test', actionType: 'info', category: 'info' }],
+        selectedIndex: 0
+      };
+
+      const spy = jest.spyOn(renderer, 'renderNavigationMode');
+      renderer.render(state);
+
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe('renderHistoryMode() - P1.2 Coverage Enhancement', () => {
+    let renderer;
+
+    beforeEach(() => {
+      renderer = new UIRenderer({
+        themeEngine: mockThemeEngine,
+        animationEngine: mockAnimationEngine,
+        keyboardMapper: mockKeyboardMapper,
+        borderRenderer: mockBorderRenderer,
+        layoutManager: mockLayoutManager,
+        iconMapper: mockIconMapper,
+        terminalDetector: mockTerminalDetector
+      });
+
+      jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      process.stdout.write.mockRestore();
+    });
+
+    it('should render history mode with command records', () => {
+      const state = {
+        mode: 'history',
+        options: [{ label: 'Test', actionType: 'info', category: 'info' }],
+        selectedIndex: 0,
+        history: [
+          {
+            commandName: 'npm test',
+            status: 'success',
+            timestamp: new Date(Date.now() - 300000),
+            duration: 2500
+          },
+          {
+            commandName: 'npm build',
+            status: 'error',
+            timestamp: new Date(Date.now() - 120000),
+            duration: 1200
+          }
+        ]
+      };
+
+      const output = renderer.render(state);
+
+      expect(output).toContain('HISTÓRICO DE COMANDOS');
+      expect(output).toContain('npm test');
+      expect(output).toContain('npm build');
+      expect(mockIconMapper.getStatusIcon).toHaveBeenCalledWith('success');
+      expect(mockIconMapper.getStatusIcon).toHaveBeenCalledWith('error');
+    });
+
+    it('should render empty history message', () => {
+      const state = {
+        mode: 'history',
+        options: [{ label: 'Test', actionType: 'info', category: 'info' }],
+        selectedIndex: 0,
+        history: []
+      };
+
+      const output = renderer.render(state);
+
+      expect(output).toContain('HISTÓRICO DE COMANDOS');
+      expect(output).toContain('Nenhum comando executado ainda');
+    });
+  });
+
+  describe('renderConfigMode() - P1.3 Coverage Enhancement', () => {
+    let renderer;
+
+    beforeEach(() => {
+      renderer = new UIRenderer({
+        themeEngine: mockThemeEngine,
+        animationEngine: mockAnimationEngine,
+        keyboardMapper: mockKeyboardMapper,
+        borderRenderer: mockBorderRenderer,
+        layoutManager: mockLayoutManager,
+        iconMapper: mockIconMapper,
+        terminalDetector: mockTerminalDetector
+      });
+
+      jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      process.stdout.write.mockRestore();
+    });
+
+    it('should render config mode with settings', () => {
+      const state = {
+        mode: 'config',
+        options: [{ label: 'Test', actionType: 'info', category: 'info' }],
+        selectedIndex: 0,
+        config: {
+          theme: 'dark',
+          animationsEnabled: true,
+          animationSpeed: 'fast',
+          iconsEnabled: true,
+          showDescriptions: true,
+          showPreviews: false
+        }
+      };
+
+      const output = renderer.render(state);
+
+      expect(output).toContain('CONFIGURAÇÕES');
+      expect(output).toContain('Tema: dark');
+      expect(output).toContain('Animações: Habilitadas');
+      expect(output).toContain('Velocidade: fast');
+      expect(output).toContain('Ícones: Habilitados');
+      expect(output).toContain('Descrições: Sim');
+      expect(output).toContain('Previews: Não');
+    });
+
+    it('should fallback to navigation mode when config not available', () => {
+      const state = {
+        mode: 'config',
+        options: [{ label: 'Test', actionType: 'info', category: 'info' }],
+        selectedIndex: 0
+      };
+
+      const spy = jest.spyOn(renderer, 'renderNavigationMode');
+      renderer.render(state);
+
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe('renderHelpMode() - P1.4 Coverage Enhancement', () => {
+    let renderer;
+
+    beforeEach(() => {
+      renderer = new UIRenderer({
+        themeEngine: mockThemeEngine,
+        animationEngine: mockAnimationEngine,
+        keyboardMapper: mockKeyboardMapper,
+        borderRenderer: mockBorderRenderer,
+        layoutManager: mockLayoutManager,
+        iconMapper: mockIconMapper,
+        terminalDetector: mockTerminalDetector
+      });
+
+      jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      process.stdout.write.mockRestore();
+    });
+
+    it('should render help mode with keyboard shortcuts', () => {
+      const state = {
+        mode: 'help',
+        options: [{ label: 'Test', actionType: 'info', category: 'info' }],
+        selectedIndex: 0
+      };
+
+      const output = renderer.render(state);
+
+      expect(output).toContain('AJUDA - ATALHOS DE TECLADO');
+      expect(mockKeyboardMapper.getAllShortcuts).toHaveBeenCalled();
+      // Check for shortcuts from mock
+      expect(output).toContain('Navigate options');
+      expect(output).toContain('Select option');
+    });
+  });
+
+  describe('Performance Tests - P1.5 Coverage Enhancement', () => {
+    let renderer;
+
+    beforeEach(() => {
+      renderer = new UIRenderer({
+        themeEngine: mockThemeEngine,
+        animationEngine: mockAnimationEngine,
+        keyboardMapper: mockKeyboardMapper,
+        borderRenderer: mockBorderRenderer,
+        layoutManager: mockLayoutManager,
+        iconMapper: mockIconMapper,
+        terminalDetector: mockTerminalDetector
+      });
+
+      jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      process.stdout.write.mockRestore();
+    });
+
+    it('should render menu in < 100ms', () => {
+      const mockState = {
+        options: [
+          { label: 'Option 1', actionType: 'download', category: 'action' },
+          { label: 'Option 2', actionType: 'upload', category: 'action' },
+          { label: 'Option 3', actionType: 'settings', category: 'utility' }
+        ],
+        selectedIndex: 0,
+        mode: 'navigation'
+      };
+
+      const start = performance.now();
+      renderer.render(mockState);
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(100);
+    });
+
+    it('should render header in < 10ms', () => {
+      const start = performance.now();
+      renderer.renderHeader();
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(10);
+    });
+
+    it('should render footer in < 10ms', () => {
+      const start = performance.now();
+      renderer.renderFooter();
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(10);
+    });
+
+    it('should render options in < 20ms per option', () => {
+      const mockOptions = Array.from({ length: 10 }, (_, i) => ({
+        label: `Option ${i + 1}`,
+        actionType: 'info',
+        category: 'action'
+      }));
+
+      const start = performance.now();
+      renderer.renderOptions(mockOptions, 0);
+      const duration = performance.now() - start;
+
+      // 20ms per option * 10 options = 200ms max
+      expect(duration).toBeLessThan(200);
+    });
+  });
+
   describe('No Color Support Fallback', () => {
     beforeEach(() => {
       mockThemeEngine.chalk = null;

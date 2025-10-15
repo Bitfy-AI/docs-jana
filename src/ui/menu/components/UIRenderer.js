@@ -150,6 +150,9 @@ class UIRenderer {
       throw new Error('Invalid state: options array is required');
     }
 
+    // Auto-invalidate cache if state changed significantly
+    this._autoInvalidateCache(state);
+
     // Save state for resize re-rendering
     this._updateLastState(state);
 
@@ -438,10 +441,30 @@ class UIRenderer {
   /**
    * Quebra texto em múltiplas linhas (legacy method, now using LayoutManager)
    * Requirements: 5.5
-   * @deprecated Use this.layoutManager.wrapText() instead
+   *
+   * @deprecated Since Phase 4 - Use this.layoutManager.wrapText() instead for better Unicode support and performance
    * @private
+   * @param {string} text - Text to wrap
+   * @param {number} [maxWidth=58] - Maximum width per line
+   * @returns {string} Wrapped text with indentation
+   *
+   * @example
+   * // DEPRECATED - Don't use
+   * renderer.wrapText('Long text here', 50);
+   *
+   * // RECOMMENDED - Use LayoutManager instead
+   * const lines = renderer.layoutManager.wrapText('Long text here', 50);
+   * const formatted = lines.map(line => `  ${line}`).join('\n');
    */
   wrapText(text, maxWidth = 58) {
+    // Log deprecation warning in debug/verbose mode
+    if (process.env.DEBUG || process.env.VERBOSE || process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[UIRenderer.wrapText] DEPRECATED: This method is deprecated since Phase 4. ' +
+        'Use layoutManager.wrapText() instead for better Unicode support and performance.'
+      );
+    }
+
     // Fallback to LayoutManager implementation
     if (this.layoutManager) {
       return this.layoutManager.wrapText(text, maxWidth).map(line => `  ${line}`).join('\n');
@@ -870,6 +893,62 @@ class UIRenderer {
       options: [...state.options],
       timestamp: Date.now()
     };
+  }
+
+  /**
+   * Verifica se o cache deve ser invalidado baseado em mudanças no state
+   * Usa hash simples para detectar mudanças significativas
+   * @private
+   * @param {Object} newState - Novo state para comparar
+   * @returns {boolean} - true se cache deve ser invalidado
+   */
+  _shouldInvalidateCache(newState) {
+    if (!this.lastState) {
+      return true;
+    }
+
+    // Compare critical properties
+    if (newState.selectedIndex !== this.lastState.selectedIndex) {
+      return true;
+    }
+
+    if (newState.mode !== this.lastState.mode) {
+      return true;
+    }
+
+    if (newState.options.length !== this.lastState.options.length) {
+      return true;
+    }
+
+    // Check if any option label or actionType changed
+    for (let i = 0; i < newState.options.length; i++) {
+      const newOpt = newState.options[i];
+      const oldOpt = this.lastState.options[i];
+
+      if (newOpt.label !== oldOpt.label || newOpt.actionType !== oldOpt.actionType) {
+        return true;
+      }
+    }
+
+    // Check for layout changes (terminal width)
+    const currentWidth = this.layoutManager ? this.layoutManager.getContentWidth() : 80;
+    if (this._lastRenderWidth && currentWidth !== this._lastRenderWidth) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Invalida cache automaticamente se state mudou significativamente
+   * @private
+   * @param {Object} newState - Novo state para renderizar
+   */
+  _autoInvalidateCache(newState) {
+    if (this._shouldInvalidateCache(newState)) {
+      this.cachedOutput = null;
+      this._lastRenderWidth = this.layoutManager ? this.layoutManager.getContentWidth() : 80;
+    }
   }
 }
 
