@@ -670,6 +670,9 @@ describe('UIRenderer - Phase 4 Refactored', () => {
     });
 
     it('should maintain legacy wrapText method', () => {
+      // Suppress deprecation warning for this test
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
       const renderer = new UIRenderer({
         themeEngine: mockThemeEngine,
         animationEngine: mockAnimationEngine,
@@ -682,6 +685,33 @@ describe('UIRenderer - Phase 4 Refactored', () => {
 
       expect(wrapped).toBeDefined();
       expect(mockLayoutManager.wrapText).toHaveBeenCalled();
+
+      // Restore console.warn
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should log deprecation warning in development mode', () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const renderer = new UIRenderer({
+        themeEngine: mockThemeEngine,
+        animationEngine: mockAnimationEngine,
+        keyboardMapper: mockKeyboardMapper,
+        layoutManager: mockLayoutManager,
+        terminalDetector: mockTerminalDetector
+      });
+
+      renderer.wrapText('test text', 50);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[UIRenderer.wrapText] DEPRECATED')
+      );
+
+      consoleWarnSpy.mockRestore();
+      process.env.NODE_ENV = originalEnv;
     });
   });
 
@@ -935,6 +965,16 @@ describe('UIRenderer - Phase 4 Refactored', () => {
       process.stdout.write.mockRestore();
     });
 
+    /**
+     * Helper function to perform warmup iterations before benchmarking
+     * Eliminates JIT cold-start overhead for more accurate measurements
+     */
+    const warmup = (fn, iterations = 3) => {
+      for (let i = 0; i < iterations; i++) {
+        fn();
+      }
+    };
+
     it('should render menu in < 100ms', () => {
       const mockState = {
         options: [
@@ -946,6 +986,10 @@ describe('UIRenderer - Phase 4 Refactored', () => {
         mode: 'navigation'
       };
 
+      // Warmup: 3 iterations to eliminate JIT cold-start
+      warmup(() => renderer.render(mockState));
+
+      // Actual benchmark
       const start = performance.now();
       renderer.render(mockState);
       const duration = performance.now() - start;
@@ -954,6 +998,10 @@ describe('UIRenderer - Phase 4 Refactored', () => {
     });
 
     it('should render header in < 10ms', () => {
+      // Warmup: 3 iterations
+      warmup(() => renderer.renderHeader());
+
+      // Actual benchmark
       const start = performance.now();
       renderer.renderHeader();
       const duration = performance.now() - start;
@@ -962,6 +1010,10 @@ describe('UIRenderer - Phase 4 Refactored', () => {
     });
 
     it('should render footer in < 10ms', () => {
+      // Warmup: 3 iterations
+      warmup(() => renderer.renderFooter());
+
+      // Actual benchmark
       const start = performance.now();
       renderer.renderFooter();
       const duration = performance.now() - start;
@@ -976,12 +1028,44 @@ describe('UIRenderer - Phase 4 Refactored', () => {
         category: 'action'
       }));
 
+      // Warmup: 3 iterations
+      warmup(() => renderer.renderOptions(mockOptions, 0));
+
+      // Actual benchmark
       const start = performance.now();
       renderer.renderOptions(mockOptions, 0);
       const duration = performance.now() - start;
 
       // 20ms per option * 10 options = 200ms max
       expect(duration).toBeLessThan(200);
+    });
+
+    it('should handle consecutive renders efficiently', () => {
+      const mockState = {
+        options: [
+          { label: 'Option 1', actionType: 'download', category: 'action' },
+          { label: 'Option 2', actionType: 'upload', category: 'action' }
+        ],
+        selectedIndex: 0,
+        mode: 'navigation'
+      };
+
+      // Warmup
+      warmup(() => renderer.render(mockState));
+
+      // Benchmark: 10 consecutive renders should be fast
+      const iterations = 10;
+      const start = performance.now();
+
+      for (let i = 0; i < iterations; i++) {
+        renderer.render(mockState);
+      }
+
+      const totalDuration = performance.now() - start;
+      const avgDuration = totalDuration / iterations;
+
+      // Average should be well under threshold
+      expect(avgDuration).toBeLessThan(50); // 50ms average for consecutive renders
     });
   });
 
