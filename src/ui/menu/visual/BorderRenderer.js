@@ -36,12 +36,13 @@ class BorderRenderer {
    * @param {TerminalDetector} terminalDetector - Terminal capability detector
    * @param {object} visualConstants - Visual design constants (BORDER_CHARS, etc)
    * @param {object} [themeEngine=null] - Optional theme engine for color application
+   * @param {FallbackLogger} [fallbackLogger=null] - Optional fallback logger for debugging
    *
    * @example
    * const detector = new TerminalDetector();
    * const renderer = new BorderRenderer(detector, VisualConstants);
    */
-  constructor(terminalDetector, visualConstants, themeEngine = null) {
+  constructor(terminalDetector, visualConstants, themeEngine = null, fallbackLogger = null) {
     if (!terminalDetector) {
       throw new TypeError('BorderRenderer requires a TerminalDetector instance');
     }
@@ -52,6 +53,15 @@ class BorderRenderer {
     this.terminalDetector = terminalDetector;
     this.visualConstants = visualConstants;
     this.themeEngine = themeEngine;
+
+    // Fallback logger for production debugging
+    if (fallbackLogger) {
+      this.fallbackLogger = fallbackLogger;
+    } else {
+      // Use global logger if available
+      const { getGlobalLogger } = require('./FallbackLogger');
+      this.fallbackLogger = getGlobalLogger();
+    }
 
     // Cache for resolved charsets to avoid repeated capability checks
     this.charsetCache = new Map();
@@ -91,7 +101,7 @@ class BorderRenderer {
     // Force ASCII if explicitly requested
     if (style === 'ascii') {
       charset = BORDER_CHARS.ascii.single;
-      this._logFallback('ASCII style explicitly requested');
+      this._logFallback('ASCII style explicitly requested', 'ASCII');
     }
     // Use Unicode if terminal supports it
     else if (this.terminalDetector.supportsUnicode()) {
@@ -111,7 +121,7 @@ class BorderRenderer {
       };
       const asciiStyle = asciiStyleMap[style] || 'single';
       charset = BORDER_CHARS.ascii[asciiStyle];
-      this._logFallback(`Unicode not supported, falling back to ASCII for style '${style}'`);
+      this._logFallback(`Unicode not supported for style '${style}'`, 'ASCII');
     }
 
     // Validate charset has required properties
@@ -130,7 +140,7 @@ class BorderRenderer {
         teeTop: '+',
         teeBottom: '+'
       };
-      this._logFallback('Invalid charset detected, using simple text fallback');
+      this._logFallback('Invalid charset detected', 'Plain text');
     }
 
     // Cache result
@@ -418,7 +428,7 @@ class BorderRenderer {
       // Fallback: return text as-is
       return text;
     } catch (error) {
-      this._logFallback(`Failed to apply color '${color}': ${error.message}`);
+      this._logFallback(`Failed to apply color '${color}': ${error.message}`, 'No color');
       return text;
     }
   }
@@ -443,15 +453,21 @@ class BorderRenderer {
   }
 
   /**
-   * Logs a warning when fallback is activated
+   * Logs a fallback event for production debugging
    *
-   * @param {string} message - Fallback warning message
+   * @param {string} reason - Reason for fallback
+   * @param {string} fallbackUsed - Fallback strategy used
    * @private
    */
-  _logFallback(message) {
-    // Only log in debug mode or if logger is available
+  _logFallback(reason, fallbackUsed) {
+    // Log to FallbackLogger for aggregation
+    if (this.fallbackLogger) {
+      this.fallbackLogger.log('BorderRenderer', reason, fallbackUsed);
+    }
+
+    // Also log to console in debug/verbose mode
     if (process.env.DEBUG || process.env.VERBOSE) {
-      console.warn(`[BorderRenderer] Fallback: ${message}`);
+      console.warn(`[BorderRenderer] Fallback: ${reason} → ${fallbackUsed}`);
     }
   }
 

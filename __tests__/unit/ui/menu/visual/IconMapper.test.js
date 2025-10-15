@@ -1447,7 +1447,7 @@ describe('IconMapper', () => {
       iconMapper._resolveIconFromSet(iconSet);
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        'IconMapper: Emoji expected but not available, using unicode'
+        '[IconMapper] Fallback: Emoji not available → Unicode'
       );
 
       consoleDebugSpy.mockRestore();
@@ -1471,7 +1471,7 @@ describe('IconMapper', () => {
       iconMapper._resolveIconFromSet(iconSet);
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
-        'IconMapper: Unicode expected but not available, using ASCII'
+        '[IconMapper] Fallback: Unicode not available → ASCII'
       );
 
       consoleDebugSpy.mockRestore();

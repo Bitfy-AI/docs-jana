@@ -66,6 +66,7 @@ class IconMapper {
    * Creates a new IconMapper instance
    *
    * @param {TerminalDetector} terminalDetector - Terminal capability detector
+   * @param {FallbackLogger} [fallbackLogger=null] - Optional fallback logger for debugging
    *
    * @example
    * const detector = new TerminalDetector();
@@ -75,7 +76,7 @@ class IconMapper {
    * const downloadIcon = iconMapper.getIcon('download');
    * console.log(`${downloadIcon} Download file`);
    */
-  constructor(terminalDetector) {
+  constructor(terminalDetector, fallbackLogger = null) {
     if (!terminalDetector) {
       throw new TypeError('IconMapper requires a TerminalDetector instance');
     }
@@ -84,6 +85,15 @@ class IconMapper {
     this.customIcons = {}; // User-registered custom icons
     this.iconCache = new Map(); // Cache for resolved icons
     this.lastCapabilities = null; // Track capabilities for cache invalidation
+
+    // Fallback logger for production debugging
+    if (fallbackLogger) {
+      this.fallbackLogger = fallbackLogger;
+    } else {
+      // Use global logger if available
+      const { getGlobalLogger } = require('./FallbackLogger');
+      this.fallbackLogger = getGlobalLogger();
+    }
 
     // Setup listener to invalidate cache when terminal capabilities change
     this._setupCapabilityChangeDetection();
@@ -332,7 +342,7 @@ class IconMapper {
     if (capabilities.supportsUnicode && iconSet.unicode) {
       // Log fallback if we expected emoji but got unicode
       if (capabilities.supportsEmojis && !iconSet.emoji) {
-        console.debug(`IconMapper: Emoji expected but not available, using unicode`);
+        this._logFallback('Emoji not available', 'Unicode');
       }
       return iconSet.unicode;
     }
@@ -341,13 +351,35 @@ class IconMapper {
     if (iconSet.ascii) {
       // Log fallback if we expected unicode
       if (capabilities.supportsUnicode) {
-        console.debug(`IconMapper: Unicode expected but not available, using ASCII`);
+        this._logFallback('Unicode not available', 'ASCII');
+      } else if (capabilities.supportsEmojis) {
+        this._logFallback('Emoji/Unicode not available', 'ASCII');
       }
       return iconSet.ascii;
     }
 
     // Plain text fallback (always available)
+    this._logFallback('No graphics support', 'Plain text');
     return iconSet.plain;
+  }
+
+  /**
+   * Logs a fallback event for production debugging
+   *
+   * @param {string} reason - Reason for fallback
+   * @param {string} fallbackUsed - Fallback strategy used
+   * @private
+   */
+  _logFallback(reason, fallbackUsed) {
+    // Log to FallbackLogger for aggregation
+    if (this.fallbackLogger) {
+      this.fallbackLogger.log('IconMapper', reason, fallbackUsed);
+    }
+
+    // Also log to console in debug mode
+    if (process.env.DEBUG) {
+      console.debug(`[IconMapper] Fallback: ${reason} → ${fallbackUsed}`);
+    }
   }
 
   /**
