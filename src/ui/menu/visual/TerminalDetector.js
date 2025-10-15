@@ -19,6 +19,7 @@
  * @property {number} height - Terminal height in rows
  * @property {string} platform - Operating system platform (win32, darwin, linux, etc)
  * @property {boolean} isCi - Running in CI/CD environment
+ * @property {boolean} isInteractive - Terminal is in interactive mode (has TTY)
  * @property {string} terminalType - Value of TERM environment variable
  */
 
@@ -83,6 +84,7 @@ class TerminalDetector {
       height: this._getCurrentHeight(),
       platform: process.platform,
       isCi: this._isCiEnvironment(),
+      isInteractive: this._isInteractive(),
       terminalType: process.env.TERM || 'unknown'
     };
 
@@ -430,6 +432,35 @@ class TerminalDetector {
     ];
 
     return ciEnvVars.some(envVar => process.env[envVar]);
+  }
+
+  /**
+   * Checks if terminal is in interactive mode (has TTY)
+   * @returns {boolean} True if interactive
+   * @private
+   */
+  _isInteractive() {
+    // Check if stdout is a TTY (not piped or redirected)
+    if (!process.stdout.isTTY) {
+      return false;
+    }
+
+    // Check if stdin is a TTY (can accept user input)
+    if (!process.stdin.isTTY) {
+      return false;
+    }
+
+    // CI environments are not interactive
+    if (this._isCiEnvironment()) {
+      return false;
+    }
+
+    // TERM=dumb is typically non-interactive
+    if (process.env.TERM === 'dumb') {
+      return false;
+    }
+
+    return true;
   }
 
   /**

@@ -448,7 +448,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 19. Atualizar cli.js printHelp() com bordas modernas
+- [x] 19. Atualizar cli.js printHelp() com bordas modernas
   - Injetar TerminalDetector e BorderRenderer em printHelp()
   - Usar BorderRenderer.renderBox() para envolver seções de help
   - Aplicar cores do tema ativo via ThemeEngine
@@ -457,6 +457,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - _Requirements: 13.3_
   - _Risk Level_: 🟢 Low (função isolada)
   - _Estimated Effort_: 2-3 horas
+  - _Status_: ✅ COMPLETED
 
 ---
 
@@ -525,8 +526,8 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
 
 ---
 
-- [ ] 23. Implementar testes de integração visual
-  - [ ] 23.1 Criar testes E2E de fluxo visual
+- [x] 23. Implementar testes de integração visual
+  - [x] 23.1 Criar testes E2E de fluxo visual
     - Criar arquivo `__tests__/integration/visual-flow.test.js`
     - Testar fluxo completo: inicialização → navegação → seleção → execução com nova UI
     - Testar mudança de tema e aplicação instantânea
@@ -534,7 +535,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
     - Testar navegação por histórico com novo visual
     - _Requirements: 9.1, 9.2_
 
-  - [ ] 23.2 Criar testes de compatibilidade
+  - [x] 23.2 Criar testes de compatibilidade
     - Testar em diferentes plataformas (Windows PowerShell, CMD, WSL, macOS Terminal, Linux)
     - Testar com diferentes valores de TERM (xterm, xterm-256color, screen, dumb)
     - Testar com diferentes color levels (0, 1, 2, 3)
@@ -544,6 +545,7 @@ O objetivo é transformar o menu interativo atual em uma experiência visual mod
   - _Target_: Funcionalidade completa em todas plataformas suportadas
   - _Risk Level_: 🟡 Medium (múltiplos ambientes)
   - _Estimated Effort_: 6-8 horas
+  - _Status_: ✅ COMPLETED (25 E2E tests + 23 compatibility tests, all passing)
 
 ---
 
