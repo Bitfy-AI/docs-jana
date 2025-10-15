@@ -155,10 +155,12 @@ OPTIONS:
 ENVIRONMENT VARIABLES:
   TARGET_N8N_URL        Target N8N instance URL (required for upload)
   TARGET_N8N_API_KEY    Target N8N API key (required)
+  TARGET_N8N_TAG        Target N8N tag (future: apply to all uploaded workflows)
   N8N_URL               Fallback N8N instance URL (if TARGET not set)
   N8N_API_KEY           Fallback N8N API key (if TARGET not set)
   N8N_USERNAME          N8N username (for basic auth)
   N8N_PASSWORD          N8N password (for basic auth)
+  N8N_TAG               Fallback tag (when TARGET_N8N_TAG not set)
   N8N_INPUT_DIR         Input directory path (optional)
   N8N_DRY_RUN           Enable dry-run mode (true/false)
   N8N_FORCE             Force overwrite existing workflows (true/false)

@@ -197,6 +197,38 @@ const n8nConfigSchema = {
   },
 
   /**
+   * SOURCE Tag Filter (for download/backup operations)
+   *
+   * Optional tag to filter workflows from source N8N instance.
+   * Takes precedence over N8N_TAG for download operations.
+   *
+   * Can be provided via:
+   * - Environment variable: SOURCE_N8N_TAG
+   */
+  sourceTag: {
+    type: 'string',
+    required: false,
+    env: 'SOURCE_N8N_TAG',
+    description: 'Tag para filtrar workflows do n8n de origem (SOURCE)',
+  },
+
+  /**
+   * TARGET Tag Filter (for upload/restore operations)
+   *
+   * Optional tag to apply to workflows when uploading to target N8N instance.
+   * Takes precedence over N8N_TAG for upload operations.
+   *
+   * Can be provided via:
+   * - Environment variable: TARGET_N8N_TAG
+   */
+  targetTag: {
+    type: 'string',
+    required: false,
+    env: 'TARGET_N8N_TAG',
+    description: 'Tag para aplicar em workflows no n8n de destino (TARGET)',
+  },
+
+  /**
    * Log Level
    *
    * Controls the verbosity of log output.

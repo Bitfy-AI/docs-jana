@@ -100,6 +100,7 @@ OPTIONS:
 ENVIRONMENT VARIABLES:
   SOURCE_N8N_URL        Source N8N instance URL (for download)
   SOURCE_N8N_API_KEY    Source N8N API key (for download)
+  SOURCE_N8N_TAG        Source N8N tag filter (for download)
   N8N_URL               Fallback N8N instance URL (if SOURCE not set)
   N8N_API_KEY           Fallback N8N API key (if SOURCE not set)
   N8N_USERNAME          N8N username (for basic auth)
@@ -137,14 +138,14 @@ EXAMPLES:
     // Map config from ConfigManager schema to expected format
     // ConfigManager uses 'n8nUrl' but our code expects 'baseUrl'
     this.config.baseUrl = this.config.n8nUrl;
+
+    // ConfigManager already handles SOURCE/TARGET fallback logic:
+    // - If SOURCE_N8N_URL exists, it becomes config.n8nUrl
+    // - If SOURCE_N8N_API_KEY exists, it becomes config.apiKey
+    // - If SOURCE_N8N_TAG exists, it becomes config.tag
     this.config.tagFilter = this.config.tag;
 
-    // Override with command-line args
-    if (this.useSource && this.config.sourceN8nUrl) {
-      // Use SOURCE credentials from .env (already applied by ConfigManager)
-      // ConfigManager automatically uses SOURCE_N8N_URL and SOURCE_N8N_API_KEY
-      this.logger.debug('Using SOURCE N8N instance from config');
-    }
+    // Override with command-line args (highest priority)
     if (this.noTagFilter) {
       this.config.tagFilter = null;
     } else if (this.tagFilter) {
@@ -152,6 +153,11 @@ EXAMPLES:
     }
     if (this.outputDir) {
       this.config.outputDir = this.outputDir;
+    }
+
+    // Log which instance we're using
+    if (this.useSource && this.config.sourceN8nUrl) {
+      this.logger.debug('Using SOURCE N8N instance from config');
     }
 
     const validation = this.configManager.validate();
@@ -231,12 +237,38 @@ EXAMPLES:
       try {
         const fullWorkflow = await this.workflowService.getWorkflow(workflow.id);
 
-        // Organize by tag: workflows/tag/workflow.json
+        // Organize by tag with layer priority
         const tags = fullWorkflow.tags || [];
-        const firstTag = tags.length > 0 ? tags[0].name : 'no-tag';
+
+        // Priority 1: Layer tags (A-F)
+        // Priority 2: Filter tag (if specified)
+        // Priority 3: First tag
+        // Fallback: 'no-tag'
+        let targetTag = 'no-tag';
+
+        if (tags.length > 0) {
+          // Define layer tag patterns (camadas)
+          const layerPattern = /^\([A-F]\)/i;
+
+          // Look for layer tag first (highest priority)
+          const layerTag = tags.find(tag => layerPattern.test(tag.name));
+
+          if (layerTag) {
+            targetTag = layerTag.name;
+          } else if (this.config.tagFilter) {
+            // Use filter tag if no layer tag found
+            const filterTag = tags.find(tag =>
+              tag.name.toLowerCase() === this.config.tagFilter.toLowerCase()
+            );
+            targetTag = filterTag ? filterTag.name : tags[0].name;
+          } else {
+            // Use first tag as fallback
+            targetTag = tags[0].name;
+          }
+        }
 
         // Sanitize tag name to remove invalid characters
-        const safeTag = firstTag.replace(/[<>:"/\\|?*]/g, '-');
+        const safeTag = targetTag.replace(/[<>:"/\\|?*]/g, '-');
 
         // Create tag subfolder
         const targetDir = this.fileManager.ensureDirectory(outputDir, safeTag);

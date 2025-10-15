@@ -91,6 +91,14 @@ class ConfigManager {
       if (config.sourceApiKey) {
         config.apiKey = config.sourceApiKey;
       }
+      // If sourceTag is set, use it as primary tag for downloads
+      if (config.sourceTag) {
+        config.tag = config.sourceTag;
+      }
+
+      // If targetN8nUrl is set for upload operations, keep both available
+      // The upload command will choose which to use based on its logic
+      // targetTag is available as config.targetTag for upload operations
     }
 
     // Step 5: Type conversion and validation

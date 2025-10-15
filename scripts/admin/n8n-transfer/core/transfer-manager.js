@@ -97,7 +97,20 @@ class TransferManager {
       // Carregar configuração
       if (typeof config === 'string') {
         this.logger.debug(`Loading config from file: ${config}`);
-        this.config = ConfigLoader.load(config);
+        const configLoader = new ConfigLoader(config);
+        const rawConfig = configLoader.load();
+
+        // Transformar formato do ConfigLoader para formato esperado pelo TransferManager
+        this.config = {
+          SOURCE: {
+            url: rawConfig.SOURCE_N8N_URL,
+            apiKey: rawConfig.SOURCE_N8N_API_KEY
+          },
+          TARGET: {
+            url: rawConfig.TARGET_N8N_URL,
+            apiKey: rawConfig.TARGET_N8N_API_KEY
+          }
+        };
       } else if (typeof config === 'object') {
         this.logger.debug('Using provided config object');
         this.config = config;
