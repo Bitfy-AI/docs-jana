@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-03T04:47:34.043Z",
+    "duration": {
+      "milliseconds": 0,
+      "seconds": 0,
+      "formatted": "0s"
+    },
+    "source": "unknown",
+    "target": "unknown",
+    "transferStarted": "2025-10-03T04:47:34.043Z",
+    "transferEnded": "2025-10-03T04:47:34.043Z"
+  },
+  "statistics": {
+    "total": 10,
+    "transferred": 10,
+    "failed": 0,
+    "duplicates": 0,
+    "successRate": "100.00%",
+    "failureRate": "0.00%"
+  },
+  "workflows": [],
+  "errors": [],
+  "configuration": {
+    "options": {},
+    "pluginsUsed": [],
+    "deduplicationEnabled": false,
+    "validationEnabled": false
+  },
+  "reportGeneration": {
+    "generatedBy": "json-reporter",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-03T04:47:34.043Z"
+  }
+}rkflow",
+      "message": "Network timeout",
+      "code": "ETIMEDOUT",
+      "timestamp": "2025-10-03T04:47:34.046Z"
+    }
+  ],
+  "configuration": {
+    "options": {
+      "dryRun": false
+    },
+    "pluginsUsed": [
+      "standard-deduplicator",
+      "integrity-validator"
+    ],
+    "deduplicationEnabled": true,
+    "validationEnabled": true
+  },
+  "reportGeneration": {
+    "generatedBy": "json-reporter",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-03T04:47:34.046Z"
+  }
+}

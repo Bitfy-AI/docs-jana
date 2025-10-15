@@ -74,7 +74,7 @@ class ServiceFactory {
     default:
       throw new Error(
         `Tipo de serviço desconhecido: "${serviceType}". ` +
-          `Tipos válidos: 'n8n', 'outline'`
+          'Tipos válidos: \'n8n\', \'outline\''
       );
     }
   }

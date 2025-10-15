@@ -85,7 +85,7 @@ class WorkflowUploadService {
           );
           this.logger.debug(`  Mapeamento registrado: ${workflow.id} -> ${existingWorkflow.id}`);
         } else {
-          this.logger.error(`  Workflow existe mas não foi encontrado na lista!`);
+          this.logger.error('  Workflow existe mas não foi encontrado na lista!');
         }
 
         this.stats.skipped++;

@@ -1,0 +1,59 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-03T04:51:28.941Z",
+    "duration": {
+      "milliseconds": 300000,
+      "seconds": 300,
+      "formatted": "5m 0s"
+    },
+    "source": "https://source.n8n.io",
+    "target": "https://target.n8n.io",
+    "transferStarted": "2025-01-03T10:00:00.000Z",
+    "transferEnded": "2025-01-03T10:05:00.000Z"
+  },
+  "statistics": {
+    "total": 100,
+    "transferred": 85,
+    "failed": 10,
+    "duplicates": 5,
+    "successRate": "85.00%",
+    "failureRate": "10.00%"
+  },
+  "workflows": [
+    {
+      "id": "1",
+      "name": "Workflow A",
+      "status": "transferred",
+      "nodes": 2,
+      "tags": [
+        "prod"
+      ],
+      "active": true,
+      "transferred": true
+    }
+  ],
+  "errors": [
+    {
+      "workflow": "Failed Workflow",
+      "message": "Network timeout",
+      "code": "ETIMEDOUT",
+      "timestamp": "2025-10-03T04:51:28.941Z"
+    }
+  ],
+  "configuration": {
+    "options": {
+      "dryRun": false
+    },
+    "pluginsUsed": [
+      "standard-deduplicator",
+      "integrity-validator"
+    ],
+    "deduplicationEnabled": true,
+    "validationEnabled": true
+  },
+  "reportGeneration": {
+    "generatedBy": "json-reporter",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-03T04:51:28.941Z"
+  }
+}

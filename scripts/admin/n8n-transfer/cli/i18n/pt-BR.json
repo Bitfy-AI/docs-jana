@@ -1,0 +1,138 @@
+{
+  "errors": {
+    "configNotFound": "Arquivo de configuração não encontrado: {{path}}",
+    "invalidConfig": "Configuração inválida: {{message}}",
+    "connectionFailed": "Falha ao conectar com {{server}}: {{error}}",
+    "transferFailed": "Falha na transferência: {{error}}",
+    "validationFailed": "Validação falhou: {{error}}",
+    "pluginNotFound": "Plugin não encontrado: {{name}}",
+    "noWorkflows": "Nenhum workflow encontrado",
+    "cancelled": "Operação cancelada pelo usuário"
+  },
+  "prompts": {
+    "configWizard": {
+      "title": "Configuração do N8N Transfer System",
+      "sourceUrl": "URL do servidor SOURCE (origem):",
+      "sourceApiKey": "API Key do SOURCE:",
+      "targetUrl": "URL do servidor TARGET (destino):",
+      "targetApiKey": "API Key do TARGET:",
+      "testConnection": "Deseja testar conectividade agora?",
+      "saveConfig": "Deseja salvar configuração em .env?"
+    },
+    "transferWizard": {
+      "title": "Transfer Wizard - Transferir Workflows",
+      "selectFilters": "Selecione os filtros para transferência:",
+      "filterByIds": "Filtrar por IDs específicos?",
+      "filterByNames": "Filtrar por nomes específicos?",
+      "filterByTags": "Filtrar por tags (incluir)?",
+      "filterByExcludeTags": "Filtrar por tags (excluir)?",
+      "dryRun": "Executar em modo dry-run (simulação)?",
+      "parallelism": "Número de transferências paralelas (1-10):",
+      "skipCredentials": "Pular workflows com credenciais?",
+      "selectDeduplicator": "Selecione deduplicator:",
+      "selectValidators": "Selecione validators (múltiplos):",
+      "selectReporters": "Selecione reporters (múltiplos):",
+      "confirm": "Confirmar transferência?"
+    },
+    "validateWizard": {
+      "title": "Validation Wizard - Validar Workflows",
+      "selectFilters": "Selecione filtros para validação:",
+      "selectValidators": "Selecione validators:"
+    }
+  },
+  "messages": {
+    "welcome": "🚀 N8N Transfer System - Bem-vindo!",
+    "configSaved": "✓ Configuração salva com sucesso em {{path}}",
+    "connectionSuccess": "✓ Conexão com {{server}} bem-sucedida",
+    "transferStarted": "Iniciando transferência de {{count}} workflow(s)...",
+    "transferComplete": "✓ Transferência completa! {{transferred}} transferidos, {{skipped}} pulados, {{failed}} falharam",
+    "dryRunComplete": "🔍 Dry-run completo. Nenhuma alteração foi feita.",
+    "validationComplete": "Validação completa. {{valid}} válidos, {{invalid}} inválidos",
+    "reportGenerated": "✓ Relatório gerado: {{path}}",
+    "cancelled": "⚠️ Operação cancelada",
+    "noWorkflowsFound": "Nenhum workflow encontrado com os filtros especificados"
+  },
+  "help": {
+    "configure": {
+      "description": "Configura URLs e API keys do SOURCE e TARGET",
+      "usage": "npm run configure [options]",
+      "flags": {
+        "non-interactive": "Executa em modo não-interativo (CI/CD)",
+        "help": "Exibe esta mensagem de help"
+      },
+      "examples": [
+        "npm run configure",
+        "npm run configure -- --help",
+        "npm run configure --non-interactive"
+      ]
+    },
+    "transfer": {
+      "description": "Transfere workflows do SOURCE para TARGET",
+      "usage": "npm run transfer [options]",
+      "flags": {
+        "dry-run": "Executa simulação sem transferir",
+        "filters.tags": "Aplica filtro por tags (separadas por vírgula)",
+        "filters.names": "Aplica filtro por nomes de workflow",
+        "filters.ids": "Aplica filtro por IDs de workflow",
+        "parallelism": "Define concorrência (1-10)",
+        "non-interactive": "Executa em modo não-interativo (CI/CD)",
+        "help": "Exibe esta mensagem de help"
+      },
+      "examples": [
+        "npm run transfer",
+        "npm run transfer -- --help",
+        "npm run transfer -- --dry-run",
+        "npm run transfer -- --filters.tags=production"
+      ]
+    },
+    "validate": {
+      "description": "Valida workflows sem transferir",
+      "usage": "npm run validate [options]",
+      "flags": {
+        "filters.tags": "Aplica filtro por tags (separadas por vírgula)",
+        "validators": "Lista de validators separados por vírgula",
+        "non-interactive": "Executa em modo não-interativo (CI/CD)",
+        "help": "Exibe esta mensagem de help"
+      },
+      "examples": [
+        "npm run validate",
+        "npm run validate -- --help",
+        "npm run validate -- --filters.tags=production",
+        "npm run validate -- --validators=integrity-validator,schema-validator"
+      ]
+    },
+    "list-plugins": {
+      "description": "Lista plugins disponíveis (deduplicators, validators, reporters)",
+      "usage": "npm run list-plugins [options]",
+      "flags": {
+        "type": "Filtra por tipo (deduplicator|validator|reporter)",
+        "non-interactive": "Executa em modo não-interativo (output JSON)",
+        "help": "Exibe esta mensagem de help"
+      },
+      "examples": [
+        "npm run list-plugins",
+        "npm run list-plugins -- --help",
+        "npm run list-plugins -- --type=validator",
+        "npm run list-plugins -- --non-interactive"
+      ]
+    },
+    "help": {
+      "description": "Exibe documentação de comandos disponíveis",
+      "usage": "npm run help [command]",
+      "examples": [
+        "npm run help",
+        "npm run help configure",
+        "npm run help transfer"
+      ]
+    }
+  },
+  "plugins": {
+    "types": {
+      "deduplicator": "Deduplicador",
+      "validator": "Validador",
+      "reporter": "Reporter"
+    },
+    "builtIn": "Built-in",
+    "custom": "Customizado"
+  }
+}

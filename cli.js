@@ -39,6 +39,11 @@ const COMMANDS = {
     handler: () => require('./src/commands/n8n-upload'),
     aliases: ['upload:n8n', 'n8n:restore']
   },
+  'n8n:configure-target': {
+    description: 'Configure target N8N instance for uploads',
+    handler: () => require('./src/commands/n8n-configure-target'),
+    aliases: ['n8n:config', 'config:n8n']
+  },
   'outline:download': {
     description: 'Download documentation from Outline',
     handler: () => require('./src/commands/outline-download'),
@@ -149,6 +154,8 @@ GLOBAL OPTIONS:
   --help, -h            Show command-specific help
   --verbose, -v         Enable verbose logging
   --config <file>       Use specific config file
+  --interactive, -i     Force interactive menu mode
+  --no-interactive      Disable interactive menu (use direct command mode)
 
 CONFIGURATION:
   Create a .env file in the project root with your configuration:
@@ -204,18 +211,225 @@ function printError(message, exitCode = 1) {
 // ===== MAIN CLI LOGIC =====
 
 /**
+ * Check if enhanced menu should be used
+ * @returns {boolean}
+ */
+function shouldUseEnhancedMenu() {
+  // Feature flag check
+  const useEnhanced = process.env.USE_ENHANCED_MENU !== 'false'; // default true
+
+  // Check if terminal is interactive
+  const isInteractive = process.stdin.isTTY && process.stdout.isTTY;
+
+  return useEnhanced && isInteractive;
+}
+
+/**
+ * Show enhanced interactive menu (new implementation)
+ */
+async function showEnhancedMenu() {
+  try {
+    const MenuOrchestrator = require('./src/ui/menu');
+    const menuOrchestrator = new MenuOrchestrator();
+
+    // Show menu and wait for selection
+    const result = await menuOrchestrator.show();
+
+    // Handle result
+    if (result.action === 'exit' || result.action === 'cancelled') {
+      console.log('\n👋 Até logo!\n');
+      process.exit(0);
+    }
+
+    if (result.action === 'executed') {
+      // Command was executed through menu
+      if (result.success) {
+        process.exit(0);
+      } else {
+        process.exit(1);
+      }
+    }
+
+    // Return selected command if menu only selected (didn't execute)
+    return result.option?.command || null;
+
+  } catch (error) {
+    // If enhanced menu fails, fall back to legacy menu
+    console.error(`\n⚠️  Enhanced menu failed: ${error.message}`);
+    console.error('Falling back to legacy menu...\n');
+    return showLegacyMenu();
+  }
+}
+
+/**
+ * Show legacy interactive menu (fallback)
+ */
+async function showLegacyMenu() {
+  const readline = require('readline');
+
+  const menuOptions = [
+    { key: '1', command: 'n8n:download', label: 'Download workflows from N8N' },
+    { key: '2', command: 'n8n:upload', label: 'Upload workflows to N8N' },
+    { key: '3', command: 'outline:download', label: 'Download documentation from Outline' },
+    { key: '4', command: 'version', label: 'Show version information' },
+    { key: '5', command: 'help', label: 'Show help (all commands)' },
+    { key: '0', command: 'exit', label: 'Exit' }
+  ];
+
+  console.log(`
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                        📚 Docs-Jana CLI v${CLI_VERSION}                        ║
+║           Unified tool for documentation and workflow management          ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📋 MENU PRINCIPAL - Selecione uma opção:
+`);
+
+  menuOptions.forEach(option => {
+    console.log(`  [${option.key}] ${option.label}`);
+  });
+
+  console.log('');
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  return new Promise((resolve) => {
+    rl.question('Digite o número da opção e pressione Enter: ', (answer) => {
+      rl.close();
+
+      const selected = menuOptions.find(opt => opt.key === answer.trim());
+
+      if (!selected) {
+        console.log('\n❌ Opção inválida! Tente novamente.\n');
+        resolve(null);
+        return;
+      }
+
+      if (selected.command === 'exit') {
+        console.log('\n👋 Até logo!\n');
+        process.exit(0);
+      }
+
+      resolve(selected.command);
+    });
+  });
+}
+
+/**
+ * Show interactive menu (routes to enhanced or legacy)
+ */
+async function showInteractiveMenu() {
+  if (shouldUseEnhancedMenu()) {
+    return showEnhancedMenu();
+  } else {
+    return showLegacyMenu();
+  }
+}
+
+/**
+ * Parse command line arguments into structured format
+ *
+ * @param {string[]} argv - Process arguments
+ * @returns {Object} Parsed context
+ */
+function parseArguments(argv) {
+  const args = argv.slice(2);
+  const command = args[0];
+  const remainingArgs = args.slice(1);
+
+  // Parse flags
+  const flags = {};
+  if (remainingArgs.includes('--verbose') || remainingArgs.includes('-v')) {
+    flags.verbose = true;
+  }
+  if (remainingArgs.includes('--debug')) {
+    flags.debug = true;
+  }
+  if (remainingArgs.includes('--dry-run')) {
+    flags.dryRun = true;
+  }
+
+  return {
+    command,
+    args: remainingArgs,
+    flags,
+    env: process.env
+  };
+}
+
+/**
  * Main CLI entry point
  */
 async function main() {
   const args = process.argv.slice(2);
 
-  // No arguments - show help
-  if (args.length === 0) {
-    printHelp();
-    return;
+  // Check for --interactive or -i flag
+  const hasInteractiveFlag = args.includes('--interactive') || args.includes('-i');
+  const hasNoInteractiveFlag = args.includes('--no-interactive');
+
+  // Remove interactive flags from args for command parsing
+  const filteredArgs = args.filter(arg =>
+    arg !== '--interactive' &&
+    arg !== '-i' &&
+    arg !== '--no-interactive'
+  );
+
+  // Show interactive menu if:
+  // 1. No arguments provided, OR
+  // 2. --interactive/-i flag is present (even with command), OR
+  // 3. Only flags provided (no command)
+  const shouldShowMenu =
+    (args.length === 0) ||
+    (hasInteractiveFlag && !hasNoInteractiveFlag) ||
+    (filteredArgs.length === 0 && !hasNoInteractiveFlag);
+
+  if (shouldShowMenu) {
+    const selectedCommand = await showInteractiveMenu();
+
+    if (!selectedCommand) {
+      return main(); // Try again
+    }
+
+    // Handle special commands in menu
+    if (selectedCommand === 'help') {
+      printHelp();
+      return;
+    }
+
+    if (selectedCommand === 'version') {
+      printVersion();
+      return;
+    }
+
+    // Execute selected command via orchestration layer
+    const { executeCommand } = require('./index');
+
+    console.log(`\n🚀 Executing: ${selectedCommand}\n`);
+
+    const result = await executeCommand({
+      command: selectedCommand,
+      args: [],
+      flags: {},
+      env: process.env
+    });
+
+    if (result.success) {
+      console.log(`\n✅ ${result.message}\n`);
+      process.exit(0);
+    } else {
+      console.error(`\n❌ ${result.message}\n`);
+      if (result.error && process.env.DEBUG) {
+        console.error('Error details:', result.error);
+      }
+      process.exit(1);
+    }
   }
 
-  const commandInput = args[0];
+  // Direct command mode - use filteredArgs
+  const commandInput = filteredArgs[0];
 
   // Find command
   const commandName = findCommand(commandInput);
@@ -235,29 +449,23 @@ async function main() {
     return;
   }
 
-  // Execute command
-  const command = COMMANDS[commandName];
+  // Execute command via orchestration layer
+  const { executeCommand } = require('./index');
+  const context = parseArguments(process.argv);
+  context.command = commandName; // Override with canonical command name
 
-  try {
-    console.log(`\n🚀 Executing: ${commandName}\n`);
+  console.log(`\n🚀 Executing: ${commandName}\n`);
 
-    // Load command handler dynamically
-    const CommandHandler = command.handler();
-    const commandArgs = args.slice(1); // Remove command name
+  const result = await executeCommand(context);
 
-    // Execute command
-    await CommandHandler.execute(commandArgs);
-
-    console.log('\n✅ Command completed successfully\n');
+  if (result.success) {
+    console.log(`\n✅ ${result.message}\n`);
     process.exit(0);
-  } catch (error) {
-    console.error(`\n❌ Command failed: ${error.message}\n`);
-
-    if (process.env.DEBUG || args.includes('--verbose') || args.includes('-v')) {
-      console.error('Stack trace:');
-      console.error(error.stack);
+  } else {
+    console.error(`\n❌ ${result.message}\n`);
+    if (result.error && (process.env.DEBUG || context.flags.verbose)) {
+      console.error('Error details:', result.error);
     }
-
     process.exit(1);
   }
 }

@@ -187,28 +187,412 @@ O repositório docs-jana possui:
 
 ---
 
+### Requirement 11: Padrões de Segurança para Comandos
+
+**User Story:** Como desenvolvedor de comandos CLI, eu quero padrões de segurança abrangentes e obrigatórios, para que todos os comandos protejam dados sensíveis, validem entradas e previnam vulnerabilidades comuns.
+
+#### Acceptance Criteria
+
+1. WHEN comando aceita URL como entrada THEN comando SHALL validar formato de URL usando validação robusta (URL constructor ou biblioteca dedicada)
+2. WHEN comando aceita URL como entrada THEN comando SHALL bloquear ranges de IP privados (localhost, 127.0.0.1, 192.168.x.x, 10.x.x.x, 172.16-31.x.x, ::1, fe80::) para prevenção de SSRF
+3. WHEN comando detecta URL com protocolo HTTP THEN comando SHALL exibir aviso de segurança recomendando HTTPS
+4. WHEN comando aceita API key ou token como entrada THEN comando SHALL validar formato esperado (ex: JWT com 3 partes separadas por ponto)
+5. WHEN comando exibe dados sensíveis (API keys, tokens, senhas) THEN comando SHALL mascarar todos os caracteres exceto últimos 3 (ex: "***xyz")
+6. WHEN comando salva credenciais em arquivo .env THEN comando SHALL definir permissões 600 (rw-------) em sistemas Unix/Linux
+7. WHEN comando salva credenciais em arquivo .env THEN comando SHALL exibir aviso sobre permissões de arquivo em Windows (não suporta chmod)
+8. WHERE comando processa entrada de usuário THEN comando SHALL sanitizar entrada para prevenir command injection (remover caracteres especiais: `;`, `|`, `&`, `$`, `` ` ``)
+9. WHERE comando valida JWT THEN comando SHALL verificar estrutura (3 partes), caracteres válidos (Base64URL) e tamanho mínimo razoável
+10. IF validação de segurança falhar THEN comando SHALL retornar erro descritivo SEM expor detalhes internos que possam auxiliar ataques
+11. IF comando requer HTTPS mas recebe HTTP THEN comando SHALL permitir execução com aviso explícito (não bloquear completamente)
+12. WHILE comando manipula dados sensíveis na memória THEN comando SHALL evitar logging ou console.log de valores completos
+13. AFTER comando concluir operações com credenciais THEN comando SHALL limpar variáveis sensíveis da memória (set to null)
+
+#### Referência de Implementação
+
+- **n8n:configure-target**: Security Score 95/100
+  - Validação SSRF completa (private IPs, localhost)
+  - JWT validation com 3 partes
+  - Masking de API keys (últimos 3 chars visíveis)
+  - chmod 600 para .env em Unix
+  - HTTP warning sem bloqueio
+
+---
+
+### Requirement 12: Padrões de UX para Comandos Interativos
+
+**User Story:** Como usuário da CLI, eu quero comandos interativos com wizards intuitivos, progresso claro e confirmações antes de ações destrutivas, para que eu tenha confiança e controle sobre as operações.
+
+#### Acceptance Criteria
+
+1. WHEN comando é wizard multi-etapas THEN comando SHALL exibir introdução explicativa antes de iniciar coleta de dados
+2. WHEN comando exibe introdução THEN introdução SHALL descrever: (a) objetivo do comando, (b) dados que serão coletados, (c) ação final que será executada
+3. WHEN comando inicia wizard THEN comando SHALL indicar progresso de etapas (formato: "Etapa X/N:")
+4. WHEN comando coleta entrada em etapa N de wizard THEN comando SHALL exibir hint contextual explicando o que inserir
+5. WHEN comando coleta dados sensíveis (API keys, URLs) THEN comando SHALL exibir tela de confirmação completa antes de executar ação
+6. WHEN comando exibe confirmação THEN confirmação SHALL mostrar: (a) todos os dados coletados (mascarados se sensíveis), (b) arquivo/recurso que será modificado, (c) prompt de confirmação (Sim/Não)
+7. WHEN usuário confirma ação em wizard THEN comando SHALL executar operação E exibir mensagem de sucesso com próximos passos
+8. WHEN usuário cancela ação em wizard (responde "não" ou pressiona Ctrl+C) THEN comando SHALL exibir mensagem de cancelamento E executar graceful shutdown
+9. WHERE comando tem múltiplas etapas sequenciais THEN cada etapa SHALL ter título claro descrevendo o que está sendo feito
+10. WHERE comando realiza operação demorada THEN comando SHALL exibir indicador de progresso (spinner, dots, ou mensagem "Processando...")
+11. IF comando falha em etapa do wizard THEN comando SHALL exibir erro descritivo E oferecer opção de retry ou abort
+12. IF comando tem atalhos ou dicas úteis THEN comando SHALL exibir tips box ao final (ex: "💡 Dica: Use comando X para validar configuração")
+13. WHILE wizard está em progresso AND usuário fornece entrada inválida THEN comando SHALL exibir erro inline E permitir retry imediato
+14. AFTER comando concluir wizard com sucesso THEN comando SHALL exibir resumo de ações executadas E próximos passos recomendados
+
+#### Referência de Implementação
+
+- **n8n:configure-target**: UX Score 95/100
+  - Introdução explicativa com contexto
+  - Wizard em 3 etapas claramente demarcadas (1/3, 2/3, 3/3)
+  - Confirmação de dados antes de salvar
+  - Tips box ao final com próximos passos
+  - 100% PT-BR, mensagens claras e acessíveis
+
+---
+
+### Requirement 13: Tratamento de Erros e Orientação ao Usuário
+
+**User Story:** Como usuário da CLI, eu quero mensagens de erro descritivas em português, com possíveis causas e passos de troubleshooting, para que eu consiga resolver problemas sem buscar ajuda externa.
+
+#### Acceptance Criteria
+
+1. WHEN comando falha com erro THEN comando SHALL exibir mensagem de erro em PT-BR
+2. WHEN comando exibe erro THEN mensagem SHALL seguir formato estruturado: `❌ Erro: [descrição breve]`
+3. WHEN comando exibe erro THEN mensagem SHALL incluir seção "Possíveis causas:" com lista de 2-4 causas prováveis
+4. WHEN comando exibe erro THEN mensagem SHALL incluir seção "Soluções:" com passos de troubleshooting numerados
+5. WHEN comando falha por configuração ausente (.env) THEN comando SHALL indicar variável específica faltante E comando para configurar (ex: `docs-jana n8n:configure-target`)
+6. WHEN comando falha por validação de entrada THEN comando SHALL indicar campo inválido, valor fornecido e formato esperado
+7. WHERE comando captura exceção de dependência externa (API, filesystem) THEN comando SHALL traduzir exceção técnica para linguagem acessível
+8. WHERE comando exibe erro de validação THEN comando SHALL usar emoji ⚠️ para warnings e ❌ para erros críticos
+9. IF erro é recuperável (ex: arquivo já existe) THEN comando SHALL oferecer opções de ação (sobrescrever, renomear, cancelar)
+10. IF erro é não-recuperável (ex: permissão negada) THEN comando SHALL exibir código de erro técnico para troubleshooting avançado
+11. WHILE comando está executando operações críticas THEN comando SHALL capturar TODOS os erros possíveis (no uncaught exceptions)
+12. AFTER comando exibir erro THEN comando SHALL retornar exit code apropriado (1 para erro geral, 2 para validação, 130 para cancelamento)
+13. WHEN comando falha por timeout ou network error THEN comando SHALL sugerir verificar conectividade, firewall e status do serviço remoto
+
+#### Formato de Mensagem de Erro Padrão
+
+```
+❌ Erro: [Descrição breve do problema]
+
+Possíveis causas:
+• [Causa 1]
+• [Causa 2]
+• [Causa 3]
+
+Soluções:
+1. [Passo de troubleshooting 1]
+2. [Passo de troubleshooting 2]
+3. [Passo de troubleshooting 3]
+
+Precisa de ajuda? Execute: docs-jana help [comando]
+```
+
+#### Referência de Implementação
+
+- **n8n:configure-target**:
+  - Mensagens 100% PT-BR
+  - Erros descritivos com contexto
+  - Sugestões de próximos passos
+
+---
+
+### Requirement 14: Padrões de Qualidade de Código e Conformidade
+
+**User Story:** Como desenvolvedor do projeto, eu quero padrões de qualidade de código obrigatórios e verificáveis, para que todos os comandos tenham código limpo, documentado e compatível com a arquitetura do projeto.
+
+#### Acceptance Criteria
+
+1. WHEN comando requer variáveis de ambiente (.env) THEN comando SHALL chamar `EnvLoader.load()` ANTES de qualquer lógica de execução
+2. WHEN comando chama EnvLoader.load() THEN comando SHALL capturar exceção se .env não existir E exibir erro orientando configuração
+3. WHEN comando é implementado ou modificado THEN código SHALL passar validação ESLint com zero violations
+4. WHEN comando é implementado ou modificado THEN código SHALL seguir ESLint rules: no-unused-vars, no-console (apenas em debug), consistent-return
+5. WHERE comando define funções THEN cada função SHALL ter JSDoc completo com: @description, @param (todos os parâmetros), @returns, @throws (se aplicável)
+6. WHERE comando define função que pode lançar exceção THEN JSDoc SHALL documentar @throws com tipo de erro e condição
+7. WHERE comando retorna resultado THEN comando SHALL usar objeto estruturado consistente: `{ success: boolean, data?: any, error?: string }`
+8. WHERE comando exibe mensagens ao usuário THEN mensagens SHALL usar formato consistente: emojis padronizados (✅ sucesso, ❌ erro, ⚠️ warning, 💡 dica)
+9. IF comando importa módulos internos THEN imports SHALL usar caminhos absolutos baseados em alias (@/ para src/) ou relativos corretos
+10. IF comando usa async/await THEN comando SHALL tratar TODOS os awaits com try/catch apropriados
+11. WHILE comando está sendo desenvolvido THEN código SHALL manter máximo de 15-20 linhas por função (SRP - Single Responsibility Principle)
+12. AFTER comando ser implementado THEN código SHALL ser revisado para remover: console.log de debug, comentários obsoletos, código comentado
+13. WHEN comando é finalizado THEN comando SHALL ter cobertura de teste unitário ≥ 80%
+
+#### Checklist de Conformidade (Code Quality Gates)
+
+- [ ] EnvLoader.load() chamado se comando usa .env
+- [ ] ESLint passa com zero violations (`pnpm lint`)
+- [ ] JSDoc completo em todas as funções
+- [ ] Mensagens de erro em PT-BR
+- [ ] Formato de retorno consistente (`{ success, data, error }`)
+- [ ] Emojis padronizados (✅ ❌ ⚠️ 💡)
+- [ ] Try/catch em todos os async/await
+- [ ] Cobertura de testes ≥ 80%
+
+#### Referência de Implementação
+
+- **n8n:configure-target**: Compliance Score 92/100
+  - EnvLoader.load() no início
+  - ESLint compliant (zero violations)
+  - JSDoc completo
+  - Mensagens consistentes
+  - Tratamento de erros robusto
+
+---
+
+### Requirement 15: Padrões de Testes para Comandos
+
+**User Story:** Como desenvolvedor do projeto, eu quero padrões de testes abrangentes e obrigatórios, para garantir que comandos sejam confiáveis, seguros e mantenham qualidade ao longo do tempo.
+
+#### Acceptance Criteria
+
+1. WHEN comando é implementado THEN comando SHALL ter suite de testes unitários cobrindo ≥ 80% do código
+2. WHEN comando é testado THEN testes SHALL cobrir: (a) fluxo de sucesso (happy path), (b) validações de entrada, (c) tratamento de erros, (d) edge cases
+3. WHEN comando tem validação de segurança (SSRF, input sanitization) THEN testes SHALL validar casos de ataque (IPs privados, caracteres especiais)
+4. WHEN comando tem wizard interativo THEN testes SHALL validar: (a) fluxo completo de etapas, (b) cancelamento em cada etapa, (c) entrada inválida em cada etapa
+5. WHERE comando chama APIs externas (n8n, Outline) THEN testes SHALL usar mocks para isolar lógica de rede
+6. WHERE comando manipula filesystem (.env, arquivos config) THEN testes SHALL usar filesystem virtual (memfs ou mock-fs) ou diretórios temporários
+7. WHERE comando usa EnvLoader THEN testes SHALL mockar EnvLoader.load() para simular configurações válidas/inválidas
+8. IF comando lança exceções específicas THEN testes SHALL verificar tipo de exceção e mensagem de erro
+9. IF comando retorna exit codes THEN testes SHALL verificar código correto para cada cenário (0 sucesso, 1 erro, 2 validação, 130 cancelamento)
+10. WHILE testes são executados THEN testes SHALL ser isolados (sem side effects entre testes) E idempotentes (mesmos resultados em múltiplas execuções)
+11. AFTER implementar comando THEN executar `pnpm test` SHALL resultar em 100% dos testes passando
+12. AFTER implementar comando THEN executar `pnpm test:coverage` SHALL reportar cobertura ≥ 80% para o arquivo do comando
+
+#### Categorias de Testes Obrigatórias
+
+1. **Testes de Validação de Entrada**
+   - Entradas válidas (happy path)
+   - Entradas inválidas (formato incorreto)
+   - Entradas maliciosas (SSRF, injection)
+   - Entradas vazias/null/undefined
+
+2. **Testes de Segurança**
+   - SSRF protection (IPs privados, localhost)
+   - Input sanitization (caracteres especiais)
+   - Masking de dados sensíveis (display)
+   - Permissões de arquivo (.env chmod 600)
+
+3. **Testes de Fluxo UX**
+   - Wizard completo (todas as etapas)
+   - Cancelamento (Ctrl+C, resposta "não")
+   - Confirmação de dados
+   - Mensagens de erro em PT-BR
+
+4. **Testes de Tratamento de Erros**
+   - Exceções capturadas
+   - Mensagens descritivas
+   - Exit codes corretos
+   - Rollback/cleanup em caso de falha
+
+5. **Testes de Integração (com mocks)**
+   - EnvLoader.load() mock
+   - Filesystem operations mock
+   - API calls mock (n8n, Outline)
+   - Dependency injection mock
+
+#### Referência de Implementação
+
+- **n8n:configure-target**:
+  - Cobertura de testes planejada para ≥ 80%
+  - Validação de segurança (SSRF tests)
+  - Testes de wizard flow
+  - Mocks de EnvLoader e filesystem
+
+---
+
+### Requirement 16: Padrões de Documentação para Comandos
+
+**User Story:** Como desenvolvedor ou usuário da CLI, eu quero documentação técnica completa e acessível, para entender arquitetura, decisões de design e como usar comandos corretamente.
+
+#### Acceptance Criteria
+
+1. WHEN comando é implementado THEN comando SHALL ter arquivo de documentação técnica em /docs/commands/[comando].md
+2. WHEN comando passa por revisão de qualidade THEN comando SHALL ter documento de Technical Review em /docs/reviews/[comando]-review.md
+3. WHEN comando melhora funcionalidade existente THEN documentação SHALL incluir seção "Before/After Metrics" com comparação quantitativa
+4. WHEN comando tem considerações de segurança THEN documentação SHALL incluir seção "Security Audit" descrevendo validações implementadas
+5. WHERE comando implementa padrões de arquitetura THEN documentação SHALL referenciar design patterns usados (Factory, Dependency Injection, etc)
+6. WHERE comando usa dependências externas THEN documentação SHALL listar dependências e justificar escolhas
+7. WHERE comando tem opções de configuração THEN documentação SHALL incluir tabela de variáveis de ambiente com: nome, tipo, obrigatório/opcional, descrição, exemplo
+8. IF comando quebra compatibilidade THEN documentação SHALL incluir seção "Breaking Changes" com guia de migração
+9. IF comando tem limitações conhecidas THEN documentação SHALL incluir seção "Known Limitations" E possíveis workarounds
+10. WHILE comando está sendo desenvolvido THEN README.md principal SHALL ser atualizado com link para documentação do comando
+11. AFTER comando ser implementado THEN documentação SHALL incluir exemplos de uso com saídas esperadas
+12. AFTER comando passar por technical review THEN review document SHALL incluir: (a) scores (Security, UX, Compliance), (b) highlights, (c) areas for improvement, (d) checklist de conformidade
+
+#### Estrutura de Documentação Obrigatória
+
+**Arquivo: /docs/commands/[comando].md**
+```markdown
+# [Nome do Comando]
+
+## Visão Geral
+[Descrição breve do comando]
+
+## Uso
+[Sintaxe e exemplos]
+
+## Configuração
+[Variáveis de ambiente necessárias]
+
+## Fluxo de Execução
+[Diagrama ou descrição do fluxo]
+
+## Segurança
+[Validações e proteções implementadas]
+
+## Tratamento de Erros
+[Erros possíveis e como resolver]
+
+## Testes
+[Estratégia de testes e cobertura]
+
+## Referências
+[Links para código, specs, PRs]
+```
+
+**Arquivo: /docs/reviews/[comando]-review.md**
+```markdown
+# Technical Review: [Nome do Comando]
+
+## Scores
+- Security: X/100
+- UX: X/100
+- Compliance: X/100
+- Overall: X/100
+
+## Highlights
+- [Ponto forte 1]
+- [Ponto forte 2]
+
+## Areas for Improvement
+- [Sugestão 1]
+- [Sugestão 2]
+
+## Before/After Metrics
+| Metric | Before | After | Delta |
+|--------|--------|-------|-------|
+| ... | ... | ... | ... |
+
+## Compliance Checklist
+- [x] Item 1
+- [x] Item 2
+- [ ] Item 3 (pending)
+```
+
+#### Referência de Implementação
+
+- **n8n:configure-target**:
+  - Technical Review completo
+  - Scores detalhados (Security 95/100, UX 95/100, Compliance 92/100)
+  - Before/After metrics comparison
+  - Compliance checklist verificado
+
+---
+
+### Requirement 17: Padrões de Integração com Menu CLI
+
+**User Story:** Como usuário da CLI, eu quero que novos comandos sejam integrados ao menu interativo principal, para que eu possa descobrir e executar comandos facilmente sem memorizar sintaxe.
+
+#### Acceptance Criteria
+
+1. WHEN comando novo é implementado THEN comando SHALL ser registrado em /cli/menu-options.js
+2. WHEN comando é registrado em menu-options.js THEN registro SHALL incluir TODOS os campos obrigatórios: key, command, label, description, icon, category, shortcut, preview
+3. WHEN comando é registrado THEN campo `label` SHALL estar em PT-BR E ser descritivo (ex: "Configurar Target n8n")
+4. WHEN comando é registrado THEN campo `description` SHALL explicar ação do comando em 1-2 frases completas em PT-BR
+5. WHEN comando é registrado THEN campo `icon` SHALL usar emoji apropriado ao contexto (⚙️ config, 📥 download, 📤 upload, 🔒 segurança, etc)
+6. WHEN comando é registrado THEN campo `category` SHALL ser uma das categorias existentes ou nova categoria apropriada (ex: "n8n", "outline", "config")
+7. WHEN comando é registrado THEN campo `shortcut` SHALL usar letra não-usada E relacionada ao comando (ex: "c" para configure, "d" para download)
+8. WHEN comando é registrado THEN campo `preview` SHALL incluir: (a) descrição detalhada, (b) parâmetros esperados, (c) avisos importantes (se aplicável)
+9. WHERE comando tem considerações de segurança THEN campo `preview` SHALL incluir warning box com ícone ⚠️
+10. WHERE comando requer configuração prévia (.env) THEN campo `preview` SHALL indicar requisitos de configuração
+11. IF comando é de configuração (ex: n8n:configure-target) THEN comando SHALL ser posicionado NO TOPO da categoria para fácil descoberta
+12. IF comando tem alias (ex: n8n:backup → n8n:download) THEN alias SHALL ser registrado separadamente OU mencionado em `preview`
+13. WHILE menu é exibido THEN comandos SHALL estar ordenados logicamente: comandos de configuração primeiro, depois operações principais
+14. AFTER registrar comando THEN executar `docs-jana` (sem argumentos) SHALL exibir comando no menu interativo
+
+#### Exemplo de Registro Completo
+
+```javascript
+{
+  key: 'configure-n8n',
+  command: 'n8n:configure-target',
+  label: '⚙️  Configurar Target n8n',
+  description: 'Configura URL e API key do servidor n8n de destino (salva em .env)',
+  icon: '⚙️',
+  category: 'n8n',
+  shortcut: 'c',
+  preview: `
+⚙️  Configurar Target n8n
+
+Este comando inicia um wizard interativo para configurar:
+  • URL do servidor n8n de destino
+  • API key para autenticação
+
+Os dados serão salvos em .env para uso posterior pelos comandos de upload/download.
+
+⚠️  IMPORTANTE: A API key será armazenada localmente. Certifique-se de que o arquivo
+.env tenha permissões adequadas (chmod 600 em Unix/Linux).
+
+Requisitos: Nenhum (comando de configuração inicial)
+  `.trim(),
+}
+```
+
+#### Referência de Implementação
+
+- **n8n:configure-target**:
+  - Registrado em menu-options.js com TODOS os campos
+  - 100% PT-BR (label, description, preview)
+  - Warning box em preview sobre API key
+  - Posicionado no topo da categoria n8n
+  - Icon apropriado (⚙️)
+
+---
+
 ## Requisitos Não-Funcionais
 
 ### Performance
 
 1. WHEN cli.js invoca index.js THEN overhead de separação SHALL ser ≤ 50ms
 2. WHEN comandos são executados THEN tempo de execução SHALL permanecer idêntico ao comportamento pré-refatoração
+3. WHEN comando carrega EnvLoader THEN tempo de parsing de .env SHALL ser ≤ 10ms
 
 ### Manutenibilidade
 
 1. WHERE código é refatorado THEN código SHALL seguir ESLint rules definidas em .eslintrc
 2. WHERE funções são criadas ou modificadas THEN funções SHALL ter JSDoc comments completos
 3. WHERE módulos são criados THEN módulos SHALL ter responsabilidade única e baixo acoplamento
+4. WHERE comando é implementado THEN código SHALL ter máximo de 15-20 linhas por função (SRP)
+5. WHERE comando é implementado THEN código SHALL seguir princípios SOLID
 
 ### Compatibilidade
 
 1. WHERE Node.js version é especificada (≥14.0.0) THEN código SHALL manter compatibilidade com Node.js 14+
 2. WHERE pnpm é package manager THEN código SHALL continuar usando pnpm ≥8.0.0
+3. WHERE comando usa filesystem operations THEN código SHALL funcionar em Windows, Linux e macOS
 
 ### Testabilidade
 
 1. WHERE cli.js contém lógica de parsing THEN lógica SHALL ser testável unitariamente sem executar comandos reais
 2. WHERE index.js contém lógica de orquestração THEN lógica SHALL ser testável com mocks de services
+3. WHERE comando é implementado THEN comando SHALL ter cobertura de testes ≥ 80%
+4. WHERE comando usa dependências externas THEN dependências SHALL ser mockáveis para testes isolados
+
+### Segurança
+
+1. WHERE comando aceita URL THEN comando SHALL implementar SSRF protection (block private IPs)
+2. WHERE comando aceita entrada de usuário THEN comando SHALL sanitizar entrada (prevent injection)
+3. WHERE comando salva credenciais THEN comando SHALL usar permissões restritivas (chmod 600)
+4. WHERE comando exibe dados sensíveis THEN comando SHALL mascarar valores (show only last 3 chars)
+5. WHERE comando valida tokens THEN comando SHALL verificar formato sem expor detalhes de validação
+
+### Conformidade
+
+1. WHERE comando é implementado THEN comando SHALL passar ESLint validation (zero violations)
+2. WHERE comando é implementado THEN comando SHALL ter JSDoc completo em todas as funções
+3. WHERE comando é implementado THEN comando SHALL seguir formato de retorno consistente (`{ success, data, error }`)
+4. WHERE comando é implementado THEN comando SHALL ter documentação técnica em /docs/commands/
+5. WHERE comando é implementado THEN comando SHALL estar registrado em menu-options.js com TODOS os campos
 
 ---
 
@@ -219,12 +603,67 @@ O repositório docs-jana possui:
 - **EARS (Easy Approach to Requirements Syntax)**: Formato de escrita de requisitos com keywords WHEN, IF, WHERE, WHILE, SHALL
 - **Design Patterns**: Factory, Service Locator, Dependency Injection (já usados em /src)
 - **Graceful Shutdown**: Encerramento controlado da aplicação capturando SIGINT/SIGTERM
+- **SSRF (Server-Side Request Forgery)**: Vulnerabilidade onde atacante força servidor a fazer requests para destinos não-autorizados
+- **JWT (JSON Web Token)**: Padrão de token de autenticação com 3 partes (header.payload.signature)
+- **EnvLoader**: Utilitário do projeto para carregar e validar variáveis de ambiente do arquivo .env
+- **SRP (Single Responsibility Principle)**: Princípio SOLID onde cada função/classe tem apenas uma responsabilidade
 
 ---
 
 ## Referências
 
+### Estrutura Existente
+
 - Estrutura atual de /src: src/auth/, src/services/, src/utils/, src/factories/, src/config/, src/commands/
 - Design patterns existentes: ServiceFactory, AuthFactory, OutlineAuthFactory
 - Comandos existentes: n8n:download, n8n:upload, outline:download
 - Configuração: .env, ConfigManager, schemas de validação em /src/config
+
+### Implementações de Referência
+
+#### n8n:configure-target (Excelência em Qualidade)
+
+Comando exemplar que define padrões de qualidade para CLI architecture refactor:
+
+**Scores de Qualidade:**
+- **Security**: 95/100 (Excelente)
+  - SSRF protection completa (private IPs bloqueados)
+  - JWT validation robusta (3 partes, Base64URL)
+  - API key masking (últimos 3 chars visíveis)
+  - File permissions (chmod 600 em Unix)
+  - HTTP warning sem bloqueio forçado
+
+- **UX**: 95/100 (Excelente)
+  - Wizard interativo em 3 etapas claramente demarcadas
+  - Introdução explicativa antes de coletar dados
+  - Confirmação de dados antes de salvar
+  - Tips box ao final com próximos passos
+  - 100% PT-BR, acessível e intuitivo
+
+- **Compliance**: 92/100 (Excelente)
+  - EnvLoader.load() integration
+  - ESLint compliant (zero violations)
+  - JSDoc completo em todas as funções
+  - Architectural patterns consistency
+  - Error handling robusto
+
+- **Overall**: 92/100 (Production-ready, Excelente)
+
+**Arquivos de Referência:**
+- Implementação: `src/commands/n8n-configure-target.js`
+- Documentação: `docs/commands/n8n-configure-target.md`
+- Technical Review: `docs/reviews/n8n-configure-target-review.md`
+- Menu Integration: `cli/menu-options.js` (entry: n8n:configure-target)
+
+**Lições Aplicáveis:**
+1. **Security-first design**: Validações de segurança ANTES de processamento
+2. **User-centric UX**: Introduções explicativas, progresso claro, confirmações
+3. **Error messages**: PT-BR descritivo com troubleshooting integrado
+4. **Code quality**: ESLint + JSDoc + EnvLoader como padrão obrigatório
+5. **Documentation**: Technical reviews com scores quantitativos
+6. **Menu integration**: Todos os campos obrigatórios, PT-BR 100%
+7. **Testing strategy**: Security tests, UX flow tests, error handling tests
+
+**Uso como Referência:**
+
+Os Requirements 11-17 foram derivados diretamente dos learnings de n8n:configure-target. Desenvolvedores DEVEM usar este comando como template de qualidade ao implementar novos comandos CLI.

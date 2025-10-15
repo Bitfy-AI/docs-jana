@@ -1,19 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: implement n8n-upload command with advanced features\n\nAdd comprehensive upload functionality with ID remapping, tag management,\nand upload history tracking.\n\n**New Features:**\n- 3-phase upload process with automatic ID remapping for executeWorkflow nodes\n- Folder-based filtering (--folder flag) for selective uploads\n- Automatic tag detection, creation, and synchronization\n- Upload history tracking (.upload-history.json) with last 3 operations\n- Dry-run mode for validation before upload\n- Reference analysis to detect missing workflow dependencies\n\n**New Services:**\n- id-mapping-service.js: Manages workflow ID mappings across upload phases\n- upload-history-service.js: Tracks upload operations and displays history\n- workflow-id-remapper.js: Remaps executeWorkflow node references\n\n**Configuration:**\n- Multi-instance support via environment variables (SOURCE/TARGET)\n- New upload config schema with validation\n\n**Documentation:**\n- Updated README with detailed upload examples\n- Migration guides and implementation summaries\n- Quick reference guides for folder filtering\n\n**Dependencies:**\n- Migrate from npm to pnpm for better performance\n- Remove package-lock.json, add pnpm-workspace.yaml\n- Update .gitignore for pnpm and upload history files\n\n**Code Quality:**\n- Improved filename sanitization in OutlineService\n- Enhanced error handling and progress reporting\n- Comprehensive test utilities included\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: implement n8n-upload command with advanced features\n\nAdd comprehensive upload functionality with ID remapping, tag management,\nand upload history tracking.\n\n**New Features:**\n- 3-phase upload process with automatic ID remapping for executeWorkflow nodes\n- Folder-based filtering (--folder flag) for selective uploads\n- Automatic tag detection, creation, and synchronization\n- Upload history tracking (.upload-history.json) with last 3 operations\n- Dry-run mode for validation before upload\n- Reference analysis to detect missing workflow dependencies\n\n**New Services:**\n- id-mapping-service.js: Manages workflow ID mappings across upload phases\n- upload-history-service.js: Tracks upload operations and displays history\n- workflow-id-remapper.js: Remaps executeWorkflow node references\n\n**Configuration:**\n- Multi-instance support via environment variables (SOURCE/TARGET)\n- New upload config schema with validation\n\n**Documentation:**\n- Updated README with detailed upload examples\n- Migration guides and implementation summaries\n- Quick reference guides for folder filtering\n\n**Dependencies:**\n- Migrate from npm to pnpm for better performance\n- Remove package-lock.json, add pnpm-workspace.yaml\n- Update .gitignore for pnpm and upload history files\n\n**Code Quality:**\n- Fix ESLint errors (no-prototype-builtins, no-unused-vars, no-case-declarations)\n- Improved filename sanitization in OutlineService\n- Enhanced error handling and progress reporting\n- Comprehensive test utilities included\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push:*)",
-      "Bash(git reset:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: implement n8n-upload command with advanced features\n\nAdd comprehensive upload functionality with ID remapping, tag management,\nand upload history tracking.\n\n**New Features:**\n- 3-phase upload process with automatic ID remapping for executeWorkflow nodes\n- Folder-based filtering (--folder flag) for selective uploads\n- Automatic tag detection, creation, and synchronization\n- Upload history tracking (.upload-history.json) with last 3 operations\n- Dry-run mode for validation before upload\n- Reference analysis to detect missing workflow dependencies\n\n**New Services:**\n- id-mapping-service.js: Manages workflow ID mappings across upload phases\n- upload-history-service.js: Tracks upload operations and displays history\n- workflow-id-remapper.js: Remaps executeWorkflow node references\n\n**Configuration:**\n- Multi-instance support via environment variables (SOURCE/TARGET)\n- New upload config schema with validation\n\n**Documentation:**\n- Updated README with detailed upload examples\n- Migration guides and implementation summaries\n- Quick reference guides for folder filtering\n\n**Dependencies:**\n- Migrate from npm to pnpm for better performance\n- Remove package-lock.json, add pnpm-workspace.yaml\n- Update .gitignore for pnpm and upload history files\n- Add workflows/ to .gitignore (may contain secrets)\n\n**Code Quality:**\n- Fix ESLint errors (no-prototype-builtins, no-unused-vars, no-case-declarations)\n- Improved filename sanitization in OutlineService\n- Enhanced error handling and progress reporting\n- Comprehensive test utilities included\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(gh repo view:*)",
-      "Bash(gh repo edit:*)",
-      "Bash(gh api:*)",
-      "Bash(git mv:*)",
-      "Bash(git commit:*)",
-      "Bash(dir:*)",
-      "Bash(find:*)"
+      "Bash(awk:*)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(DEBUG=1 node interactive-cli.js nonexistent-command)",
+      "Bash(npm run:*)",
+      "Bash(gh pr create:*)",
+      "Bash(winget install:*)",
+      "Bash(curl:*)",
+      "Bash(dd:*)",
+      "Bash(tee:*)",
+      "Bash(apt:*)",
+      "Bash(apt install:*)",
+      "Bash(node cli.js --help)"
     ],
     "deny": [],
     "ask": []

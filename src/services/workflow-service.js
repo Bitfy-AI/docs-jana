@@ -43,46 +43,227 @@ class WorkflowService {
 
   /**
    * List all workflows (with pagination support)
+   * Robust implementation that handles multiple API response formats
+   * and prevents infinite loops
+   *
    * @returns {Promise<Array>} Array of workflows
    */
   async listWorkflows() {
     try {
       this.logger.debug('Fetching workflows list from API');
 
-      // N8N API uses cursor-based pagination
+      // Pagination state
       let allWorkflows = [];
       let cursor = undefined;
       let hasMore = true;
+      let pageCount = 0;
+      const MAX_PAGES = 1000; // Safety limit to prevent infinite loops
+      const PAGE_LIMIT = 100;
+      const seenCursors = new Set(); // Track cursors to detect loops
+      const seenWorkflowIds = new Set(); // Track workflow IDs to prevent duplicates
 
-      while (hasMore) {
-        const params = cursor ? `?cursor=${cursor}&limit=100` : '?limit=100';
+      while (hasMore && pageCount < MAX_PAGES) {
+        pageCount++;
+
+        // Build request params
+        const params = cursor ? `?cursor=${cursor}&limit=${PAGE_LIMIT}` : `?limit=${PAGE_LIMIT}`;
+
+        this.logger.debug(`Fetching page ${pageCount}${cursor ? ` (cursor: ${cursor.substring(0, 20)}...)` : ''}`);
+
         const response = await this.httpClient.get(`/api/v1/workflows${params}`);
 
-        // Extract workflows from response (handle both array and object formats)
-        const workflows = Array.isArray(response) ? response : (response.data || []);
+        // STEP 1: Extract workflows from response (handle multiple formats)
+        let workflows = this._extractWorkflowsFromResponse(response);
 
-        if (workflows && workflows.length > 0) {
-          allWorkflows = allWorkflows.concat(workflows);
-          this.logger.debug(`Fetched ${workflows.length} workflows (total: ${allWorkflows.length})`);
+        if (!workflows || !Array.isArray(workflows)) {
+          this.logger.warn(`Page ${pageCount} returned invalid workflows data, stopping pagination`);
+          break;
         }
 
-        // Check for next cursor (always check on response object, not on data array)
-        const nextCursor = response.nextCursor || null;
-        hasMore = !!nextCursor;
-        cursor = nextCursor;
+        // STEP 2: Filter out duplicate workflows
+        const newWorkflows = workflows.filter(wf => {
+          if (!wf.id) {
+            this.logger.warn(`Workflow without ID found, skipping: ${wf.name || 'unknown'}`);
+            return false;
+          }
+          if (seenWorkflowIds.has(wf.id)) {
+            this.logger.debug(`Duplicate workflow ID detected: ${wf.id}, skipping`);
+            return false;
+          }
+          seenWorkflowIds.add(wf.id);
+          return true;
+        });
 
-        if (!hasMore) {
-          this.logger.debug('No more pages, stopping pagination');
+        const duplicateCount = workflows.length - newWorkflows.length;
+        if (duplicateCount > 0) {
+          this.logger.debug(`Filtered out ${duplicateCount} duplicate workflow(s) on page ${pageCount}`);
+        }
+
+        // STEP 3: Add new workflows to result
+        if (newWorkflows.length > 0) {
+          allWorkflows = allWorkflows.concat(newWorkflows);
+          this.logger.debug(`Page ${pageCount}: fetched ${newWorkflows.length} workflows (total: ${allWorkflows.length})`);
+        } else if (workflows.length === 0) {
+          this.logger.debug(`Page ${pageCount}: empty page received, stopping pagination`);
           break;
+        } else {
+          this.logger.debug(`Page ${pageCount}: all workflows were duplicates, stopping pagination`);
+          break;
+        }
+
+        // STEP 4: Detect next cursor (try multiple possible fields)
+        const nextCursor = this._extractNextCursor(response);
+
+        // STEP 5: Determine if there are more pages using multiple heuristics
+        if (!nextCursor) {
+          // No cursor found
+          if (newWorkflows.length < PAGE_LIMIT) {
+            // Received less than page limit = last page
+            this.logger.debug(`Page ${pageCount}: received ${newWorkflows.length}/${PAGE_LIMIT} workflows and no cursor, stopping pagination`);
+            hasMore = false;
+          } else {
+            // Received full page but no cursor = ambiguous
+            // Some APIs don't return cursor on last page even if it's full
+            // To be safe, we stop here to avoid infinite loops
+            this.logger.warn(`Page ${pageCount}: received full page (${newWorkflows.length}) but no cursor. Stopping to prevent potential infinite loop.`);
+            this.logger.warn('If you believe there are more workflows, please check API pagination implementation.');
+            hasMore = false;
+          }
+        } else {
+          // Cursor found
+          // Check for cursor loop (same cursor returned repeatedly = API bug)
+          if (seenCursors.has(nextCursor)) {
+            this.logger.warn(`Cursor loop detected! Same cursor returned twice: ${nextCursor.substring(0, 20)}...`);
+            this.logger.warn('This indicates an API bug. Stopping pagination.');
+            hasMore = false;
+          } else {
+            seenCursors.add(nextCursor);
+            cursor = nextCursor;
+            hasMore = true;
+          }
         }
       }
 
-      this.logger.debug(`Received total of ${allWorkflows.length} workflows from API`);
+      // Check if we hit the safety limit
+      if (pageCount >= MAX_PAGES) {
+        this.logger.warn(`⚠️  Reached maximum page limit (${MAX_PAGES}). Stopping pagination.`);
+        this.logger.warn(`This is a safety measure. If you have more than ${MAX_PAGES * PAGE_LIMIT} workflows, please contact support.`);
+      }
+
+      this.logger.debug(`Pagination complete: ${pageCount} page(s) fetched, ${allWorkflows.length} total workflows`);
       return allWorkflows;
     } catch (error) {
       this.logger.error(`Failed to list workflows: ${error.message}`);
       throw error;
     }
+  }
+
+  /**
+   * Extract workflows array from API response
+   * Handles multiple response formats:
+   * - Direct array: [workflow1, workflow2, ...]
+   * - Object with data: { data: [...], nextCursor: "..." }
+   * - Object with workflows: { workflows: [...], next: "..." }
+   * - Object with items: { items: [...], cursor: "..." }
+   *
+   * @param {*} response - API response
+   * @returns {Array} Array of workflows or empty array
+   * @private
+   */
+  _extractWorkflowsFromResponse(response) {
+    // Format 1: Direct array
+    if (Array.isArray(response)) {
+      this.logger.debug('Response format: direct array');
+      return response;
+    }
+
+    // Format 2: Object with data array
+    if (response && response.data && Array.isArray(response.data)) {
+      this.logger.debug('Response format: object with data array');
+      return response.data;
+    }
+
+    // Format 3: Object with workflows array
+    if (response && response.workflows && Array.isArray(response.workflows)) {
+      this.logger.debug('Response format: object with workflows array');
+      return response.workflows;
+    }
+
+    // Format 4: Object with items array
+    if (response && response.items && Array.isArray(response.items)) {
+      this.logger.debug('Response format: object with items array');
+      return response.items;
+    }
+
+    // Format 5: Object with results array
+    if (response && response.results && Array.isArray(response.results)) {
+      this.logger.debug('Response format: object with results array');
+      return response.results;
+    }
+
+    // Unknown format
+    this.logger.warn('Unknown response format, cannot extract workflows');
+    this.logger.debug(`Response type: ${typeof response}, keys: ${response ? Object.keys(response).join(', ') : 'null'}`);
+    return [];
+  }
+
+  /**
+   * Extract next cursor from API response
+   * Tries multiple possible field names and locations
+   *
+   * @param {*} response - API response
+   * @returns {string|null} Next cursor or null if not found
+   * @private
+   */
+  _extractNextCursor(response) {
+    // If response is array, no cursor available
+    if (Array.isArray(response)) {
+      return null;
+    }
+
+    if (!response || typeof response !== 'object') {
+      return null;
+    }
+
+    // Try common cursor field names (in order of likelihood)
+    const cursorFields = [
+      'nextCursor',
+      'next',
+      'cursor',
+      'next_cursor',
+      'nextPageCursor',
+      'continuation',
+      'continuationToken',
+    ];
+
+    for (const field of cursorFields) {
+      if (response[field]) {
+        this.logger.debug(`Found cursor in field: ${field}`);
+        return response[field];
+      }
+    }
+
+    // Try nested pagination object
+    if (response.pagination) {
+      for (const field of cursorFields) {
+        if (response.pagination[field]) {
+          this.logger.debug(`Found cursor in pagination.${field}`);
+          return response.pagination[field];
+        }
+      }
+    }
+
+    // Try nested meta object
+    if (response.meta) {
+      for (const field of cursorFields) {
+        if (response.meta[field]) {
+          this.logger.debug(`Found cursor in meta.${field}`);
+          return response.meta[field];
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

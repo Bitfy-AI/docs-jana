@@ -39,7 +39,7 @@ const n8nConfigSchema = {
    * Example: https://n8n.example.com
    *
    * Can be provided via:
-   * - Environment variable: N8N_URL
+   * - Environment variable: N8N_URL (fallback to SOURCE_N8N_URL)
    * - CLI argument: First positional argument
    */
   n8nUrl: {
@@ -51,6 +51,38 @@ const n8nConfigSchema = {
   },
 
   /**
+   * SOURCE N8N instance URL (for download/backup operations)
+   *
+   * The base URL of the source N8N instance.
+   * Takes precedence over N8N_URL for download operations.
+   *
+   * Can be provided via:
+   * - Environment variable: SOURCE_N8N_URL
+   */
+  sourceN8nUrl: {
+    type: 'string',
+    required: false,
+    env: 'SOURCE_N8N_URL',
+    description: 'URL do n8n de origem (SOURCE)',
+  },
+
+  /**
+   * TARGET N8N instance URL (for upload/restore operations)
+   *
+   * The base URL of the target N8N instance.
+   * Used for upload operations.
+   *
+   * Can be provided via:
+   * - Environment variable: TARGET_N8N_URL
+   */
+  targetN8nUrl: {
+    type: 'string',
+    required: false,
+    env: 'TARGET_N8N_URL',
+    description: 'URL do n8n de destino (TARGET)',
+  },
+
+  /**
    * N8N API Key
    *
    * API key for authenticating with N8N.
@@ -58,7 +90,7 @@ const n8nConfigSchema = {
    * This is the preferred authentication method.
    *
    * Can be provided via:
-   * - Environment variable: N8N_API_KEY
+   * - Environment variable: N8N_API_KEY (fallback to SOURCE_N8N_API_KEY)
    * - CLI argument: Second positional argument
    *
    * Note: Either apiKey OR (username + password) must be provided.
@@ -69,6 +101,40 @@ const n8nConfigSchema = {
     env: 'N8N_API_KEY',
     positional: 1,
     description: 'API Key do n8n',
+    secret: true,
+  },
+
+  /**
+   * SOURCE N8N API Key (for download/backup operations)
+   *
+   * API key for the source N8N instance.
+   * Takes precedence over N8N_API_KEY for download operations.
+   *
+   * Can be provided via:
+   * - Environment variable: SOURCE_N8N_API_KEY
+   */
+  sourceApiKey: {
+    type: 'string',
+    required: false,
+    env: 'SOURCE_N8N_API_KEY',
+    description: 'API Key do n8n de origem (SOURCE)',
+    secret: true,
+  },
+
+  /**
+   * TARGET N8N API Key (for upload/restore operations)
+   *
+   * API key for the target N8N instance.
+   * Used for upload operations.
+   *
+   * Can be provided via:
+   * - Environment variable: TARGET_N8N_API_KEY
+   */
+  targetApiKey: {
+    type: 'string',
+    required: false,
+    env: 'TARGET_N8N_API_KEY',
+    description: 'API Key do n8n de destino (TARGET)',
     secret: true,
   },
 
@@ -128,6 +194,38 @@ const n8nConfigSchema = {
     env: 'N8N_TAG',
     positional: 2,
     description: 'Tag para filtrar workflows',
+  },
+
+  /**
+   * SOURCE Tag Filter (for download/backup operations)
+   *
+   * Optional tag to filter workflows from source N8N instance.
+   * Takes precedence over N8N_TAG for download operations.
+   *
+   * Can be provided via:
+   * - Environment variable: SOURCE_N8N_TAG
+   */
+  sourceTag: {
+    type: 'string',
+    required: false,
+    env: 'SOURCE_N8N_TAG',
+    description: 'Tag para filtrar workflows do n8n de origem (SOURCE)',
+  },
+
+  /**
+   * TARGET Tag Filter (for upload/restore operations)
+   *
+   * Optional tag to apply to workflows when uploading to target N8N instance.
+   * Takes precedence over N8N_TAG for upload operations.
+   *
+   * Can be provided via:
+   * - Environment variable: TARGET_N8N_TAG
+   */
+  targetTag: {
+    type: 'string',
+    required: false,
+    env: 'TARGET_N8N_TAG',
+    description: 'Tag para aplicar em workflows no n8n de destino (TARGET)',
   },
 
   /**

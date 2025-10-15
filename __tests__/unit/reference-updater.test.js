@@ -168,7 +168,7 @@ describe('ReferenceUpdater', () => {
   describe('Max Depth Limit', () => {
     it('should stop recursion at MAX_DEPTH (50 levels)', () => {
       // Create deeply nested object (51 levels)
-      let deepObj = { workflowId: { value: 'test', cachedResultName: 'Test' } };
+      const deepObj = { workflowId: { value: 'test', cachedResultName: 'Test' } };
       let current = deepObj;
 
       for (let i = 0; i < 50; i++) {
@@ -191,7 +191,7 @@ describe('ReferenceUpdater', () => {
       mockIdMapper.getIdByName.mockReturnValue('new-id-123');
 
       // Create nested object at exactly 49 levels (within limit)
-      let obj = { value: 'root' };
+      const obj = { value: 'root' };
       let current = obj;
 
       for (let i = 0; i < 48; i++) {

@@ -142,7 +142,7 @@ class ReferenceUpdater {
 
     // PROTEÇÃO: Detecta referências circulares
     if (visited.has(obj)) {
-      this.logger.debug(`  Referência circular detectada - ignorando objeto`);
+      this.logger.debug('  Referência circular detectada - ignorando objeto');
       return;
     }
 

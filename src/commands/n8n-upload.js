@@ -153,10 +153,14 @@ OPTIONS:
   --help, -h            Show this help message
 
 ENVIRONMENT VARIABLES:
-  N8N_URL               N8N instance URL (required)
-  N8N_API_KEY           N8N API key (required)
+  TARGET_N8N_URL        Target N8N instance URL (required for upload)
+  TARGET_N8N_API_KEY    Target N8N API key (required)
+  TARGET_N8N_TAG        Target N8N tag (future: apply to all uploaded workflows)
+  N8N_URL               Fallback N8N instance URL (if TARGET not set)
+  N8N_API_KEY           Fallback N8N API key (if TARGET not set)
   N8N_USERNAME          N8N username (for basic auth)
   N8N_PASSWORD          N8N password (for basic auth)
+  N8N_TAG               Fallback tag (when TARGET_N8N_TAG not set)
   N8N_INPUT_DIR         Input directory path (optional)
   N8N_DRY_RUN           Enable dry-run mode (true/false)
   N8N_FORCE             Force overwrite existing workflows (true/false)
@@ -233,7 +237,17 @@ NOTES:
     }
 
     // Map config from ConfigManager schema to expected format
-    this.config.baseUrl = this.config.n8nUrl;
+    // For upload, use TARGET if available, otherwise fallback to N8N_URL
+    if (this.config.targetN8nUrl) {
+      this.config.baseUrl = this.config.targetN8nUrl;
+      if (this.config.targetApiKey) {
+        this.config.apiKey = this.config.targetApiKey;
+      }
+      this.logger?.info('🎯 Using TARGET N8N instance for upload');
+    } else {
+      this.config.baseUrl = this.config.n8nUrl;
+      this.logger?.debug('Using default N8N_URL for upload');
+    }
 
     // Override with command-line args
     if (this.inputDir) {
@@ -244,6 +258,15 @@ NOTES:
     }
     if (this.force) {
       this.config.force = this.force;
+    }
+
+    // Validate inputDir is provided (required for upload operation)
+    if (!this.config.inputDir) {
+      console.error('❌ Configuration Error:\n');
+      console.error('   - Input directory is required for upload');
+      console.error('\n💡 Provide via --input flag or N8N_INPUT_DIR environment variable');
+      console.error('   Example: docs-jana n8n:upload --input ./n8n-workflows-2025-10-01\n');
+      throw new Error('Invalid configuration');
     }
 
     const validation = this.configManager.validate();

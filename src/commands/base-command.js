@@ -148,10 +148,10 @@ class BaseCommand {
       const arg = args[i];
 
       switch (arg) {
-        case '--help':
-        case '-h':
-          this.showHelp = true;
-          break;
+      case '--help':
+      case '-h':
+        this.showHelp = true;
+        break;
       }
     }
   }

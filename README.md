@@ -17,6 +17,84 @@
 - **⚡ Modern CLI**: Unified interface with intuitive commands
 - **🎨 Clean Architecture**: Factory patterns, DI, and service layers
 - **🔒 Secure**: Environment-based configuration, no hardcoded secrets
+- **✨ Interactive Menu**: Beautiful keyboard-driven interface with themes, animations, and history
+
+---
+
+## ✨ Interactive Menu (NEW!)
+
+Experience a modern, keyboard-driven interactive menu with rich visual feedback and productivity features.
+
+### Quick Start
+
+```bash
+# Launch interactive menu (no arguments)
+docs-jana
+
+# Or explicitly
+docs-jana --interactive
+```
+
+![Interactive Menu Preview](docs/interactive-menu/preview.png)
+
+### Key Features
+
+- **🎯 Keyboard Navigation**: Arrow keys, Enter, Esc - no mouse needed
+- **🎨 4 Beautiful Themes**: Default, Dark, Light, High-Contrast (WCAG AA compliant)
+- **⚡ Keyboard Shortcuts**: Single-key shortcuts for instant access
+- **📜 Command History**: Track and re-run previous executions
+- **🔍 Command Preview**: See exactly what will execute before running
+- **⚙️ Customizable**: Configure themes, animations, icons, and more
+- **♿ Accessible**: Full keyboard support, contrast validation, fallback modes
+
+### Navigation Shortcuts
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| `↑↓` | Navigate | Move through options |
+| `Enter` | Select | Execute highlighted command |
+| `1-6` or `d/u/o` | Quick Select | Jump to specific commands |
+| `h` | History | View execution history |
+| `s` | Settings | Configure preferences |
+| `?` | Help | Show all shortcuts |
+| `q` | Quit | Exit application |
+
+### Menu Modes
+
+- **Navigation Mode**: Browse and select commands
+- **Preview Mode**: Detailed command information with warnings
+- **History Mode**: View last 10 executions with stats
+- **Config Mode**: Customize theme, animations, and behavior
+- **Help Mode**: Complete keyboard reference
+
+### Configuration
+
+Settings are persisted to `~/.docs-jana/config.json`:
+
+```json
+{
+  "theme": "default",
+  "animationsEnabled": true,
+  "animationSpeed": "normal",
+  "iconsEnabled": true,
+  "showDescriptions": true,
+  "showPreviews": true,
+  "historySize": 50
+}
+```
+
+### Documentation
+
+- **[User Guide](docs/interactive-menu/USER_GUIDE.md)** - Complete usage guide
+- **[Developer Guide](docs/interactive-menu/DEVELOPER_GUIDE.md)** - Architecture and extension guide
+- **[API Reference](docs/interactive-menu/API_REFERENCE.md)** - Full API documentation
+- **[Migration Guide](docs/interactive-menu/MIGRATION_GUIDE.md)** - Upgrade guide
+
+### Requirements
+
+- **Terminal**: Modern terminal with color support (Windows Terminal, iTerm2, etc.)
+- **Node.js**: 16+ (same as main CLI)
+- **Environment**: Interactive terminal (auto-detects CI/CD and falls back)
 
 ---
 
@@ -200,14 +278,12 @@ docs-jana test:outline
 ```
 docs-jana/
 ├── cli.js                      # Main CLI entry point
+├── index.js                    # Orchestration layer (NEW)
 ├── src/
 │   ├── commands/               # CLI command implementations
 │   │   ├── n8n-download.js
 │   │   ├── n8n-upload.js
-│   │   ├── outline-download.js
-│   │   ├── docs-generate.js
-│   │   ├── test-migration.js
-│   │   └── test-outline.js
+│   │   └── outline-download.js
 │   ├── services/               # Business logic services
 │   │   ├── workflow-service.js
 │   │   ├── outline-service.js
@@ -224,24 +300,131 @@ docs-jana/
 │   │   ├── file-manager.js
 │   │   ├── config-manager.js
 │   │   └── ...
-│   └── models/                 # Data models
-├── __tests__/                  # Test suites
+│   ├── models/                 # Data models
+│   └── tests/                  # (moved to /scripts)
+├── __tests__/                  # Jest test suites
 │   ├── unit/
 │   ├── integration/
 │   └── e2e/
+├── scripts/                    # Utility scripts (NEW)
+│   ├── test/                   # Test scripts
+│   ├── admin/                  # Admin scripts
+│   └── README.md               # Scripts documentation
+├── examples/                   # CLI examples (NEW)
+│   ├── n8n-import/             # N8N import example
+│   └── simple-cli/             # Simple CLI example
+├── docs/                       # Documentation (NEW)
+│   ├── technical/              # Technical documentation
+│   ├── architecture/           # Architecture docs (future)
+│   └── README.md               # Documentation index
 ├── .claude/                    # Claude Code specs
 │   └── specs/
-│       └── code-quality-improvements/
-└── docs/                       # Generated documentation
+│       └── cli-architecture-refactor/
+└── test-orchestration.js       # Orchestration tests
 ```
 
 ### Design Patterns
 
+- **Service Locator**: Centralized service management with lazy loading (index.js)
 - **Command Pattern**: Each CLI command is a separate module
 - **Factory Pattern**: Auth strategies created via factory
 - **Strategy Pattern**: Multiple authentication methods
 - **Dependency Injection**: Services receive dependencies via constructor
 - **Service Layer**: Business logic separated from CLI logic
+- **Orchestration**: Lifecycle management for command execution
+
+### Architecture
+
+The project follows a **three-layer architecture** that separates concerns and improves testability:
+
+```
+┌─────────────────────────────────────────┐
+│  Layer 1: CLI Interface (cli.js)        │
+│  - Parse arguments                      │
+│  - Display help/version                 │
+│  - Interactive menu                     │
+│  - Invoke orchestration layer           │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  Layer 2: Orchestration (index.js)      │
+│  - ServiceContainer (Service Locator)   │
+│  - CommandOrchestrator                  │
+│  - Service lifecycle management         │
+│  - Configuration loading                │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│  Layer 3: Business Logic (src/)         │
+│  - Command handlers (src/commands/)     │
+│  - Business services (src/services/)    │
+│  - Utilities (src/utils/)               │
+│  - Factories (src/factories/)           │
+└─────────────────────────────────────────┘
+```
+
+**Key Components:**
+
+- **[cli.js](cli.js)**: Command-line interface entry point
+  - Minimal business logic
+  - User-facing interactions
+  - Calls `executeCommand()` from index.js
+
+- **[index.js](index.js)**: Orchestration layer (468 lines)
+  - `ServiceContainer`: Service Locator with lazy instantiation
+  - `CommandOrchestrator`: Lifecycle management (initialize → run → cleanup)
+  - `executeCommand()`: Public API for command execution
+
+**Performance:**
+- Orchestration overhead: **~1ms average** (measured across 100 iterations)
+- Lazy instantiation: Services only created when needed
+- Resource cleanup: Automatic cleanup after each execution
+
+**Learn More:**
+- **[CLI Architecture](docs/architecture/CLI-ARCHITECTURE.md)** - Comprehensive architecture documentation
+- **[Service Factory](docs/architecture/SERVICE-FACTORY.md)** - Service management patterns
+
+---
+
+## 📚 Documentation
+
+Comprehensive documentation for all aspects of the project.
+
+### Documentation Hub
+- **[Documentation Index](docs/README.md)** - Central documentation hub with links to all docs
+
+### Key Documentation
+- **[Technical Documentation](docs/technical/)** - Implementation guides and technical reports
+- **[CLI Learning Guide](LEARNING-CLI.md)** - How the CLI works internally
+- **[Scripts Documentation](scripts/README.md)** - Utility scripts guide
+- **[Examples](examples/)** - CLI examples and templates
+
+### Specs & Architecture
+- **[KFC Specs](.claude/specs/)** - Feature specifications
+- **[CLI Architecture Refactor](.claude/specs/cli-architecture-refactor/)** - Current refactoring spec
+
+---
+
+## 🛠️ Scripts & Utilities
+
+Utility scripts for testing, administration, and maintenance.
+
+### Script Categories
+- **[Scripts Documentation](scripts/README.md)** - Complete scripts guide
+- **[Test Scripts](scripts/test/)** - Testing and validation scripts
+- **[Admin Scripts](scripts/admin/)** - Administrative utilities (⚠️ use with caution)
+
+### Quick Access
+```bash
+# View all available scripts
+cat scripts/README.md
+
+# Run a test script
+node scripts/test/test-tag-operations.js
+
+# Admin operations (careful!)
+node scripts/admin/cleanup-duplicates.js --dry-run
+```
 
 ---
 
