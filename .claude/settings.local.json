@@ -12,7 +12,12 @@
       "Bash(tee:*)",
       "Bash(apt:*)",
       "Bash(apt install:*)",
-      "Bash(node cli.js --help)"
+      "Bash(node cli.js --help)",
+      "Bash(for dir in .claude/specs/*/)",
+      "Bash(ls:*)",
+      "Bash(done)",
+      "Bash(for dir in */)",
+      "Bash(do echo \"=== $dir%/ ===\")"
     ],
     "deny": [],
     "ask": []
