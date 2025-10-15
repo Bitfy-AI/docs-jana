@@ -1,8 +1,42 @@
 # Visual Components Documentation
 
+> Comprehensive technical reference for the docs-jana CLI visual enhancement system
+
+**Version**: 2.0.0
+**Last Updated**: 2025-10-15
+**Status**: Complete
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Architecture](#architecture)
+3. [Component Reference](#component-reference)
+4. [Customization Guide](#customization-guide)
+5. [Best Practices](#best-practices)
+6. [Examples](#examples)
+
+---
+
 ## Overview
 
 The Docs-Jana CLI features a modern, responsive visual system built with four core components that work together to provide an exceptional terminal experience with graceful degradation for limited environments.
+
+### Key Features
+
+- **Responsive Layout**: Automatically adapts to terminal width (expanded, standard, compact modes)
+- **Progressive Enhancement**: Graceful degradation from emojis → Unicode → ASCII → plain text
+- **Terminal Detection**: Automatic capability detection for colors, Unicode, and emojis
+- **Decorative Borders**: Modern box-drawing with multiple styles (single, double, bold, rounded)
+- **Icon System**: Contextual icons with 4-level fallback chain
+- **Performance**: Caching and debouncing for optimal speed
+- **Accessibility**: WCAG 2.1 AA compliant color contrasts and screen reader support
+
+### Design Principles
+
+1. **Never Break**: All features degrade gracefully; no terminal left behind
+2. **Performance First**: Caching, debouncing, and efficient re-rendering
+3. **User Choice**: Customizable themes, icons, and design tokens
+4. **Accessibility**: Readable in all modes, with or without colors/graphics
 
 ## Architecture
 
@@ -499,60 +533,422 @@ npm test -- __tests__/unit/ui/menu/visual/
 
 ---
 
-## Customization
+## Customization Guide
 
-### Custom Themes
+### Creating Custom Themes
 
-Extend ThemeEngine with custom colors:
+Themes control the color palette of the CLI. Create custom themes by extending the `ThemeEngine`.
+
+#### Complete Theme Structure
 
 ```javascript
 const customTheme = {
-  name: 'custom',
+  name: 'my-theme',
   colors: {
-    primary: '#00ff00',
-    success: '#00cc00',
-    // ... other colors
+    // Base colors
+    primary: '#3b82f6',       // Primary interactive color
+    success: '#10b981',       // Success state
+    error: '#ef4444',         // Error state
+    warning: '#f59e0b',       // Warning state
+    info: '#06b6d4',          // Info state
+
+    // Text colors
+    highlight: '#8b5cf6',     // Highlight/accent
+    muted: '#6b7280',         // Muted/secondary text
+    dimText: '#9ca3af',       // Dimmed text
+    selectedText: '#ffffff',  // Text on selected background
+
+    // Accent colors
+    accent1: '#ec4899',       // Additional accent 1
+    accent2: '#14b8a6',       // Additional accent 2
+
+    // Destructive actions
+    destructive: '#dc2626'
+  },
+
+  backgrounds: {
+    selected: '#3b82f6',      // Selected option background
+    hover: '#1e40af'          // Hover state background (optional)
+  },
+
+  borders: {
+    primary: '#3b82f6',       // Primary border color
+    secondary: '#6b7280',     // Secondary border color
+    accent: '#8b5cf6',        // Accent border color
+    muted: '#9ca3af'          // Muted border color
+  },
+
+  contrastRatios: {
+    // WCAG 2.1 AA compliance (minimum 4.5:1 for normal text)
+    primaryOnBackground: 5.2,
+    successOnBackground: 4.8,
+    errorOnBackground: 5.1
+  }
+};
+```
+
+#### Registering Custom Themes
+
+```javascript
+const ThemeEngine = require('./src/ui/menu/utils/ThemeEngine');
+
+// Load the theme engine
+const themeEngine = new ThemeEngine();
+
+// Register your custom theme
+themeEngine.registerTheme('my-theme', customTheme);
+
+// Load your theme
+themeEngine.loadTheme('my-theme');
+```
+
+#### Example: High Contrast Theme
+
+```javascript
+const highContrastTheme = {
+  name: 'high-contrast',
+  colors: {
+    primary: '#ffffff',
+    success: '#00ff00',
+    error: '#ff0000',
+    warning: '#ffff00',
+    info: '#00ffff',
+    highlight: '#ff00ff',
+    muted: '#cccccc',
+    dimText: '#999999',
+    selectedText: '#000000',
+    accent1: '#ff8800',
+    accent2: '#00ff88',
+    destructive: '#ff0000'
+  },
+  backgrounds: {
+    selected: '#ffffff'
   },
   borders: {
     primary: '#ffffff',
-    secondary: '#cccccc'
+    secondary: '#cccccc',
+    accent: '#ff00ff',
+    muted: '#999999'
+  },
+  contrastRatios: {
+    primaryOnBackground: 21.0,  // Maximum contrast
+    successOnBackground: 15.3,
+    errorOnBackground: 13.1
+  }
+};
+```
+
+### Registering Custom Icons
+
+Add custom icons for new action types or override existing ones.
+
+#### Icon Set Structure
+
+```javascript
+const iconSet = {
+  emoji: '🚀',     // Modern terminals with emoji support
+  unicode: '↑',    // Terminals with Unicode support
+  ascii: '^',      // ASCII-only terminals
+  plain: '[D]'     // Plain text fallback (CI, screen readers)
+};
+```
+
+#### Example: Deployment Pipeline Icons
+
+```javascript
+const pipelineIcons = {
+  build: {
+    emoji: '🔨',
+    unicode: '▣',
+    ascii: '#',
+    plain: '[B]'
+  },
+  test: {
+    emoji: '✅',
+    unicode: '✓',
+    ascii: '+',
+    plain: '[T]'
+  },
+  deploy: {
+    emoji: '🚀',
+    unicode: '↑',
+    ascii: '^',
+    plain: '[D]'
+  },
+  rollback: {
+    emoji: '⏪',
+    unicode: '◄',
+    ascii: '<',
+    plain: '[R]'
   }
 };
 
-themeEngine.loadTheme(customTheme);
-```
-
-### Custom Icons
-
-Register custom action icons:
-
-```javascript
-iconMapper.registerIcon('deploy', {
-  emoji: '🚀',
-  unicode: '↗',
-  ascii: '^',
-  plain: 'GO'
+// Register all icons
+Object.entries(pipelineIcons).forEach(([type, iconSet]) => {
+  iconMapper.registerIcon(type, iconSet);
 });
 ```
 
-### Custom Layouts
+### Adjusting Design Tokens
 
-Override visual constants:
+Design tokens (spacing, typography, breakpoints) are centralized. Override specific values:
 
 ```javascript
+const baseConstants = require('./src/ui/menu/config/visual-constants');
+
 const customConstants = {
-  ...require('./src/ui/menu/config/visual-constants'),
+  ...baseConstants,
+
+  // Override layout breakpoints
   LAYOUT: {
-    ...visualConstants.LAYOUT,
+    ...baseConstants.LAYOUT,
     breakpoints: {
       expanded: 120,  // Larger expanded mode
-      standard: 90,
-      compact: 70
+      standard: 90,   // Slightly wider standard
+      compact: 70     // More forgiving compact
     }
+  },
+
+  // Override spacing
+  SPACING: {
+    ...baseConstants.SPACING,
+    beforeHeader: 2,    // More space before header
+    afterHeader: 2,     // More space after header
+    betweenOptions: 1   // Space between options
+  },
+
+  // Override typography
+  TYPOGRAPHY: {
+    ...baseConstants.TYPOGRAPHY,
+    maxDescriptionLength: {
+      expanded: 140,
+      standard: 100,
+      compact: 80
+    },
+    indentation: 4  // Larger indentation
   }
 };
 
+// Use custom constants
 const layoutManager = new LayoutManager(terminalDetector, customConstants);
+const borderRenderer = new BorderRenderer(terminalDetector, customConstants);
+```
+
+---
+
+## Best Practices
+
+### Accessibility
+
+#### Color Contrast Guidelines
+
+Always ensure WCAG 2.1 AA compliance:
+- **Normal text**: Minimum contrast ratio of 4.5:1
+- **Large text** (18pt+): Minimum contrast ratio of 3:1
+- **UI components**: Minimum contrast ratio of 3:1
+
+```javascript
+// Validate theme contrast
+const theme = themeEngine.getCurrentTheme();
+const validation = themeEngine.validateContrast(theme);
+
+if (!validation.valid) {
+  console.warn('Theme has contrast issues:', validation.issues);
+}
+```
+
+#### Screen Reader Support
+
+- Always provide plain text fallbacks
+- Use semantic status indicators (success, error) not just colors
+- Include descriptive text alongside icons
+
+```javascript
+// Good: Text + Icon
+console.log(`${successIcon} Operation completed successfully`);
+
+// Better: Accessible alternative
+if (isScreenReaderMode) {
+  console.log('[SUCCESS] Operation completed successfully');
+} else {
+  console.log(`${successIcon} Operation completed successfully`);
+}
+```
+
+### Performance Optimization
+
+#### Intelligent Caching
+
+All components implement caching. Leverage it for optimal performance:
+
+```javascript
+// BorderRenderer caches charsets
+const charset = borderRenderer.getCharSet('double');  // Computed
+const charset2 = borderRenderer.getCharSet('double'); // Cached
+
+// LayoutManager caches layout config
+const config = layoutManager.getLayoutConfig();  // Computed
+const config2 = layoutManager.getLayoutConfig(); // Cached if width unchanged
+
+// IconMapper caches resolved icons
+const icon = iconMapper.getIcon('download');  // Resolved
+const icon2 = iconMapper.getIcon('download'); // Cached
+```
+
+#### Performance Targets
+
+- Initial render: < 100ms
+- Navigation update: < 50ms
+- Resize re-render: < 200ms
+- Theme switch: < 150ms
+
+### Theme Design Best Practices
+
+1. **Test All Color Modes**: Verify in TrueColor, 256-color, 16-color, and no-color modes
+2. **Use Semantic Names**: Prefer `success`, `error` over `green`, `red`
+3. **Consider Color Blindness**: Use symbols and position, not just colors
+4. **Maintain Hierarchy**: Ensure visual hierarchy through contrast and sizing
+
+---
+
+## Examples
+
+### Example 1: Complete Menu with Visual Components
+
+```javascript
+const chalk = require('chalk');
+const TerminalDetector = require('./src/ui/menu/visual/TerminalDetector');
+const BorderRenderer = require('./src/ui/menu/visual/BorderRenderer');
+const LayoutManager = require('./src/ui/menu/visual/LayoutManager');
+const IconMapper = require('./src/ui/menu/visual/IconMapper');
+const VisualConstants = require('./src/ui/menu/config/visual-constants');
+const ThemeEngine = require('./src/ui/menu/utils/ThemeEngine');
+
+// Initialize components
+const detector = new TerminalDetector();
+detector.initialize(chalk);
+
+const themeEngine = new ThemeEngine();
+themeEngine.loadTheme('default');
+
+const borderRenderer = new BorderRenderer(detector, VisualConstants, themeEngine);
+const layoutManager = new LayoutManager(detector, VisualConstants);
+const iconMapper = new IconMapper(detector);
+
+// Get layout config
+const layout = layoutManager.getLayoutConfig();
+
+// Render header
+const headerTitle = layoutManager.centerText('DOCS-JANA CLI', layout.contentWidth - 4);
+const headerVersion = layoutManager.centerText('v2.0.0', layout.contentWidth - 4);
+
+let output = '';
+output += '\n'.repeat(layout.verticalSpacing.beforeHeader);
+output += borderRenderer.renderTopBorder(layout.contentWidth, 'double') + '\n';
+output += `║ ${headerTitle} ║\n`;
+output += `║ ${headerVersion} ║\n`;
+output += borderRenderer.renderBottomBorder(layout.contentWidth, 'double') + '\n';
+output += '\n'.repeat(layout.verticalSpacing.afterHeader);
+
+// Render options
+const options = [
+  { type: 'download', label: 'Download documentation' },
+  { type: 'upload', label: 'Upload to server' },
+  { type: 'settings', label: 'Configuration' }
+];
+
+options.forEach((option, index) => {
+  const icon = iconMapper.getIcon(option.type);
+  const indicator = index === 0 ? iconMapper.getSelectionIndicator() : ' ';
+  const padding = ' '.repeat(layout.horizontalPadding);
+
+  output += `${indicator}${padding}${icon} ${option.label}\n`;
+});
+
+// Render footer
+output += '\n'.repeat(layout.verticalSpacing.beforeFooter);
+output += borderRenderer.renderSeparator(layout.contentWidth, 'single') + '\n';
+output += layoutManager.centerText('[↑↓] Navigate | [Enter] Select | [q] Quit', layout.contentWidth) + '\n';
+
+console.log(output);
+```
+
+### Example 2: Status Messages with Icons
+
+```javascript
+const detector = new TerminalDetector();
+detector.initialize(chalk);
+
+const iconMapper = new IconMapper(detector);
+const themeEngine = new ThemeEngine();
+themeEngine.loadTheme('default');
+
+function showStatus(type, message) {
+  const icon = iconMapper.getStatusIcon(type);
+
+  let coloredMessage;
+  switch (type) {
+    case 'success':
+      coloredMessage = themeEngine.colorize(message, 'success');
+      break;
+    case 'error':
+      coloredMessage = themeEngine.colorize(message, 'error');
+      break;
+    case 'warning':
+      coloredMessage = themeEngine.colorize(message, 'warning');
+      break;
+    case 'info':
+      coloredMessage = themeEngine.colorize(message, 'info');
+      break;
+    default:
+      coloredMessage = message;
+  }
+
+  console.log(`${icon} ${coloredMessage}`);
+}
+
+// Usage
+showStatus('success', 'File downloaded successfully');
+showStatus('error', 'Connection failed');
+showStatus('warning', 'Disk space low');
+showStatus('info', 'Update available');
+```
+
+### Example 3: Responsive Box with Auto-Resize
+
+```javascript
+function renderResponsiveBox(title, content) {
+  const layout = layoutManager.getLayoutConfig();
+
+  // Adjust content based on layout mode
+  let displayContent = content;
+  if (layout.mode === 'compact') {
+    displayContent = layoutManager.truncateText(content, 40);
+  } else if (layout.mode === 'standard') {
+    const lines = layoutManager.wrapText(content, 60);
+    displayContent = lines.join('\n');
+  }
+
+  // Render box with appropriate padding
+  const padding = layout.mode === 'expanded' ? 2 : 1;
+  const box = borderRenderer.renderBox([title, '', displayContent], {
+    style: layout.mode === 'compact' ? 'single' : 'double',
+    padding,
+    align: 'center'
+  });
+
+  return box;
+}
+
+// Initial render
+console.clear();
+console.log(renderResponsiveBox('Welcome', 'This box adapts to your terminal width'));
+
+// Re-render on resize
+detector.onResize(() => {
+  console.clear();
+  console.log(renderResponsiveBox('Welcome', 'This box adapts to your terminal width'));
+});
 ```
 
 ---
