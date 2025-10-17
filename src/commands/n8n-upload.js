@@ -15,6 +15,7 @@ const WorkflowService = require('../services/workflow-service');
 const IDMappingService = require('../services/id-mapping-service');
 const WorkflowIDRemapper = require('../services/workflow-id-remapper');
 const UploadHistoryService = require('../services/upload-history-service');
+const PlaceholderResolver = require('../utils/placeholder-resolver');
 const fs = require('fs');
 const path = require('path');
 
@@ -306,6 +307,61 @@ NOTES:
   }
 
   /**
+   * Valida e resolve inputDir no momento de uso
+   *
+   * Resolve placeholders (ex: {timestamp}) antes de validar existência do diretório.
+   * Garante que o diretório existe e é válido antes de prosseguir.
+   *
+   * @returns {string} Path resolvido e validado
+   * @throws {Error} Se diretório não existir ou placeholder não puder ser resolvido
+   */
+  validateAndResolveInputDir() {
+    let inputDir = this.config.inputDir;
+
+    // Resolve placeholders if present
+    if (PlaceholderResolver.hasPlaceholder(inputDir)) {
+      const context = {
+        baseDir: process.cwd(),
+        explicitTimestamp: this.config.explicitTimestamp
+      };
+
+      try {
+        const resolvedInputDir = PlaceholderResolver.resolve(inputDir, context);
+        this.logger.info(`📁 Placeholder resolvido: ${inputDir} → ${resolvedInputDir}`);
+        inputDir = resolvedInputDir;
+      } catch (error) {
+        throw new Error(
+          'Failed to resolve placeholder in inputDir\n' +
+          `   Original: ${inputDir}\n` +
+          `   ${error.message}`
+        );
+      }
+    }
+
+    // Resolve relative paths
+    const resolvedPath = path.isAbsolute(inputDir)
+      ? inputDir
+      : path.resolve(process.cwd(), inputDir);
+
+    // Validate directory exists
+    if (!fs.existsSync(resolvedPath)) {
+      throw new Error(
+        `Directory does not exist: ${resolvedPath}\n` +
+        `   Original config: ${this.config.inputDir}\n` +
+        '   💡 Tip: Ensure the directory was created by \'n8n:download\' command'
+      );
+    }
+
+    // Validate it's a directory
+    const stats = fs.statSync(resolvedPath);
+    if (!stats.isDirectory()) {
+      throw new Error(`Path is not a directory: ${resolvedPath}`);
+    }
+
+    return resolvedPath;
+  }
+
+  /**
    * Read workflow files from input directory
    *
    * Reads all JSON files from the configured input directory and parses them
@@ -321,12 +377,14 @@ NOTES:
    *   - Folder filtering via --folder flag
    *   - Automatic tag detection from source folder name
    *   - Recursive reading of subdirectories
+   *   - Placeholder resolution for dynamic paths
    *
    * @returns {Array<Object>} Array of workflow objects with id, name, nodes, connections, sourceFolder, etc.
-   * @throws {Error} If input directory doesn't exist
+   * @throws {Error} If input directory doesn't exist or placeholder cannot be resolved
    */
   readWorkflowFiles() {
-    let inputDir = path.resolve(this.config.inputDir);
+    // Validate and resolve inputDir with placeholder support
+    let inputDir = this.validateAndResolveInputDir();
 
     // Apply folder filter if specified
     if (this.folderFilter) {
