@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const PlaceholderResolver = require('../utils/placeholder-resolver');
 
 /**
  * N8N Upload Configuration Schema
@@ -171,6 +172,20 @@ const n8nUploadConfigSchema = {
         return null; // Allow empty if not provided (will be checked later)
       }
 
+      // Check if value contains placeholders (ex: {timestamp})
+      if (PlaceholderResolver.hasPlaceholder(value)) {
+        // Validate placeholder format only - skip directory existence check
+        const formatValidation = PlaceholderResolver.validateFormat(value);
+        if (!formatValidation.valid) {
+          return formatValidation.error;
+        }
+
+        // Placeholder format is valid - skip directory existence check
+        // Directory will be validated at runtime after placeholder resolution
+        return null;
+      }
+
+      // Standard validation for non-placeholder paths
       // Resolve relative paths
       const resolvedPath = path.isAbsolute(value) ? value : path.resolve(process.cwd(), value);
 
