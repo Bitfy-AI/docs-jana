@@ -157,11 +157,6 @@ EXAMPLES:
       this.config.outputDir = this.outputDir;
     }
 
-    // Log which instance we're using
-    if (this.useSource && this.config.sourceN8nUrl) {
-      this.logger.debug('Using SOURCE N8N instance from config');
-    }
-
     const validation = this.configManager.validate();
 
     if (!validation.valid) {
@@ -172,13 +167,18 @@ EXAMPLES:
       throw new Error('Invalid configuration');
     }
 
-    // Create logger
+    // Create logger FIRST before using it
     this.logger = new Logger({
       logLevel: this.config.logLevel || 'info',
       enableColors: true
     });
 
     this.logger.info('🔧 Initializing N8N Backup...');
+
+    // Log which instance we're using (after logger is created)
+    if (this.useSource && this.config.sourceN8nUrl) {
+      this.logger.debug('Using SOURCE N8N instance from config');
+    }
 
     // Create dependencies using Factory Pattern
     const authStrategy = AuthFactory.create(this.config);
