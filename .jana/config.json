@@ -1,0 +1,12 @@
+{
+  "n8n": {
+    "apiUrl": "https://your-n8n-instance.com/api/v1",
+    "apiKey": "your_api_key_here"
+  },
+  "validation": {
+    "idPattern": "\\([A-Z]+-[A-Z]+-\\d{3}\\)",
+    "strict": true,
+    "maxDuplicates": 100,
+    "logPath": ".jana/logs/validation.log"
+  }
+}

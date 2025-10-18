@@ -17,7 +17,7 @@ export class InternalIDExtractor {
   constructor(config: ValidationConfig) {
     // Compila regex uma vez no constructor para performance
     const pattern = config.idPattern || String.raw`\([A-Z]+-[A-Z]+-\d{3}\)`;
-    this.ID_PATTERN = new RegExp(pattern, 'g');
+    this.ID_PATTERN = new RegExp(pattern, 'gi'); // Case-insensitive
   }
 
   /**
