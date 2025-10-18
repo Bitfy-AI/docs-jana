@@ -6,6 +6,7 @@ Bem-vindo à documentação completa do projeto docs-jana - CLI unificado para g
 
 ### 🎯 Para Usuários
 
+- **[Referência de Comandos CLI](guides/CLI-COMMANDS.md)** ⭐ **NOVO** - Referência completa de todos os comandos
 - **[Como Usar o CLI](guides/como-usar-cli.md)** - Guia completo de uso do CLI
 - **[Guia de Migração](guides/MIGRATION.md)** - Como migrar para a nova versão
 - **[Guia de Migração Completo](guides/MIGRATION-GUIDE.md)** - Detalhes técnicos de migração
@@ -23,6 +24,13 @@ Bem-vindo à documentação completa do projeto docs-jana - CLI unificado para g
   - TerminalDetector, BorderRenderer, LayoutManager, IconMapper
   - Themes e degradação graciosa
   - Compatibilidade multi-plataforma
+
+#### Services
+- **[Guia de Integração de Services](guides/services/INTEGRATION-GUIDE.md)** ⭐ **NOVO** - Integração completa dos services
+  - IDMappingService, WorkflowIDRemapper, UploadHistoryService
+  - WorkflowValidator, MigrationVerifier, ReferenceUpdater
+  - Exemplos de uso e workflows
+  - Ver também: [Services README](guides/services/README.md)
 
 #### Decisões Arquiteturais
 - **[ADRs (Architecture Decision Records)](decisions/README.md)** - Decisões arquiteturais documentadas
@@ -145,5 +153,12 @@ Para contribuir com a documentação:
 
 ---
 
-**Última atualização**: 2025-10-15
-**Versão da documentação**: 1.0.0
+**Última atualização**: 2025-10-18
+**Versão da documentação**: 1.1.0
+
+## 🆕 Novidades (v1.1.0)
+
+- ⭐ **Referência Completa de Comandos CLI** - [CLI-COMMANDS.md](guides/CLI-COMMANDS.md)
+- ⭐ **Guia de Integração de Services** - [INTEGRATION-GUIDE.md](guides/services/INTEGRATION-GUIDE.md)
+- ✅ Novos comandos: `n8n:verify` e `n8n:validate`
+- ✅ Documentação reorganizada em `guides/services/`
