@@ -340,9 +340,11 @@ NOTES:
         process.exit(1);
       }
 
+      process.exit(0);  // Explicit success exit
+
     } catch (error) {
       this.logger.error(`\n❌ Verification failed: ${error.message}\n`);
-      throw error;
+      process.exit(1);  // Exit with error code on exception
     }
   }
 }
