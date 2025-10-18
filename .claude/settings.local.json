@@ -20,7 +20,8 @@
       "Bash(findstr:*)",
       "SlashCommand(/prisma:implementacao-paralela ultrathink)",
       "SlashCommand(/prisma:implementacao-paralela:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "SlashCommand(/prisma:especificacao:nova)"
     ],
     "deny": [],
     "ask": [],

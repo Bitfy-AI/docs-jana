@@ -1,0 +1,36 @@
+NOME-WORKFLOW=(ERR-OUT-001) Logs de erros
+ID-NO-MEU-N8N=aKdqlCGOK8gCcP9b
+
+QUANDO EU FOR BAIXAR
+
+A CLI BATE NO MEU N8N
+
+BAIXA OS WORKFLOWS
+
+COMPARA SE O CODIGO (ERR-OUT-001) TEM DOIS FLUXOS
+
+SE TIVER DOIS FLUXOS
+
+SAYONARA ESQUECEU DE MUDAR
+
+X na minha tela
+
+"Foi encontrado o fluxo de id interno ERR-OUT-001 esse fluxo esta atualmente com o id "aKdqlCGOK8gCcP9b" no n8n, nao deveria ser ERR-OUT-002?"
+"Encontrado fluxo de id interno ERR-OUT-001 nao deveria ser ERR-OUT-002?"
+
+
+(ERR-OUT-001) Logs de erros
+ID: aKdqlCGOK8gCcP9b
+
+(ERR-OUT-002) Logs de erros
+ID: ?
+
+{
+    "workflows": [
+   {
+    "id": "aKdqlCGOK8gCcP9b",
+    "v1": "(ERR-OUT-001)",
+    "v2": "(ERR-OUT-002)"
+   }
+]
+}
