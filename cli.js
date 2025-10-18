@@ -44,6 +44,16 @@ const COMMANDS = {
     handler: () => require('./src/commands/n8n-configure-target'),
     aliases: ['n8n:config', 'config:n8n']
   },
+  'n8n:verify': {
+    description: 'Verify migration integrity after upload',
+    handler: () => require('./src/commands/n8n-verify'),
+    aliases: ['verify:n8n', 'n8n:check']
+  },
+  'n8n:validate': {
+    description: 'Validate workflows for duplicate IDs',
+    handler: () => require('./src/commands/n8n-validate'),
+    aliases: ['validate:n8n', 'n8n:check-ids']
+  },
   'outline:download': {
     description: 'Download documentation from Outline',
     handler: () => require('./src/commands/outline-download'),
@@ -161,6 +171,12 @@ function printHelp() {
     console.log(`    ${themeEngine.applyTheme('n8n:upload', 'primary')}            Upload workflows to N8N with preserved IDs`);
     console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} upload:n8n, n8n:restore`);
     console.log('');
+    console.log(`    ${themeEngine.applyTheme('n8n:verify', 'primary')}            Verify migration integrity after upload`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} verify:n8n, n8n:check`);
+    console.log('');
+    console.log(`    ${themeEngine.applyTheme('n8n:validate', 'primary')}          Validate workflows for duplicate IDs`);
+    console.log(`                          ${themeEngine.applyTheme('Aliases:', 'dimText')} validate:n8n, n8n:check-ids`);
+    console.log('');
 
     console.log(themeEngine.applyTheme('  Outline Documentation:', 'info'));
     console.log(`    ${themeEngine.applyTheme('outline:download', 'primary')}      Download documentation from Outline`);
@@ -260,6 +276,12 @@ COMMANDS:
 
     n8n:upload            Upload workflows to N8N instance with preserved IDs
                           Aliases: upload:n8n, n8n:restore
+
+    n8n:verify            Verify migration integrity after upload
+                          Aliases: verify:n8n, n8n:check
+
+    n8n:validate          Validate workflows for duplicate IDs
+                          Aliases: validate:n8n, n8n:check-ids
 
   Outline Documentation:
     outline:download      Download documentation from Outline

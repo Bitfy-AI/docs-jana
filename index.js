@@ -295,6 +295,8 @@ class CommandOrchestrator {
       'n8n:download': './src/commands/n8n-download',
       'n8n:upload': './src/commands/n8n-upload',
       'n8n:configure-target': './src/commands/n8n-configure-target',
+      'n8n:verify': './src/commands/n8n-verify',
+      'n8n:validate': './src/commands/n8n-validate',
       'n8n:compare': './src/commands/n8n-compare',
       'n8n:dry-run': './src/commands/n8n-dry-run',
       'outline:download': './src/commands/outline-download'
