@@ -12,6 +12,7 @@ const FileManager = require('../utils/file-manager');
 const ConfigManager = require('../utils/config-manager');
 const AuthFactory = require('../auth/auth-factory');
 const WorkflowService = require('../services/workflow-service');
+const WorkflowValidator = require('../services/validation-wrapper');
 const fs = require('fs');
 const path = require('path');
 
@@ -45,11 +46,13 @@ class N8nBackupApp {
     this.logger = null;
     this.workflowService = null;
     this.fileManager = null;
+    this.workflowValidator = null;
     this.showHelp = false;
     this.tagFilter = null;
     this.outputDir = null;
     this.noTagFilter = false;
     this.useSource = false;
+    this.skipValidation = false;
   }
 
   /**
@@ -78,6 +81,9 @@ class N8nBackupApp {
       case '--source':
         this.useSource = true;
         break;
+      case '--skip-validation':
+        this.skipValidation = true;
+        break;
       }
     }
   }
@@ -97,6 +103,7 @@ OPTIONS:
   --tag, -t <tag>       Filter workflows by tag
   --no-tag-filter       Ignore N8N_TAG from .env and download all workflows
   --output, -o <dir>    Output directory (default: ./n8n-workflows-TIMESTAMP)
+  --skip-validation     Skip ID duplicate validation (not recommended)
   --help, -h            Show this help message
 
 ENVIRONMENT VARIABLES:
@@ -193,6 +200,7 @@ EXAMPLES:
 
     this.fileManager = new FileManager(this.logger);
     this.workflowService = new WorkflowService(httpClient, authStrategy, this.logger);
+    this.workflowValidator = new WorkflowValidator(this.logger);
   }
 
   /**
@@ -210,6 +218,28 @@ EXAMPLES:
     // Fetch workflows
     const workflows = await this.workflowService.listWorkflows();
     this.logger.info(`✅ Found ${workflows.length} workflows`);
+
+    // Validate workflow IDs for duplicates
+    try {
+      const validationResult = this.workflowValidator.validate(workflows, {
+        skipValidation: this.skipValidation,
+        strict: true
+      });
+
+      if (!validationResult.valid && !validationResult.skipped) {
+        this.logger.warn('⚠️  Validation found issues but continuing...');
+      }
+    } catch (error) {
+      if (error.name === 'ValidationError') {
+        // Exibe mensagens formatadas
+        error.messages.forEach(msg => console.error(msg));
+        this.logger.info(`🔍 Detalhes salvos em: ${error.logPath}`);
+
+        // Exit com código 1
+        process.exit(1);
+      }
+      throw error; // Re-throw se não for ValidationError
+    }
 
     // Filter by tag if specified
     let filteredWorkflows = workflows;
