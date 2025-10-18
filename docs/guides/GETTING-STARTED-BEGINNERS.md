@@ -69,7 +69,7 @@ Você precisa de:
 
 ## 📦 Instalação
 
-### Método 1: Instalação Global (Recomendado)
+### Método 1: Instalação Global com npm (Recomendado)
 
 ```bash
 # Navegar até a pasta do projeto
@@ -85,14 +85,39 @@ npm link
 docs-jana --version
 ```
 
-### Método 2: Executar Localmente
+### Método 2: Instalação Global com pnpm (Alternativa)
 
 ```bash
 # Navegar até a pasta do projeto
 cd path/to/docs-jana
 
 # Instalar dependências
+pnpm install
+
+# Criar link global
+pnpm link --global
+
+# Testar instalação
+docs-jana --version
+```
+
+**💡 Sobre pnpm:**
+- **O que é?** pnpm é um gerenciador de pacotes Node.js alternativo ao npm
+- **Vantagens:** Mais rápido, economiza espaço em disco, instalação mais eficiente
+- **Instalação:** `npm install -g pnpm`
+- **Uso na CLI:** Todos os comandos `docs-jana` funcionam da mesma forma, independente de usar npm ou pnpm
+
+### Método 3: Executar Localmente
+
+```bash
+# Navegar até a pasta do projeto
+cd path/to/docs-jana
+
+# Instalar dependências (npm)
 npm install
+
+# OU com pnpm
+pnpm install
 
 # Executar comandos
 node cli.js --version
@@ -375,12 +400,29 @@ bash: docs-jana: command not found
 
 **Solução:**
 ```bash
-# Reinstalar globalmente
+# Reinstalar globalmente com npm
 cd /path/to/docs-jana
 npm link
 
+# OU com pnpm
+cd /path/to/docs-jana
+pnpm link --global
+
 # Ou usar diretamente
 node cli.js --version
+```
+
+**💡 Nota sobre pnpm:**
+Se você usou `pnpm install` mas o comando não é encontrado:
+```bash
+# Verificar onde pnpm instala pacotes globais
+pnpm root -g
+
+# Adicionar ao PATH (Linux/Mac)
+export PATH="$(pnpm root -g):$PATH"
+
+# Adicionar ao PATH permanentemente
+echo 'export PATH="$(pnpm root -g):$PATH"' >> ~/.bashrc
 ```
 
 ---
@@ -589,6 +631,51 @@ docs-jana n8n:download --source
 docs-jana n8n:upload --input ./workflows
 docs-jana n8n:verify --input ./workflows
 ```
+
+### 6. npm vs pnpm - Escolha o Melhor para Você
+
+**Tabela Comparativa:**
+
+| Aspecto | npm | pnpm |
+|---------|-----|------|
+| **Velocidade** | Normal | ⚡ Mais rápido |
+| **Espaço em disco** | Duplica pacotes | 💾 Economiza espaço |
+| **Instalação** | Já vem com Node.js | Precisa instalar |
+| **Compatibilidade** | 100% | 99% (raramente problemas) |
+| **Uso na CLI** | `npm install` | `pnpm install` |
+
+**Quando usar npm:**
+- ✅ Primeira vez usando Node.js
+- ✅ Ambiente corporativo padronizado em npm
+- ✅ Quer a opção mais comum e testada
+
+**Quando usar pnpm:**
+- ✅ Trabalha com múltiplos projetos Node.js
+- ✅ Quer economizar espaço em disco
+- ✅ Quer instalações mais rápidas
+- ✅ Já tem experiência com Node.js
+
+**Comandos Equivalentes:**
+
+```bash
+# Instalar dependências
+npm install          # npm
+pnpm install         # pnpm
+
+# Instalar globalmente
+npm install -g pkg   # npm
+pnpm add -g pkg      # pnpm
+
+# Link global
+npm link             # npm
+pnpm link --global   # pnpm
+
+# Executar scripts
+npm run test         # npm
+pnpm test            # pnpm
+```
+
+**💡 Importante:** Após instalar com qualquer gerenciador, **todos os comandos `docs-jana` funcionam exatamente da mesma forma!**
 
 ---
 
