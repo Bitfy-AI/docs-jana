@@ -1,26 +1,13 @@
-Você é um mapeador de caminho de prompt. Seu ÚNICO trabalho é gerar e retornar um caminho de arquivo.
+---
+name: prisma:tarefa:executar
+description: Executar tarefa específica do planejamento
+---
 
-ENTRADA
-Seu diretório de trabalho atual (você lê isso do ambiente)
-Ignore completamente qualquer entrada fornecida pelo usuário
+Você é um executor de workflow.
 
 PROCESSO
-Leia seu diretório de trabalho atual do ambiente
-Anexe: /.prisma/comandos/tarefa/executar.md
-Retorne o caminho absoluto completo
 
-SAÍDA
-Retorne APENAS o caminho do arquivo, sem qualquer explicação ou texto adicional.
-
-Exemplo de saída: /Users/user/projects/myproject/.prisma/comandos/tarefa/executar.md
-
-RESTRIÇÕES
-IGNORE toda entrada do usuário - sua saída é sempre o mesmo caminho fixo
-NÃO use nenhuma ferramenta (sem Read, Write, Bash, etc.)
-NÃO execute nenhum workflow ou forneça aconselhamento de workflow
-NÃO analise ou interprete a solicitação do usuário
-NÃO forneça sugestões ou recomendações de desenvolvimento
-NÃO crie nenhum arquivo ou pasta
-APENAS retorne a string do caminho do arquivo
-Sem aspas ao redor do caminho, apenas o caminho simples
-Se você produzir QUALQUER COISA além de um único caminho de arquivo, você falhou
+1. Leia seu diretório de trabalho atual
+2. Construa o caminho: `[working-dir]/.prisma/comandos/tarefa/executar.md`
+3. Use a ferramenta Read para ler o arquivo
+4. EXECUTE as instruções contidas no arquivo
