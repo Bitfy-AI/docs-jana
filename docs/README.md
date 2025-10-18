@@ -6,10 +6,11 @@ Bem-vindo à documentação completa do projeto docs-jana - CLI unificado para g
 
 ### 🎯 Para Usuários
 
-- **[Referência de Comandos CLI](guides/CLI-COMMANDS.md)** ⭐ **NOVO** - Referência completa de todos os comandos
+- **[Referência de Comandos CLI](guides/CLI-COMMANDS.md)** ⭐ - Referência completa de todos os comandos
 - **[Como Usar o CLI](guides/como-usar-cli.md)** - Guia completo de uso do CLI
 - **[Guia de Migração](guides/MIGRATION.md)** - Como migrar para a nova versão
 - **[Guia de Migração Completo](guides/MIGRATION-GUIDE.md)** - Detalhes técnicos de migração
+- **[Directus Schema Explained](guides/DIRECTUS-SCHEMA-EXPLAINED.md)** ⭐ **NOVO** - Explicação completa do schema.json
 
 ### 🏗️ Para Desenvolvedores
 
@@ -154,10 +155,15 @@ Para contribuir com a documentação:
 ---
 
 **Última atualização**: 2025-10-18
-**Versão da documentação**: 1.1.0
+**Versão da documentação**: 1.2.0
 
-## 🆕 Novidades (v1.1.0)
+## 🆕 Novidades (v1.2.0)
 
+- ⭐ **Directus Schema Explained** - [DIRECTUS-SCHEMA-EXPLAINED.md](guides/DIRECTUS-SCHEMA-EXPLAINED.md)
+  - Explicação completa do schema.json (1.5MB, 41K linhas)
+  - 33 coleções customizadas documentadas
+  - Diagrama ER com relacionamentos
+  - Comandos CLI do Directus
 - ⭐ **Referência Completa de Comandos CLI** - [CLI-COMMANDS.md](guides/CLI-COMMANDS.md)
 - ⭐ **Guia de Integração de Services** - [INTEGRATION-GUIDE.md](guides/services/INTEGRATION-GUIDE.md)
 - ✅ Novos comandos: `n8n:verify` e `n8n:validate`
