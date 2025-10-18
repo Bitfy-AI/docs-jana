@@ -10,6 +10,7 @@ export { DuplicateIDDetector } from './DuplicateIDDetector';
 export { IDSuggestionEngine } from './IDSuggestionEngine';
 export { ErrorMessageFormatter } from './ErrorMessageFormatter';
 export { WorkflowValidationService, ValidationError } from './WorkflowValidationService';
+export { ValidationReportGenerator } from './ValidationReportGenerator';
 
 // Errors
 export {
