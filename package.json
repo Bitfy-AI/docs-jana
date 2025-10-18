@@ -32,6 +32,9 @@
     "test:menu:accessibility": "jest __tests__/accessibility/menu-accessibility.test.js --verbose",
     "test:menu:coverage": "jest __tests__/unit/ui/menu __tests__/integration/ui/menu --coverage --coverageDirectory=coverage/menu",
     "test:menu:all": "node scripts/test/run-all-menu-tests.js",
+    "test:validation": "vitest run src/services/validation",
+    "test:validation:watch": "vitest watch src/services/validation",
+    "test:validation:coverage": "vitest run --coverage src/services/validation",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky"
@@ -61,13 +64,17 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/node": "^20.17.12",
     "eslint": "^8.57.1",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
     "jscpd": "^4.0.5",
     "lint-staged": "^16.2.4",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
   },
   "repository": {
     "type": "git",
